@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=true" />
+    <title>AircraftWar</title>
+    
+    <script src="../../src/cn/cooltree/type/SystemType.js"></script>
+    <script src="../../src/cn/cooltree/extend/json2.js"></script>
+    <script src="../../src/cn/cooltree/utils/MathUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/ClassUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/ObjectUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/StringUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/ColorUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/CanvasUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/WordUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/DOMUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/ObjectPool.js"></script>
+    <script src="../../src/cn/cooltree/utils/CollisionUtil.js"></script>
+    <script src="../../src/cn/cooltree/utils/PropUtil.js"></script>
+	<script src="../../src/cn/cooltree/utils/SVGUtil.js"></script>
+	<script src="../../src/cn/cooltree/utils/UniqueUtil.js"></script>
+	
+	<script src="../../src/cn/cooltree/model/ContextVO.js"></script>
+    <script src="../../src/cn/cooltree/model/GraphicsVO.js"></script>
+    
+    <script src="../../src/cn/cooltree/core/BaseObject.js"></script>
+    <script src="../../src/cn/cooltree/geom/Point.js"></script>
+    <script src="../../src/cn/cooltree/geom/Rectangle.js"></script>
+    <script src="../../src/cn/cooltree/geom/Matrix.js"></script>
+    <script src="../../src/cn/cooltree/model/GColor.js"></script>
+    
+    <script src="../../src/cn/cooltree/core/Global.js"></script>
+    <script src="../../src/cn/cooltree/events/Event.js"></script>
+    <script src="../../src/cn/cooltree/events/EventDispatcher.js"></script>
+   
+    <script src="../../src/cn/cooltree/core/MovieManager.js"></script>
+    <script src="../../src/cn/cooltree/filters/DropShadowFilter.js"></script>
+    <script src="../../src/cn/cooltree/core/AssetManager.js"></script>
+    
+    <script src="../../src/cn/cooltree/display/BlendMode.js"></script>
+    <script src="../../src/cn/cooltree/geom/ColorTransform.js"></script>
+    <script src="../../src/cn/cooltree/core/FontManager.js"></script>
+    
+    <script src="../../src/cn/cooltree/core/RenderObject.js"></script>
+    <script src="../../src/cn/cooltree/core/Timer.js"></script>
+    <script src="../../src/cn/cooltree/core/Source.js"></script>
+    <script src="../../src/cn/cooltree/utils/AssetUtil.js"></script>
+    <script src="../../src/cn/cooltree/net/Ajax.js"></script>
+    <script src="../../src/cn/cooltree/display/Graphics.js"></script>
+    <script src="../../src/cn/cooltree/display/DisplayBase.js"></script>
+    <script src="../../src/cn/cooltree/display/DOMDisplay.js"></script>
+    <script src="../../src/cn/cooltree/display/DOMMovie.js"></script>
+    <script src="../../src/cn/cooltree/display/DisplayObject.js"></script>
+    <script src="../../src/cn/cooltree/media/MediaManager.js"></script>
+    <script src="../../src/cn/cooltree/media/Media.js"></script>
+    <script src="../../src/cn/cooltree/media/Video.js"></script>
+    <script src="../../src/cn/cooltree/media/Sound.js"></script>
+    <script src="../../src/cn/cooltree/media/WebAudio.js"></script>
+    <script src="../../src/cn/cooltree/display/DisplayObjectContainer.js"></script>
+    <script src="../../src/cn/cooltree/display/Sprite.js"></script>
+    <script src="../../src/cn/cooltree/ui/VideoPlayer.js"></script>
+    <script src="../../src/cn/cooltree/loader/URLLoader.js"></script>
+    <script src="../../src/cn/cooltree/loader/Loader.js"></script>
+    <script src="../../src/cn/cooltree/text/InputText.js"></script>
+    <script src="../../src/cn/cooltree/text/BitmapFont.js"></script>
+    
+    <script src="../../src/cn/cooltree/events/StageEvent.js"></script>
+    <script src="../../src/cn/cooltree/ui/UIBase.js"></script>
+     <script src="../../src/cn/cooltree/ui/BoxShape.js"></script>
+    <script src="../../src/cn/cooltree/text/TextField.js"></script>
+    <script src="../../src/cn/cooltree/text/BitmapText.js"></script>
+    <script src="../../src/cn/cooltree/display/Stage.js"></script>
+    <script src="../../src/cn/cooltree/display/MovieClip.js"></script>
+    <script src="../../src/cn/cooltree/core/Factory.js"></script>
+    <script src="../../src/cn/cooltree/ui/Button.js"></script>
+    <script src="../../src/cn/cooltree/transitions/Easing.js"></script>
+    <script src="../../src/cn/cooltree/transitions/TweenLite.js"></script>
+	
+	<script src="js/app/Firing.js"></script>
+	<script src="js/app/Scence.js"></script>
+	<script src="js/app/Hero.js"></script>
+	<script src="js/app/Enemy.js"></script>
+	<script src="js/app/Game.js"></script>
+	<script src="js/app/Layout.js"></script>
+	<script src="js/app/Main.js"></script>
+	
+    <script type="text/javascript">
+//  	Global.htmlDebug=Global.debug=true;
+    </script>
+</head>
+<body bgcolor="#222222" style="width:100%;height:100%;padding:0;margin:0">
+	<div id="stage" style="position: absolute;z-index: 5;overflow:hidden;width: 100%;height:100%;padding:0;margin:0;"></div>
+</body>
+</html>
