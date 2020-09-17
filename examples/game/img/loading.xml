@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<TextureAtlas imagePath="img/loading.png">
-        <SubTexture name="Image 1" x="0" y="0" width="109" height="24" frameX="0" frameY="0" frameWidth="109" frameHeight="24"/>
-        <SubTexture name="Image 2" x="0" y="24" width="109" height="24" frameX="0" frameY="0" frameWidth="109" frameHeight="24"/>
-        <SubTexture name="Image 3" x="0" y="48" width="109" height="24" frameX="0" frameY="0" frameWidth="109" frameHeight="24"/>
-        <SubTexture name="Image 4" x="0" y="72" width="109" height="24" frameX="0" frameY="0" frameWidth="109" frameHeight="24"/>
-</TextureAtlas>

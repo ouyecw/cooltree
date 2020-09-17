@@ -1,8 +1,0 @@
-{
-	"preload": [
-        "img/loading.png","img/loading.xml"
-    ],
-    "game": [
-        "img/sound/Sound 2.mp3","img/sound/Sound 3.mp3","img/sound/Sound 4.mp3","img/sound/Sound 5.mp3","img/sound/Sound 8.mp3","img/sound/Sound 9.mp3","img/sound/Sound 11.mp3","img/sound/Sound 12.mp3","img/onky.png","img/onky.fnt","img/textures/ActionTexture.png","img/textures/ActionTexture.json","img/textures/empTexture.png","img/textures/empTexture.json","img/textures/FloorTexture.png","img/textures/FloorTexture.json","img/textures/SkyTexture.png","img/textures/SkyTexture.json","img/textures/gameui.png","img/textures/gameui.xml"
-    ]
-}
