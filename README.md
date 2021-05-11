@@ -17,13 +17,6 @@ import library
 ```
 import * as CT from 'cooltree'
 ```
-setup to window
-```
-for(let i in CT){
-   if(i=="default") continue;
-   window[i]=CT[i];
-}
-```
 change display mode
 ```
 // * true canvas mode
