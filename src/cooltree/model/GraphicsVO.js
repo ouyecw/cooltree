@@ -1,43 +1,31 @@
 import ContextVO from './ContextVO.js'
 
+/**
+ * @class
+ * @module GraphicsVO
+ */
 export default class GraphicsVO
 {
 	constructor()
 	{
-		this.actions=[];
-		this.type_id=1;
-		this.value=null;
-	}
-	
-	getValue()
-	{
-		if(this.value) return this.value;
-		this.value={};
-		let name;
-		
-		for(name in this)
-		{
-	    	if(GraphicsVO.LIST.indexOf(name)>=0 || typeof this[name]==="function" || name=="actions" || name=="type_id" || name=="value") continue;
-	    	this.value[name]=this[name];
-	    	delete this[name];
-		}
-		return this.value;
+		this.reset();
 	}
 	
 	reset()
 	{
-		if(!this.value){
-			let name;
-			for(name in this)
-			{
-		    	if(GraphicsVO.LIST.indexOf(name)>=0 || typeof this[name]==="function" || name=="actions" || name=="type_id" || name=="value") continue;
-		    	delete this[name];
-			}
-		}
+		this.value={
+			line_alpha:1,
+			line_width:1,
+			miter_limit:10,
+			line_cap:"butt",
+			line_join:"miter",
+			fill_style:"#FFFFFF",
+			stroke_style:"#000000"
+		};
 		
-		this.type_id=1;
+		this.strict=false;
+		this.type_id=0;
 		this.actions=[];
-		this.value=null;
 	}
 	
 	static INIT_CLASS()
@@ -46,13 +34,27 @@ export default class GraphicsVO
 		GraphicsVO.IS_INIT=true;
 
 		let name;
+
+		for(name of GraphicsVO.ATTR)
+		{
+			Object.defineProperty(GraphicsVO.prototype,name,{
+				get:ContextVO.get_attr_func(name),
+				set:ContextVO.create_func(0,name),
+				enumerable:true,configurable:true
+			});
+		}
+		
 		for(name of GraphicsVO.LIST)
 		{
-			GraphicsVO.prototype[name]=ContextVO.create_func(name);
+			GraphicsVO.prototype[name]=ContextVO.create_func(1,name);
 		}
+		
 	}
 }
 
-GraphicsVO.LIST=["beginPath","closePath","stroke","fill","moveTo","lineTo","arcTo","arc","rect","clip","curveTo","createPattern","bezierCurveTo","createLinearGradient","createRadialGradient",'lineStyle','clear','beginFill','endFill','beginBitmapFill','linearGradientFill','radialGradientFill','drawRect','drawRoundRect','drawPath','drawCircle','drawEllipse','createPolygon','drawSVGPath','drawShape','dispose'];
+GraphicsVO.LIST=['arc','moveTo','lineTo','beginPath','closePath','bezierCurveTo','curveTo','lineStyle','clear','beginFill','endFill','beginBitmapFill','linearGradientFill','radialGradientFill','drawRect','drawRoundRect','drawPath','drawCircle','drawEllipse','createPolygon','drawSVGPath','drawShape','dispose'];
+
+GraphicsVO.ATTR=['line_cap','line_join','line_alpha','stroke_style','line_width','miter_limit','fill_alpha','fill_style'];
+
 GraphicsVO.IS_INIT=false;
 GraphicsVO.className="GraphicsVO";

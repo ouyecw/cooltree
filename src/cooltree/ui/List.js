@@ -11,6 +11,11 @@ import Global from '../core/Global.js'
 import Button from './Button.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module List
+ * @extends DisplayObjectContainer
+ */
 export default class List extends DisplayObjectContainer
 {
 	constructor()

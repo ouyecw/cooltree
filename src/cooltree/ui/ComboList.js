@@ -11,6 +11,11 @@ import Button from './Button.js'
 import Global from '../core/Global.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module ComboList
+ * @extends DisplayObjectContainer
+ */
 export default class ComboList extends DisplayObjectContainer
 {	
 	constructor()

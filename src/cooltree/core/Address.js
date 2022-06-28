@@ -7,6 +7,12 @@ import EventDispatcher from '../events/EventDispatcher.js'
 import Event from '../events/Event.js'
 import Global from './Global.js'
 
+/**
+ * @class
+ * @module Address
+ * @extends EventDispatcher
+ */
+
 export default class Address extends EventDispatcher
 {
 	constructor()

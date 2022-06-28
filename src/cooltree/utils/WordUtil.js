@@ -1,3 +1,4 @@
+
 export class Language{}
 
 /**
@@ -51,6 +52,10 @@ Language.SV="sv";
  */
 Language.IT="it";
 
+/**
+ * @class
+ * @module WordUtil
+ */
 export default class WordUtil
 {
 	static set(label,word,language)

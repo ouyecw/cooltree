@@ -1,6 +1,10 @@
 import ObjectUtil from '../utils/ObjectUtil.js'
 import ObjectPool from '../utils/ObjectPool.js'
 
+/**
+ * @class
+ * @module BitmapFont
+ */
 export default class BitmapFont
 {
 	constructor()

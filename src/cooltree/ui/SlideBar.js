@@ -5,6 +5,11 @@ import Event from '../events/Event.js'
 import Global from '../core/Global.js'
 import MoveBar from './MoveBar.js'
 
+/**
+ * @class
+ * @module SlideBar
+ * @extends MoveBar
+ */
 export default class SlideBar extends MoveBar
 {
 	constructor()

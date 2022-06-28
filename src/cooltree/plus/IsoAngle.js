@@ -1,4 +1,8 @@
 
+/**
+ * @class
+ * @module IsoAngle
+ */
 export default class IsoAngle
 {
 	/**

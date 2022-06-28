@@ -4,6 +4,10 @@ import AssetManager from './AssetManager.js'
 import MathUtil from '../utils/MathUtil.js'
 import Factory from './Factory.js'
 
+/**
+ * @class
+ * @module MovieManager
+ */
 export default class MovieManager
 {
 	/**

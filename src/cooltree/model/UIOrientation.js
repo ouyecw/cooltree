@@ -1,3 +1,8 @@
+
+/**
+ * @class
+ * @module UIOrientation
+ */
 export default class UIOrientation{};
 UIOrientation.className="UIOrientation";
 

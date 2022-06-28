@@ -1,5 +1,9 @@
 import StringUtil from './StringUtil.js'
 
+/**
+ * @class
+ * @module DOMUtil
+ */
 export default class DOMUtil
 {
 	/**

@@ -1,3 +1,7 @@
+/**
+ * @class
+ * @module SVGLabel
+ */
 export default class SVGLabel{};
 
 //线段

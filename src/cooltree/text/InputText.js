@@ -10,6 +10,11 @@ import MathUtil from '../utils/MathUtil.js'
 import Global from '../core/Global.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module InputText
+ * @extends DOMDisplay
+ */
 export default class InputText extends DOMDisplay
 {
 	/**

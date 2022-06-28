@@ -1,4 +1,8 @@
 
+/**
+ * @class
+ * @module DoubleClick
+ */
 export default class DoubleClick
 {
 	static check()

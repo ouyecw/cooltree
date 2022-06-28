@@ -11,6 +11,11 @@ import GColor from '../model/GColor.js'
 import Global from '../core/Global.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module Shape
+ * @extends DisplayObjectContainer
+ */
 export default class Shape extends DisplayObjectContainer
 {
 	constructor() 

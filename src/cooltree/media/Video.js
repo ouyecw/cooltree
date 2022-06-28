@@ -8,6 +8,11 @@ import Global from '../core/Global.js'
 import MathUtil from '../utils/MathUtil.js'
 import SystemType from '../type/SystemType.js'
 
+/**
+ * @class
+ * @module Video
+ * @extends Media
+ */
 export default class Video extends Media
 {
 	constructor()

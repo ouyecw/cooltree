@@ -15,6 +15,11 @@ import ObjectPool from '../utils/ObjectPool.js'
 import StringUtil from '../utils/StringUtil.js'
 import CollisionUtil from '../utils/CollisionUtil.js'
 
+/**
+ * @class
+ * @module DisplayObjectContainer
+ * @extends DisplayBase
+ */
 export default class DisplayObjectContainer extends DisplayBase
 {
 	constructor()
@@ -142,12 +147,21 @@ export default class DisplayObjectContainer extends DisplayBase
 		}
 	}
 	
+	/**
+	 * 添加显示子对象
+	 * @param {DisplayBase} displayObject
+	 */
 	addChild(displayObject)
 	{
 		if(displayObject==undefined || !displayObject instanceof DisplayBase) return ;
 		return this.addChildAt(displayObject,this._children.length);
 	}
 	
+	/**
+	 * 添加显示子对象 到对应图层
+	 * @param {DisplayBase} displayObject
+	 * @param {Number} index
+	 */
 	addChildAt(displayObject,index)
 	{
 		if(displayObject==undefined || !displayObject instanceof DisplayBase) return ;
@@ -193,11 +207,19 @@ export default class DisplayObjectContainer extends DisplayBase
 		ObjectPool.remove(rect);
 	}
 	
+	/**
+	 * 移除子对象
+	 * @param {DisplayBase} displayObject
+	 */
 	removeChild(displayObject)
 	{
 		return this.removeChildAt(this._children.indexOf(displayObject));
 	}
 	
+	/**
+	 * 移除对应图层子对象
+	 * @param {Number} index
+	 */
 	removeChildAt(index)
 	{
 		if (index < 0 || index > (this._children.length - 1)) return null;
@@ -215,6 +237,11 @@ export default class DisplayObjectContainer extends DisplayBase
 		return displayObject;
 	}
 	
+	/**
+	 * 根据对象名称,获取对应子对象
+	 * @param {String} name
+	 * @returns {DisplayBase} displayObject
+	 */
 	getChildByName(name)
 	{
 		if(StringUtil.isEmpty(name)) return;
@@ -229,12 +256,21 @@ export default class DisplayObjectContainer extends DisplayBase
 		return null;
 	}
 	
+	/**
+	 * 根据图层数,获取对应子对象
+	 * @param {Number} index
+	 * @returns {DisplayBase} displayObject
+	 */
 	getChildAt(index)
 	{
 		if (index < 0 || index > (this._children.length - 1)) return null;
 		return this._children[index];
 	}
 	
+	/**
+	 * 清除全部子对象
+	 * @param {Boolean} bool 清除时是否销毁子对象
+	 */
 	removeAllChildren(bool)
 	{
 		if(this._children==undefined || this._children.length<1) return;
@@ -261,6 +297,10 @@ export default class DisplayObjectContainer extends DisplayBase
 		this.width=this.height=0;
 	}
 	
+	/**
+	 * 是否包含该显示对象
+	 * @param {DisplayBase} displayObject
+	 */
 	contains(displayObject)
 	{
 		return this._children.indexOf(displayObject)!=-1;
@@ -282,6 +322,11 @@ export default class DisplayObjectContainer extends DisplayBase
 		this.updateMatrix=false;
 	}
 	
+	/**
+	 * 调换两个图层的位置
+	 * @param {Number} index1
+	 * @param {Number} index2
+	 */
 	swapChildrenAt(index1, index2)
 	{
 		const len=this._children.length;
@@ -293,6 +338,11 @@ export default class DisplayObjectContainer extends DisplayBase
 	    this._children[index2]=temp;
 	}
 	
+	/**
+	 * 移动子对象到对应图层
+	 * @param {DisplayBase} displayObject
+	 * @param {Number} index
+	 */
 	setChildIndex(child, index)
 	{
 		const pos=this._children.indexOf(child);
@@ -336,6 +386,13 @@ export default class DisplayObjectContainer extends DisplayBase
 		return all ? g : null;
 	}
 	
+	/**
+	 * 本容器是否与对应坐标有碰触
+	 * @param {Number} x
+	 * @param {Number} y
+	 * @param {Boolean} usePixelTrace
+	 * @returns {Boolean}
+	 */
 	hitTestPoint (x,y, usePixelTrace) 
 	{
 		if(this._children.length<=0) return false;
@@ -353,6 +410,12 @@ export default class DisplayObjectContainer extends DisplayBase
 		return false;
 	}
 	
+	/**
+	 * 本容器是否与对应另一个显示对象有碰触
+	 * @param {DisplayBase} obj
+	 * @param {Boolean} usePixelTrace
+	 * @returns {Boolean}
+	 */
 	hitTestObject (obj, usePixelTrace) 
 	{
 		let i,h,j,g;
@@ -399,6 +462,9 @@ export default class DisplayObjectContainer extends DisplayBase
 		super.reset();
 	}
 	
+	/**
+	 * 销毁
+	 */
 	dispose()
 	{
 		super.dispose();

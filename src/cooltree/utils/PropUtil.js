@@ -1,5 +1,8 @@
 
-
+/**
+ * @class
+ * @module PropUtil
+ */
 export default class PropUtil
 {
 	static parseProperties(data)

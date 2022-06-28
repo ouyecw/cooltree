@@ -4,14 +4,21 @@ MovieClip Class
 ===================================================================
 **/
 import Source from '../core/Source.js'
+import MathUtil from '../utils/MathUtil.js'
 import ObjectPool from '../utils/ObjectPool.js'
 import DisplayObject from './DisplayObject.js'
 import StringUtil from '../utils/StringUtil.js'
 
 const _rate=Symbol("rate");
+const _swing_play=Symbol("swingPlay");
 const _reverse_play=Symbol("reversePlay");
 const _current_frame=Symbol("currentFrame");
 
+/**
+ * @class
+ * @module MovieClip
+ * @extends DisplayObject
+ */
 export default class MovieClip extends DisplayObject
 {
 	constructor(s=null)
@@ -23,12 +30,18 @@ export default class MovieClip extends DisplayObject
 		this._paused=true;
 		
 		this._replay_time=0;
+		this[_swing_play]=false;
 		this[_reverse_play]=false;
 		this._count=this[_rate]=1;
 		
 		this._frame=1;
 		this[_current_frame]=1;
 		if(s) this.setFrames(s);
+	}
+	
+	get swing()
+	{
+		return this[_swing_play];
 	}
 	
 	get totalFrame()
@@ -67,6 +80,12 @@ export default class MovieClip extends DisplayObject
 		this[_reverse_play]=Boolean(value);
     }
 	
+	set swing(value)
+	{
+		if(value==undefined || value==null || value==this[_swing_play]) return;
+		this[_swing_play]=Boolean(value);
+	}
+	
 	clearAllFrames()
 	{
 		if(this._frames==undefined) return;
@@ -81,6 +100,10 @@ export default class MovieClip extends DisplayObject
 		this._paused=true;
 	}
 	
+	/**
+	 * 设置显示资源数组
+	 * @param {Array} data [Source|DisplayObject]
+	 */
 	setFrames(data)
 	{
 		if(data==null || !(data instanceof Array) || data.length<=0) return;
@@ -131,17 +154,28 @@ export default class MovieClip extends DisplayObject
 		}
 	}
 	
+	/**
+	 * 播放
+	 * @param {Number} time 循环次数
+	 */
 	play(time)
 	{
 		this._replay_time=(time==undefined) ? 0 : time;
 		this._paused=false;
 	}
 	
+	/**
+	 * 停止播放
+	 */
 	stop()
 	{
 		this._paused=true;
 	}
-		
+	
+	/**
+	 * 跳转到index帧停止播放
+	 * @param {Object} index
+	 */
 	gotoAndStop(index)
 	{
 		if(this._frames==undefined) return;
@@ -163,6 +197,10 @@ export default class MovieClip extends DisplayObject
 		this._paused=true;
 	}
 	
+	/**
+	 * 跳转到index帧开始播放
+	 * @param {Object} index
+	 */
 	gotoAndPlay(index)
 	{
 		this.gotoAndStop(index);
@@ -200,18 +238,27 @@ export default class MovieClip extends DisplayObject
 				this._count--;
 			
 				if(this._count<=0 ){
-					this.nextFrame();
-					
-					if(((this[_reverse_play] && this[_current_frame]<=1)||(!this[_reverse_play] && this[_current_frame]>=this._frames.length)) && this._replay_time>0){
-						this._replay_time--;
-						if(this._replay_time==0) {
-							this._paused=true;
-							this.dispatchEvent(new Event(Event.PLAY_OVER));
+					if(((this[_reverse_play] && this[_current_frame]<=1)||(!this[_reverse_play] && this[_current_frame]>=this._frames.length))){     
+						
+						if(this[_swing_play]){
+							this.reverse=!this[_reverse_play];
 						}
+						
+						if(this._replay_time>0){
+							this._replay_time--;
+							if(this._replay_time==0) {
+								this._paused=true;
+								this.dispatchEvent(new Event(Event.PLAY_OVER));
+							}
+						}
+						else this.dispatchEvent(new Event(Event.PLAY_OVER));
 					}
+					
+					this.nextFrame();
 				}
 				
 				this._count=(this._count<=0) ? this[_rate] : this._count;
+				this.__checkDisplayUpdate();
 			}
 		}
 		
@@ -226,6 +273,7 @@ export default class MovieClip extends DisplayObject
 		this.label=null;
 		this._paused=true;
 		this._replay_time=0;
+		this[_swing_play]=false;
 		this[_reverse_play]=false;
 		this._frame=this._count=this[_rate]=this[_current_frame]=1;
 		if(s) this.setFrames(s);
@@ -234,7 +282,7 @@ export default class MovieClip extends DisplayObject
 	dispose()
 	{
 		super.dispose();
-		delete this._frame,this._count,this[_rate],this[_reverse_play],this._replay_time,this._frames,this._paused,this[_current_frame],this.label;
+		delete this[_swing_play],this._frame,this._count,this[_rate],this[_reverse_play],this._replay_time,this._frames,this._paused,this[_current_frame],this.label;
 	}
 	
 	toString()

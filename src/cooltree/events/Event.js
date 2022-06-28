@@ -7,6 +7,10 @@ Event Class
 ===================================================================
 **/
 
+/**
+ * @class
+ * @module Event
+ */
 export default class Event
 {
 	constructor(type,params=null,label=null,target=null)
@@ -37,7 +41,7 @@ export default class Event
 	
 	toString()
 	{
-		return '{"type":' + this.type + ',label":' + this.label ? this.label.toString() :'' + ',"target":' +this.target ? this.target.toString() : ''+ ',"params":' +this.params ? this.params.toString() :''+'}';
+		return '{"type":' + this.type + ',label":' + (this.label ? this.label.toString() :'') + ',"target":' +(this.target ? this.target.toString() : '')+ ',"params":' +(this.params ? this.params.toString() :'')+'}';
 	}
 }
 

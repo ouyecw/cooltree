@@ -11,6 +11,11 @@ import ObjectUtil from '../utils/ObjectUtil.js'
 import ColorUtil from '../utils/ColorUtil.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module TextField
+ * @extends DisplayObject
+ */
 export default class TextField extends DisplayObject
 {
 
@@ -523,27 +528,25 @@ export default class TextField extends DisplayObject
 	
 	_draw(str,posY=0,posX=0,vertical=false)
 	{
+	    if((this._fill_type=="fill" || this._fill_type=="both") && (this.context.fillStyle != this._color)) 
+			this.context.fillStyle = this._color;
+
+		if((this._fill_type=="stroke" || this._fill_type=="both") && (this.context.strokeStyle != this._color2)) 
+			this.context.strokeStyle = this._color2;
+		
+		const tbl=this._writingMode && vertical ? 'bottom' : this._textBaseline;
+		if(this.context.textBaseline !=tbl) this.context.textBaseline =tbl;
 		this.context.save();
-		this.context.textBaseline =this._textBaseline;
 		
 		if(this._writingMode && vertical){
 			const special=TextField.specialCode.indexOf(str.charCodeAt(0))>=0;
 			this.context.translate(special ? posX : posX-this.size*0.5+(str.match(/[),!,t,f,i,l,j,I,J,r,I,F,E,I,Y]/) ? -(this.size*0.25) : (str.match(/[O,@,%,&,q,w,m,W,M,Q,N,p]/) ? (this.size*0.3) : 0)), posY-this.size);
 			this.context.rotate(Math.PI/180*90);
-			this.context.textBaseline = 'bottom' ;
 			posX=posY=0;
 		}
 		
-		if(this._fill_type=="fill" || this._fill_type=="both"){
-			this.context.fillStyle = this._color;	   
-			this.context.fillText  (str,  posX, posY);
-		}
-		
-		if(this._fill_type=="stroke" || this._fill_type=="both"){
-			this.context.strokeStyle = this._color2;
-			this.context.strokeText  (str, posX, posY);
-		}
-		
+		if(this._fill_type=="stroke" || this._fill_type=="both") this.context.strokeText  (str, posX, posY);
+		if(this._fill_type=="fill" || this._fill_type=="both") this.context.fillText  (str,  posX, posY);
 		this.context.restore();
 	}
 	

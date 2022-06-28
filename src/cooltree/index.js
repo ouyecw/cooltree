@@ -10,6 +10,8 @@ app.SystemType=require('./type/SystemType.js').default
 
 app.MathUtil=require('./utils/MathUtil.js').default
 
+app.Vector=require('./geom/Vector.js').default
+
 app.ClassUtil=require('./utils/ClassUtil.js').default
 
 app.ObjectUtil=require('./utils/ObjectUtil.js').default
@@ -40,10 +42,13 @@ app.Compile=require('./plus/Compile.js').default
 
 app.SVGLabel=require('./type/SVGLabel.js').default
 
+app.ImageUtil=require('./utils/ImageUtil.js').default
 
 app.ContextVO=require('./model/ContextVO.js').default
 
 app.GraphicsVO=require('./model/GraphicsVO.js').default
+
+app.JSONUtil=require('./utils/JSONUtil.js').default
 
 
 app.Point=require('./geom/Point.js').default
@@ -63,6 +68,7 @@ app.EventDispatcher=require('./events/EventDispatcher.js').default
 
 app.Address=require('./core/Address.js').default
 
+app.QRCode=require('./plus/QRCode.js').default
 
 app.Storage=require('./plus/Storage.js').default
 
@@ -72,7 +78,6 @@ app.DropShadowFilter=require('./filters/DropShadowFilter.js').default
 
 app.AssetManager=require('./core/AssetManager.js').default
 
-
 app.BlendMode=require('./type/BlendMode.js').default
 
 app.ColorTransform=require('./geom/ColorTransform.js').default
@@ -80,7 +85,6 @@ app.ColorTransform=require('./geom/ColorTransform.js').default
 app.FontManager=require('./core/FontManager.js').default
 
 app.File=require('./core/File.js').default
-
 
 app.RenderObject=require('./core/RenderObject.js').default
 
@@ -120,7 +124,6 @@ app.DefsNode=require('./display/DefsNode.js').default
 
 app.UIBase=require('./ui/UIBase.js').default
 
-
 app.ShapeVO=require('./model/ShapeVO.js').default
 
 app.Sprite=require('./display/Sprite.js').default
@@ -136,7 +139,6 @@ app.InputText=require('./text/InputText.js').default
 app.BitmapFont=require('./text/BitmapFont.js').default
 
 app.Effect=require('./model/Effect.js').default
-
 
 app.BoxShape=require('./ui/BoxShape.js').default
 
@@ -161,6 +163,8 @@ app.TweenLite=require('./transitions/TweenLite.js').default
 
 
 app.LoadingClip=require('./plus/LoadingClip.js').default
+
+app.Calendar=require('./plus/Calendar.js').default
 
 app.List=require('./ui/List.js').default
 
@@ -196,6 +200,8 @@ app.QuickUI=require('./utils/QuickUI.js').default
 app.ShapeUtil=require('./utils/ShapeUtil.js').default
 
 app.RouteUtil=require('./utils/RouteUtil.js').default
+
+app.Popup=require('./ui/Popup.js').default
 
 app.TimeUtil=require('./utils/TimeUtil.js').default
 

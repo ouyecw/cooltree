@@ -9,6 +9,11 @@ import DisplayUtil from '../utils/DisplayUtil.js'
 import Rectangle from '../geom/Rectangle.js'
 import Point from '../geom/Point.js'
 
+/**
+ * @class
+ * @module TouchScale
+ * @extends DisplayObjectContainer
+ */
 export default class TouchScale extends DisplayObjectContainer
 {
 	constructor()

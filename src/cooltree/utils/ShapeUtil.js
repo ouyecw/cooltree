@@ -7,6 +7,10 @@ import SVGLabel from '../type/SVGLabel.js'
 import ShapeVO from '../model/ShapeVO.js'
 import Rectangle from '../geom/Rectangle.js'
 
+/**
+ * @class
+ * @module ShapeUtil
+ */
 export default class ShapeUtil
 {
 	/**

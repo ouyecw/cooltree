@@ -10,6 +10,10 @@ EventDispatcher Class
 import StringUtil from '../utils/StringUtil.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module EventDispatcher
+ */
 export default class EventDispatcher
 {
 	constructor()

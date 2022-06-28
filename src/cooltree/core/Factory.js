@@ -22,6 +22,10 @@ import FontManager from './FontManager.js'
 import Effect from '../model/Effect.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module Factory
+ */
 export default class Factory
 {
 	
@@ -58,7 +62,7 @@ export default class Factory
 	 * do DisplayObject
 	 * ef Effect
 	 * bs BoxShape
-	 * @param {Object || Array} properties
+	 * @param {Object|Array} properties
 	 * @param {Boolean} useCanvas
 	 */
 	static c(type,properties,useCanvas=null)

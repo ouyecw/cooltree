@@ -7,6 +7,10 @@ import FontManager from './FontManager.js'
 import Source from './Source.js'
 import Global from './Global.js'
 
+/**
+ * @class
+ * @module AssetManager
+ */
 export default class AssetManager
 {
 	static addFiles(files)
@@ -131,6 +135,21 @@ export default class AssetManager
 	static clear()
 	{
 		AssetManager._cache={};
+	}
+	
+	static fromImage(img)
+	{
+		const source=ObjectPool.create(Source);
+		const config={
+			x:0,y:0,
+			width:img.width,
+			height:img.height,
+			frameWidth:img.width,
+			frameHeight:img.height,
+			name:img.name ||img.src
+		}
+		source.setup(img,config);
+		return source;
 	}
 
 }

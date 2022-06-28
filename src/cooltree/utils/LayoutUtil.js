@@ -1,4 +1,7 @@
-
+/**
+ * @class
+ * @module LayoutUtil
+ */
 export default class LayoutUtil
 {
 	/**
@@ -123,14 +126,14 @@ export default class LayoutUtil
 	{
 		if(n<1) return 0;
 				
-		if(isWidth && rect && rect.width!=0) return Math.round(Math.abs(rect.width*n+(n-1)*space));
-		if(!isWidth && rect && rect.height!=0) return Math.round(Math.abs(rect.height*n+(n-1)*space));
+		if(isWidth && rect && rect.width!=0) return Math.round((rect && rect.x || 0)+Math.abs(rect.width*n+(n-1)*space));
+		if(!isWidth && rect && rect.height!=0) return Math.round((rect && rect.y || 0)+Math.abs(rect.height*n+(n-1)*space));
 		
-		let i,size=0;
+		let i,size=(rect && (isWidth ? rect.x : rect.y) || 0);
 		for(i=0;i<n;i++)
 		{
 			size+=isWidth ? Math.round(array[i].width) : Math.round(array[i].height);
-			size+=space;
+			if(i<n-1) size+=space;
 		}
 		
 		return size;

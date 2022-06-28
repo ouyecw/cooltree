@@ -17,6 +17,11 @@ import Graphics from './Graphics.js'
 import Point from '../geom/Point.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module Stage
+ * @extends DisplayObjectContainer
+ */
 export default class Stage extends DisplayObjectContainer
 {
 	constructor()

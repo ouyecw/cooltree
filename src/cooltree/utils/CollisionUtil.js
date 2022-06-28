@@ -1,4 +1,8 @@
 
+/**
+ * @class
+ * @module CollisionUtil
+ */
 export default class CollisionUtil
 {
 	/**

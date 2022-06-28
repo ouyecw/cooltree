@@ -1,3 +1,7 @@
+/**
+ * @class
+ * @module MathUtil
+ */
 export default class MathUtil
 {
 
@@ -25,7 +29,7 @@ export default class MathUtil
 	
 	static sort(arr,func)
 	{
-		if(arr==null || arr.length<2 ) return;
+		if(arr==null || arr.length<2 ) return arr;
 		
 		let flag,value1,value2,temp;
 	    for(let i=0;i<arr.length-1;i++){
@@ -73,7 +77,7 @@ export default class MathUtil
 	
 	static clamp(number,min,max)
 	{
-		if (number < min)
+		if (number < Math.min(max,min))
 			return min;
 		if (number > Math.max(max,min))
 			return max;

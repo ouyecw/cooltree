@@ -1,6 +1,11 @@
 import StringUtil from './StringUtil.js'
+import ObjectUtil from './ObjectUtil.js'
 import MathUtil from './MathUtil.js'
 
+/**
+ * @class
+ * @module ArrayUtil
+ */
 export default class ArrayUtil
 {
 	/**
@@ -13,7 +18,7 @@ export default class ArrayUtil
 	{
 		if(array==null || array.length<1 || StringUtil.isEmpty(property)) return -1;
 		return array.findIndex(function(value, index, arr) {
-		  return value[property]==data;
+		  return (typeof value=="object" && ObjectUtil.getAttribute(value,property)==data);
 		});
 	}
 	
@@ -26,7 +31,7 @@ export default class ArrayUtil
 	 */
 	static sort(array,property,order,num)
 	{
-		if(array==null || array.length<2 ) return;
+		if(array==null || array.length<2 ) return array;
 					
 		return MathUtil.sort(array,function(a,b){
 	        let value1 = StringUtil.isEmpty(property) ? a : a[property];
@@ -46,10 +51,28 @@ export default class ArrayUtil
 	/**
 	 * 拷贝一个数组中数据（剔除重复数据）
 	 * @param {Array} array
+	 * @param {String} property
+	 * @param {Boolean} original 是原对象还是仅返还属性值
+	 * @param {Array} target 返回对象
+	 * @param {String} 包含子数组的属性
 	 */
-	static createUniqueCopy(array)
+	static createUniqueCopy(array,property=null,original=true,target=null,attr=null)
 	{
-		return [...new Set(array)];
+		if(!array) return null;
+		if(!property) return [...new Set(array)];
+		
+		const arr=target ? target : [];
+		let item,index;
+		
+		for(item of array){
+			index=arr.length ? (original ? ArrayUtil.indexByProperty(arr,property,item[property]) : arr.indexOf(item[property])) : -1;
+			if(index>=0) continue;
+			arr.push(original ? item : item[property]);
+			if(!attr || !item[attr] || !item[attr].length) continue;
+			ArrayUtil.createUniqueCopy(item[attr],property,original,arr,attr);
+		}
+		
+		return arr;
 	}
 	
 	/**
@@ -100,7 +123,7 @@ export default class ArrayUtil
 	 * @param {Array} arrayB
 	 * @param {Boolean} order 是否顺序也要相同
 	 */
-	static sameItems(arrayA,arrayB,order)
+	static equal(arrayA,arrayB,order)
 	{
 		if(arrayA==null || arrayB==null) return null;
 		if(order==true) return (arrayA.join(",")==arrayB.join(","));
@@ -114,11 +137,43 @@ export default class ArrayUtil
 	}
 	
 	/**
-	 * 复制数组
-	 * @param {Array} source 目标数组
-	 * @param {Array} array  复制对象
+	 * 两个数组相减 arrayA减arrayB
+	 * @param {Array} arrayA
+	 * @param {Array} arrayB
 	 */
-	static copyArray(source=[],array)
+	static subtract(arrayA,arrayB)
+	{
+		if(!arrayB) return arrayA;
+		arrayA=ArrayUtil.copyArray(arrayA);
+		
+		for(let item of arrayB){
+			const index=arrayA.indexOf(item);
+			if(index>=0) arrayA.splice(index,1);
+		}
+		
+		return arrayA;
+	}
+	
+	/**
+	 * 两个数组相加 arrayA加arrayB去重
+	 * @param {Array} arrayA
+	 * @param {Array} arrayB
+	 * @param {Number} length 限制长度 0为不限制
+	 */
+	static add(arrayA,arrayB,length=0)
+	{
+		if(!arrayB) return arrayA;
+		arrayA=ArrayUtil.createUniqueCopy(arrayA.concat(arrayB));
+		if(length && arrayA.length>length) arrayA=arrayA.slice(0,length);
+		return arrayA;
+	}
+	
+	/**
+	 * 复制数组
+	 * @param {Array} array  复制对象
+	 * @param {Array} source 目标数组
+	 */
+	static copyArray(array,source=[])
 	{
 		source.push(...array);
 		return source;
@@ -152,5 +207,23 @@ export default class ArrayUtil
 			}
 		}
 		return array;
+	}
+	
+	/**
+	 * 一个数组，根据长度，截取成二维数组
+	 * @param {Object} array
+	 * @param {Object} length
+	 */
+	static slice(array,length)
+	{
+		if(array.length<=length) return [array];
+		const n=Math.ceil(array.length/length);
+		const d=[];
+		
+		for(let i=0;i<n;i++){
+			d.push(array.slice(i*length,Math.min((i+1)*length,array.length)));
+		}
+		
+		return d;
 	}
 }

@@ -11,6 +11,11 @@ import Global from '../core/Global.js'
 import Point from '../geom/Point.js'
 import UIBase from './UIBase.js'
 
+/**
+ * @class
+ * @module UIContainer
+ * @extends UIBase
+ */
 export default class UIContainer extends UIBase
 {
 	constructor()

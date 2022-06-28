@@ -1,7 +1,13 @@
+import DOMUtil from './DOMUtil.js'
 import MathUtil from './MathUtil.js'
 import ObjectPool from './ObjectPool.js'
 import Rectangle from '../geom/Rectangle.js'
+import DOMDisplay from '../display/DOMDisplay.js'
 
+/**
+ * @class
+ * @module SVGUtil
+ */
 export default class SVGUtil
 {
 	/**

@@ -1,5 +1,9 @@
 import StringUtil from './StringUtil.js'
 
+/**
+ * @class
+ * @module RouteUtil
+ */
 export default class RouteUtil
 {
 	/**
@@ -21,6 +25,13 @@ export default class RouteUtil
 	static copy(data)
 	{
 		if(!data) return;
+		
+		try{
+			navigator.clipboard.writeText(data);
+			return;
+		}
+		catch(err){}
+		
 		const transfer = document.createElement('input');
 		document.body.appendChild(transfer);
 		transfer.value = data;
@@ -35,5 +46,55 @@ export default class RouteUtil
 		
 		transfer.blur();
 		document.body.removeChild(transfer);
+	}
+	
+	/**
+	 * 下载文件
+	 *  @param {Object} data blob
+	 *  @param {String} type
+	 *  @example 
+	 *  const data=await new Ajax().post(url,param,{ responseType: 'blob'});
+	 *  RouteUtil.download(data);
+	 */
+	static async download(data,type="zip",name=null)
+	{
+		const aLink = document.createElement("a");
+		const urlObject = window.URL || window.webkitURL;
+		const blob = new Blob([data], { type: "application/"+type });
+		const timestamp = (new Date()).valueOf();
+		aLink.href = URL.createObjectURL(blob);
+		aLink.download = (name || timestamp)+'.'+type;
+		aLink.click();
+		
+		document.body.appendChild(aLink);
+		urlObject.revokeObjectURL(aLink.href);
+		document.body.removeChild(aLink);
+	}
+	
+	/**
+	 * 打印
+	 * @param {Object|String} data
+	 * @param {Number} width
+	 * @param {Number} height
+	 */
+	static print(node,width=0,height=0)
+	{
+		if(!node) return;
+		
+		const iframe = document.createElement('iframe');
+		document.body.appendChild(iframe);
+		
+		const doc = iframe.contentWindow.document;
+		doc.body.setAttribute('style',`width:${width ? width+'px' : '100%'};height:${height ? height+'px' : 'auto'}`);
+		
+		if(typeof node=='string'){
+			doc.write(node);
+			doc.close();
+		}
+		else  doc.body.appendChild(node);
+		
+		iframe.contentWindow.focus();
+		iframe.contentWindow.print();
+		document.body.removeChild(iframe);
 	}
 }

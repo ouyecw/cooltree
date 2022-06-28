@@ -24,6 +24,11 @@ import Point from '../geom/Point.js'
 
 const _element=Symbol("element");
 
+/**
+ * @class
+ * @module DOMDisplay
+ * @extends DisplayBase
+ */
 export default class DOMDisplay extends DisplayBase
 {
 	constructor()
@@ -169,6 +174,10 @@ export default class DOMDisplay extends DisplayBase
 	
 	_render (){}
 	
+	/**
+	 * 设置显示资源
+	 * @param {Source|DisplayObject|Canvas|Image|Graphics|SVGElement|DivElement} target
+	 */
 	setInstance(target)
 	{
 		if(target==undefined || target==null || this.instance==target) {

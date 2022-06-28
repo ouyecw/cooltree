@@ -5,6 +5,10 @@ import BitmapFont from '../text/BitmapFont.js'
 import URLLoader from '../loader/URLLoader.js'
 import AssetManager from '../core/AssetManager.js'
 
+/**
+ * @class
+ * @module AssetUtil
+ */
 export default class AssetUtil
 {
 	static parseSheet(image,data,isXML)

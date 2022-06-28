@@ -10,6 +10,11 @@ import Event from '../events/Event.js'
 import Global from '../core/Global.js'
 import Ajax from '../net/Ajax.js'
 
+/**
+ * @class
+ * @module URLLoader
+ * @extends EventDispatcher
+ */
 export default class URLLoader extends EventDispatcher
 {
 	constructor()

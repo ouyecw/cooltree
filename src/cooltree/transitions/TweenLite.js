@@ -8,6 +8,10 @@ import Timer from '../core/Timer.js'
 import Stage from '../display/Stage.js'
 import StageEvent from '../events/StageEvent.js'
 
+/**
+ * @class
+ * @module TweenLite
+ */
 export default class TweenLite
 {
 
@@ -95,6 +99,15 @@ export default class TweenLite
 		if (!TweenLite._inited) TweenLite.init();
 		if(!TweenLite._transitionList.hasOwnProperty(ease)) return target_value;
 		return TweenLite._transitionList[ease](min, start_value, target_value, max, param);
+	}
+	
+	static run(target, duration, vars)
+	{
+		return new Promise(resolve => {
+			if(target==undefined || duration<=0 || vars==undefined) return resolve();
+			vars.onComplete=resolve;
+			TweenLite.to(target, duration, vars);
+		});
 	}
 	
 	/**

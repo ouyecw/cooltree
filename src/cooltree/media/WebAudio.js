@@ -11,6 +11,11 @@ import UniqueUtil from '../utils/UniqueUtil.js'
 import StringUtil from '../utils/StringUtil.js'
 import EventDispatcher from '../events/EventDispatcher.js'
 
+/**
+ * @class
+ * @module WebAudio
+ * @extends EventDispatcher
+ */
 export default class WebAudio extends EventDispatcher
 {
 	constructor()

@@ -1,4 +1,8 @@
 
+/**
+ * @class
+ * @module MySocket
+ */
 export default class MySocket
 {
 	constructor()
@@ -48,7 +52,8 @@ export default class MySocket
 		console.log("WebSocket init:"+this.uri);
 	}
 	
-	reconnect(){
+	reconnect()
+	{
 		if(this.lock_reconnect || this.isQuit) return;
 		this.lock_reconnect=true;
 		
@@ -69,7 +74,8 @@ export default class MySocket
 		this.start();
 	}
 	
-	start(){
+	start()
+	{
 		this.heart_timeout_id && clearTimeout(this.heart_timeout_id);
 		this.heart_timeout_id=0;
 		
@@ -77,28 +83,26 @@ export default class MySocket
 		this.heart_timeout_id=setTimeout(this.heartHandler.bind(this),this.delay);
 	}
 	
-	heartHandler(){
+	heartHandler()
+	{
 		if (this.ws.readyState == 1)  this.ws.send(this.heart);
-		else {
-			if(this.lock_reconnect) return;
+		else if(!this.lock_reconnect) {
 			this.reconnect();
+			return;
 		}
-		
-		this.server_timeout_id && clearTimeout(this.server_timeout_id);
-		this.server_timeout_id= setTimeout(()=>
-		{
-			this.ws.close();
-		},
-		this.delay);
+
+		this.start();
 	}
 	
-	wsOpenHandler(e){
+	wsOpenHandler(e)
+	{
 		this.start();
 		if(!this.currentList || !this.currentList.length) return;
 		while(this.currentList.length) this.ws.send(this.currentList.shift());
 	}
 	
-	wsMessageHandler(e){
+	wsMessageHandler(e)
+	{
 		var data=e.data;
 
 		try{
@@ -113,14 +117,16 @@ export default class MySocket
 		this.reset();
 	}
 	
-	wsErrorHandler(e){
+	wsErrorHandler(e)
+	{
 		console.log("WebSocket Error!>");
 		console.log(e);
 		
 		this.reconnect();
 	}
 	
-	wsCloseHandler(e){
+	wsCloseHandler(e)
+	{
 		// console.log('websocket close: ' + e.code + ' ' + e.reason + ' ' + e.wasClean);
 		this.reconnect();
 	}

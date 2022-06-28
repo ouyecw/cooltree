@@ -8,6 +8,10 @@ import ClassUtil from '../utils/ClassUtil.js'
 import MathUtil from '../utils/MathUtil.js'
 import Point from '../geom/Point.js'
 
+/**
+ * @class
+ * @module Effect
+ */
 export default class Effect
 {
 	constructor(type,value,time,align,tween)
@@ -19,7 +23,7 @@ export default class Effect
 	/**
 	 * 设置特效
 	 * @param {String} type
-	 * @param {Number || String} value
+	 * @param {Number|String} value
 	 * @param {Number} time
 	 * @param {Number} align
 	 * @param {String} tween

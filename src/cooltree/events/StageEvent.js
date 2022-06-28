@@ -7,6 +7,11 @@ StageEvent Class
 import Event from './Event.js'
 import Factory from '../core/Factory.js'
 
+/**
+ * @class
+ * @module StageEvent
+ * @extends Event
+ */
 export default class StageEvent extends Event
 {
 	constructor(type,params,label,target)

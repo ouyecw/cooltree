@@ -7,6 +7,11 @@ import UniqueUtil from '../utils/UniqueUtil.js'
 import StringUtil from '../utils/StringUtil.js'
 import DisplayObject from '../display/DisplayObject.js'
 
+/**
+ * @class
+ * @module Media
+ * @extends DisplayObject
+ */
 export default class Media extends DisplayObject
 {
 	constructor()
@@ -22,9 +27,9 @@ export default class Media extends DisplayObject
 		this.volume=1;
 		
 		this.delay_id=0;
-		this.delay_max=30;
+		this.delay_max=20;
 		this.delay_count=0;
-		this.delay_time=500;
+		this.delay_time=400;
 	}
 	
 	init  ()
@@ -53,14 +58,8 @@ export default class Media extends DisplayObject
 	
 	_delay()
 	{
-		if(this.element.readyState>0){
+		if(this.element.readyState>0 || this.delay_count<=0){
 			this._load_complete();
-			return;
-		}
-		
-		if(this.delay_count<=0){
-			trace("[ERROR] MEDIA ERROR !!");
-			this.dispatchEvent(new Event(Media.MEDIA_ERROR));
 			return;
 		}
 		
@@ -70,7 +69,7 @@ export default class Media extends DisplayObject
 	
 	_load_handler(e)
 	{
-		this.length=(this.element.duration==null) ? 0 : Math.max(0,this.element.duration);
+		this.length=(this.element.duration==null || isNaN(this.element.duration)) ? 0 : Math.max(0,this.element.duration);
 		if(e.type.indexOf("canplay")!=0 || this.loaded) return;
 		this._load_complete();
 	}
@@ -180,16 +179,24 @@ export default class Media extends DisplayObject
 			});
 		}
 		
-		for (let source,obj,type,bool,i=0,l=args.length;i<l;i++){
+		for (let source,obj,type,bool,prefix,i=0,l=args.length;i<l;i++){
 			obj=args[i];
 			if(StringUtil.isEmpty(obj.url)) continue;
 			type=this._type+'/'+this._fit_name(StringUtil.getPathExt(obj.url))+("codecs" in obj ? ';codecs="'+obj.codecs+'"' :'');
 			bool=this.element.canPlayType(type);
-			if(!bool && obj.url.indexOf("blob:")!=0) continue;
+			
+			prefix=obj.url.slice(0,4).toLowerCase();
+			if(prefix=='rtmp'){
+				bool=true;
+				type="rtmp/flv";
+			}
+			
 			if(bool){
 				source=DOMUtil.createDOM("source",{type:type,src:obj.url});
 				this.element.appendChild(source);
 			}
+			else if(prefix!='blob') continue;
+			
 			this.list.push(obj);
 		}
 		

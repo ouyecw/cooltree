@@ -6,6 +6,11 @@ import Effect from '../model/Effect.js'
 import Global from '../core/Global.js'
 import Button from './Button.js'
 
+/**
+ * @class
+ * @module TouchItem
+ * @extends Button
+ */
 export default class TouchItem extends Button
 {
 	constructor()

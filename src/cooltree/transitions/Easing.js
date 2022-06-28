@@ -1,4 +1,8 @@
 
+/**
+ * @class
+ * @module Easing
+ */
 export default class Easing
 {
 	static easeNone  (t, b, c, d, p_params) 

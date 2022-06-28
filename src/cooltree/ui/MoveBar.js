@@ -5,6 +5,11 @@ import Stage from '../display/Stage.js'
 import Global from '../core/Global.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module MoveBar
+ * @extends DisplayObjectContainer
+ */
 export default class MoveBar extends DisplayObjectContainer
 {
 	constructor()

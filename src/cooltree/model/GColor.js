@@ -1,4 +1,8 @@
 
+/**
+ * @class
+ * @module GColor
+ */
 export default class GColor
 {
 	constructor(type,xStart, yStart, xEnd, yEnd, offsetlist, colorList, radiusStart, radiusEnd)

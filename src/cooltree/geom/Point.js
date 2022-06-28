@@ -9,7 +9,12 @@ Point Class
 import MathUtil from '../utils/MathUtil.js'
 import ObjectUtil from '../utils/ObjectUtil.js'
 import ObjectPool from '../utils/ObjectPool.js'
+import StringUtil from '../utils/StringUtil.js'
 
+/**
+ * @class
+ * @module Point
+ */
 export default class Point
 {
 	constructor(x_=0, y_=0,z_=0)
@@ -342,7 +347,121 @@ export default class Point
 		let c1=a.x*b.y-b.x*a.y;
 		return (a1*d.x+b1*d.y)==c1;
 	}
-
+	
+	/**
+	 * 交叉点 求直线1与直线2的交叉点
+	 * @param line1_p1 直线1的A点
+	 * @param line1_p2 直线1的B点
+	 * @param line2_p1 直线2的A点
+	 * @param line2_p2 直线2的B点
+	 */
+	static intersection(line1_p1,line1_p2,line2_p1,line2_p2)
+	{
+		const a1=line1_p2.y-line1_p1.y;
+		const b1=line1_p1.x-line1_p2.x;
+		const c1=line1_p2.x*line1_p1.y-line1_p1.x*line1_p2.y;
+	
+		const a2=line2_p2.y-line2_p1.y;
+		const b2=line2_p1.x-line2_p2.x;
+		const c2=line2_p2.x*line2_p1.y-line2_p1.x*line2_p2.y;
+	
+		return {x:(b1*c2-b2*c1)/(a1*b2-a2*b1),y:(a2*c1-a1*c2)/(a1*b2-a2*b1)};
+	}
+	
+	/**
+	 * 将连续线扩展offsetx2成图形
+	 * @param {Array} dots      连续点
+	 * @param {Number} offset   扩大尺寸
+	 */
+	static lineExpandArea(dots,offset)
+	{
+		if(!dots || dots.length<2) return null;
+		
+		let i,j,dot,next,pos,left,right;
+		let return_dots=[];
+		
+		const len=dots.length;
+		const temp=[];
+		
+		for(i=0;i<len;i++){
+		    if(i>=len-1) break;
+		
+		    dot=dots[i];
+		    next=dots[i+1];
+		    
+		    j=i==0 ? (i+1==len-1 ? 3 : 1) :(i+1==len-1 ? 2 : 0);
+		    pos=Point._expand_point(dot,next,j,left,right,offset);
+		    
+		    temp.push(pos[0]);
+		    return_dots.push(pos[1]);
+		
+		    if(pos.length<3) {
+		        left.a=left.b;
+		        left.b=pos[0];
+		
+		        right.a=right.b;
+		        right.b=pos[1];
+		        continue;
+		    }
+		    
+		    temp.push(pos[2]);
+		    return_dots.push(pos[3]);
+		
+		    left={a:pos[0],b:pos[2]};
+		    right={a:pos[1],b:pos[3]};
+		}
+		
+		temp.reverse();
+		return_dots=return_dots.concat(temp);
+		
+		return return_dots;
+	}
+	
+	/**
+	 * @param {Point}  start  开始点
+	 * @param {Point}  end    结束点
+	 * @param {Number} type   1开始点，2结束点,3同时存在，0中间点
+	 * @param {Object} left   左侧线
+	 * @param {Object} right  右侧线
+	 * @param {Number} offset 扩大尺寸
+	 */
+	static _expand_point(start,end,type,left,right,offset)
+    {
+		const radians=Math.atan2(end.y-start.y,end.x-start.x);
+		
+		if(type==1 || type==3) start=Point.rotateLine(offset,start,radians+Math.PI,false);
+		end=Point.rotateLine(offset,end,radians,false);
+		
+		const return_dots=[];
+		const left_start=Point.rotateLine(offset,start,Math.PI*0.5+radians,false);
+		const right_start=Point.rotateLine(offset,start,Math.PI*0.5-radians,true);
+		
+		const left_end=Point.rotateLine(offset,end,radians+Math.PI*0.5,false);
+		const right_end=Point.rotateLine(offset,end,Math.PI*0.5-radians,true);
+		
+		let cross_pos;
+		
+		if(left) {
+		    cross_pos=Point.intersection(left.a,left.b,left_start,left_end);
+		    left.b.x=cross_pos.x;
+		    left.b.y=cross_pos.y;
+		}
+		
+		if(right) {
+		    cross_pos=Point.intersection(right.a,right.b,right_start,right_end);
+		    right.b.x=cross_pos.x;
+		    right.b.y=cross_pos.y;
+		}
+		
+		if(type==1 || type==3){
+		    return_dots.push(left_start);
+		    return_dots.push(right_start);
+		}
+		
+		return_dots.push(left_end);
+		return_dots.push(right_end);
+		return return_dots;
+	}
 }
 
 Point.className="Point";

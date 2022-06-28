@@ -15,6 +15,10 @@ import ObjectPool from '../utils/ObjectPool.js'
 import Storage from '../plus/Storage.js'
 import Stage from '../display/Stage.js'
 
+/**
+ * @class
+ * @module Global
+ */
 export default class Global
 {
 	static setup(n)
@@ -145,7 +149,7 @@ export default class Global
 				Global.output.style.zIndex=Global.layer+10;
 				Global.output.style.height=Math.ceil((Global.canvas ? Global.canvas.height : Global.root.innerHeight)*0.5)+"px";
 				Global.output.style.width=Math.ceil((Global.canvas ? Global.canvas.width: Global.root.innerWidth)*0.5)+"px";
-				Global.output.style.fontSize=Global.fontSize+"px";
+				Global.output.style.fontSize=Math.floor(Global.fontSize*Global.pixelRatio)+"px";
 				Global.output.style.color="#880000";
 				Global.output.style.left="3px";
 			}

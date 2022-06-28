@@ -10,6 +10,11 @@ import DOMUtil from '../utils/DOMUtil.js'
 import Event from '../events/Event.js'
 import Global from './Global.js'
 
+/**
+ * @class
+ * @module File
+ * @extends EventDispatcher
+ */
 export default class File extends EventDispatcher
 {
 	/**

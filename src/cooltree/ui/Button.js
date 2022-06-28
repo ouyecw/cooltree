@@ -7,6 +7,11 @@ import Effect from '../model/Effect.js'
 import Source from '../core/Source.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module Button
+ * @extends DisplayObjectContainer
+ */
 export default class Button extends DisplayObjectContainer
 {
 	constructor() 
@@ -37,6 +42,10 @@ export default class Button extends DisplayObjectContainer
 		return this._register_instance;
 	}
 	
+	/**
+	 * 设置实例
+	 * @param {Source|Image|DisplayBase}  value
+	 */
 	set instance(value) 
 	{
     	let depth=null;
@@ -90,6 +99,7 @@ export default class Button extends DisplayObjectContainer
 	}
 	
 	/**
+	 * 设置标签
 	 * @param {Object} tf 
 	 * @param {String} over_color
 	 * @param {String} disabled_color
@@ -100,7 +110,7 @@ export default class Button extends DisplayObjectContainer
 		if(this.tf) this.tf.removeFromParent(true);	
 		if(!tf)return;
 	
-		this.tf=(tf instanceof DisplayBase) ? f : Factory.c("tf",tf);
+		this.tf=(tf instanceof DisplayBase) ? tf : Factory.c("tf",tf);
 		this.tf.mouseEnabled=false;
 		this.addChild(this.tf);
 		

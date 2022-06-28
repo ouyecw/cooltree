@@ -9,6 +9,10 @@ import MathUtil from '../utils/MathUtil.js'
 import ObjectUtil from '../utils/ObjectUtil.js'
 import ObjectPool from '../utils/ObjectPool.js'
 
+/**
+ * @class
+ * @module Matrix
+ */
 export default class Matrix
 {
 	constructor(a=1, b=0, c=0, d=1, tx=0, ty=0)

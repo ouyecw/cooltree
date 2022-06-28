@@ -6,12 +6,15 @@
 import StringUtil from '../utils/StringUtil.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module Ajax
+ */
 export default class Ajax
 {
 	constructor(type="json")
 	{
 		this.responseType = type;
-		this._responseType= null;
 	}
 	
 	/**
@@ -19,7 +22,7 @@ export default class Ajax
 	 * @param {String} url 
 	 * @param {Object} data
 	 * @param {Object} config
-	 * {useFormData 是否使用表格数据传值 ,withCredentials,async 异步/同步,headers}
+	 *  {useFormData 是否使用表格数据传值 ,withCredentials,async 异步/同步,headers 请求头,timeout 请求超时时间,responseType 返回数据类型}
 	 */
 	get  (url, data, config=null) 
 	{
@@ -33,13 +36,13 @@ export default class Ajax
 	 * @param {String} url 
 	 * @param {Object} data
 	 * @param {Object} config 
-	 * {useFormData 是否使用表格数据传值 ,withCredentials,async 异步/同步,headers}
+	 * {useFormData 是否使用表格数据传值 ,withCredentials,async 异步/同步,headers 请求头,timeout 请求超时时间,responseType 返回数据类型}
 	 */
 	post  (url, data, config=null) 
 	{
 		if(Ajax.POST_USE_FORMDATA) {
 			if(!config) config={};
-			config.useFormData=true;
+			if(!config.hasOwnProperty("useFormData")) config.useFormData=true;
 		}
 		
 		return new Promise(function(resolve, reject){ 
@@ -80,7 +83,7 @@ export default class Ajax
 		const ajax = s.getHttp();
 		if (!ajax) return;
 		
-		if(config && config.with_credentials){
+		if(config && config.withCredentials){
 			try{
 				ajax.withCredentials = true;
 			}
@@ -126,6 +129,7 @@ export default class Ajax
 		}
 		
 		ajax.open(t, url, is_async);
+		ajax.timeout = (config && config.timeout ? config.timeout : 600000);
 		
 		const headers=config && config.headers ? config.headers : null;
 		// (!block && s.responseType == Ajax.JSON ? {"Content-Type":"application/json"} : null);
@@ -140,33 +144,26 @@ export default class Ajax
 		}
 		
 		ajax._responseType=StringUtil.getPathExt(url);
-		
-		if (s.responseType) {
-			try{
-				ajax.responseType = s.responseType;
-			}
-			catch(error){};
-			ajax._responseType = s.responseType;
-		}
+		ajax.responseType=config && config.responseType ? config.responseType : (s.responseType || ajax.responseType);
 		
 		ajax.onreadystatechange = function () {
 			if (ajax.readyState == 4) {
 				if (ajax.status >= 200 && ajax.status < 300 || ajax.status === 304) {
 					if (oncomplete) {
-						if(ajax._responseType == Ajax.JSON){
-							oncomplete(ajax.response || JSON.parse(ajax.responseText));
-						}
-						else if(ajax._responseType == Ajax.PROP){
+						if(ajax._responseType == Ajax.PROP){
 							oncomplete(PropUtil.parseProperties(ajax.responseText));
 						}
-						else if (ajax.responseType == Ajax.ARRAY_BUFFER || ajax.responseType == Ajax.BLOB || ajax.responseType == Ajax.JSON) {
+						else if(ajax._responseType == Ajax.JSON || ajax.responseType == Ajax.JSON){
+							oncomplete(ajax.response && typeof ajax.response=='object' ? ajax.response : JSON.parse(ajax.responseText));
+						}
+						else if (ajax.response && (ajax.responseType == Ajax.ARRAY_BUFFER || ajax.responseType == Ajax.BLOB)) {
 							oncomplete(ajax.response);
 						} 
 						else if (ajax.responseText.length > 0) {
 							oncomplete(ajax.responseText);
 						} 
 						else {
-							oncomplete(null);
+							oncomplete(ajax.response);
 						}
 					}
 				} 
@@ -175,7 +172,13 @@ export default class Ajax
 				}
 	 		}
 		};
-		ajax.send(data);
+		
+		try{
+			ajax.send(data);
+		}
+		catch(err){
+			onerror(err);
+		}
 	}
 }
 
@@ -189,6 +192,6 @@ Ajax.ARRAY_BUFFER = "arraybuffer";
 Ajax.REMOVE_TYPE=false;
 
 //post数据时，是否自动默认表格数据
-Ajax.POST_USE_FORMDATA=false;
+Ajax.POST_USE_FORMDATA=true;
 
 Ajax.className="Ajax";

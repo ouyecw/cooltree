@@ -1,6 +1,10 @@
 import StringUtil from './StringUtil.js'
 import ClassUtil from './ClassUtil.js'
 
+/**
+ * @class
+ * @module ObjectPool
+ */
 export default class ObjectPool
 {
 	/**

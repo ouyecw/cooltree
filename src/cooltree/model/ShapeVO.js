@@ -5,6 +5,10 @@ import StringUtil from '../utils/StringUtil.js'
 import ShapeUtil from '../utils/ShapeUtil.js'
 import Rectangle from '../geom/Rectangle.js'
 
+/**
+ * @class
+ * @module ShapeVO
+ */
 export default class ShapeVO
 {
 	constructor(type=null,properties=null)

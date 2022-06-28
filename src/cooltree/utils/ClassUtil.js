@@ -1,6 +1,10 @@
 import Global from '../core/Global.js'
 import StringUtil from './StringUtil.js'
 
+/**
+ * @class
+ * @module ClassUtil
+ */
 export default class ClassUtil
 {
 	static getQualifiedClassName(value) 

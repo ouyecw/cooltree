@@ -7,7 +7,12 @@ import ColorUtil from './ColorUtil.js'
 import Factory from '../core/Factory.js'
 import Loader from '../loader/Loader.js'
 import TweenLite from '../transitions/TweenLite.js'
+import GColor from '../model/GColor.js'
 
+/**
+ * @class
+ * @module QuickUI
+ */
 export default class QuickUI
 {
 	/**
@@ -60,7 +65,7 @@ export default class QuickUI
 		
 		let dc,img=new Image();
 		if(!only_image) dc=Factory.c("do");
-
+	
 		if(Loader.CORS && url && url.indexOf("http")==0){
 			img.crossOrigin = Global.crossdomain;
 			if(Loader.CORS>1) url=(url.indexOf("?")<0 ? url : url.split("?")[0])+"?"+Math.random();

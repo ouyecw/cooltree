@@ -10,21 +10,26 @@ import ObjectPool from '../utils/ObjectPool.js'
 import MathUtil from '../utils/MathUtil.js'
 import Global from './Global.js'
 
+/**
+ * @class
+ * @module Source
+ */
 export default class Source
 {
-	constructor(img=null,obj=null)
+	constructor(img=null,obj=null,isJson=false)
 	{
 		this.x=this.y=this.regX=this.regY=this.index=this.width=this.height=this.frame_width=this.frame_height=0;
 		this.image=this.name=this.animation=this.label=this.url=null;
 		this.isClone=false;
 		this.scale=1;
-		if(img && obj) this.setup(img,obj);
+		
+		if(img && obj) 
+			this.setup(img,obj,isJson);
 	}
 	
-	setup (img,obj,isJson)
+	setup (img,obj,isJson=false)
 	{
 		if(!img) return;
-		isJson=(isJson==true);
 		
 		let bool=isJson ? !(obj.sourceSize.w==obj.spriteSourceSize.w && obj.sourceSize.h==obj.spriteSourceSize.h) : false;
 		let labels=String(isJson && obj.name.indexOf(".")>=0 ? StringUtil.replaceAll(obj.name,[".png",".jpg",".gif"],["","",""]) : obj.name).split("|");
@@ -53,9 +58,9 @@ export default class Source
 	    
 		this.url=img.src;
 		if(Global.useCanvas && Global.useCache && (this.width!=img.width || this.height!=img.height)){
-			let canvas=CanvasUtil.splitFrames(img,this.x,this.y,this.width,this.height);
+			const canvas=CanvasUtil.splitFrames(img,this.x,this.y,this.width,this.height);
 			if(canvas){
-				this.image=canvas;
+				this.image=CanvasUtil.toImage(canvas);
 				this.x=this.y=0;
 			}
 			else this.image=img;

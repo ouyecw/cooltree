@@ -11,6 +11,11 @@ import Global from '../core/Global.js'
 import Video from '../media/Video.js'
 import Media from '../media/Media.js'
 
+/**
+ * @class
+ * @module VideoPlayer
+ * @extends DisplayObjectContainer
+ */
 export default class VideoPlayer extends DisplayObjectContainer
 {
 	constructor()

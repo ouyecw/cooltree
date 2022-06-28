@@ -24,7 +24,14 @@ import Global from '../core/Global.js'
 import Event from '../events/Event.js'
 import Matrix from '../geom/Matrix.js'
 import Point from '../geom/Point.js'
+import Rectangle from '../geom/Rectangle.js';
+import DisplayObjectContainer from './DisplayObjectContainer.js';
 
+/**
+ * @class
+ * @module DisplayBase
+ * @extends EventDispatcher
+ */
 export default class DisplayBase extends EventDispatcher
 {
 	constructor()
@@ -43,6 +50,7 @@ export default class DisplayBase extends EventDispatcher
 	
 	set buttonMode(value)
 	{
+		this.mouseEnabled=true;
 		this._cursor=value ? "pointer" : "";
 	}
 	
@@ -66,6 +74,9 @@ export default class DisplayBase extends EventDispatcher
 		return this._resize;
 	}
 	
+	/**
+	 * 获取舞台对象
+	 */
 	get stage()
 	{
 		return this._stage;
@@ -96,11 +107,18 @@ export default class DisplayBase extends EventDispatcher
 		this._parent=value;
     }
 	
+	/**
+	 * 获取父级对象
+	 */
 	get parent()
 	{
 		return this._parent;
 	}
-
+	
+	/**
+	 * 设置透明度
+	 * @param {Number} value
+	 */
 	set alpha(value) 
 	{
         if(this._alpha==value || Number.isNaN(value)) return;
@@ -159,6 +177,10 @@ export default class DisplayBase extends EventDispatcher
 		return this[_x];
 	}
 	
+	/**
+	 * 设置X坐标
+	 * @param {Number} value
+	 */
 	set x(value)
 	{
 		if(this[_x]==value|| Number.isNaN(value))return;
@@ -172,6 +194,10 @@ export default class DisplayBase extends EventDispatcher
 		return this[_y];
 	}
 	
+	/**
+	 * 设置Y坐标
+	 * @param {Number} value
+	 */
 	set y(value)
 	{
 		if(this[_y]==value|| Number.isNaN(value))return;
@@ -185,6 +211,10 @@ export default class DisplayBase extends EventDispatcher
 		return this[_width];
 	}
 	
+	/**
+	 * 设置宽度
+	 * @param {Number} value
+	 */
 	set width(value) 
 	{
         if(this[_width]==value || Number.isNaN(value)) return;     
@@ -199,6 +229,10 @@ export default class DisplayBase extends EventDispatcher
 		return this[_height];
 	}
 	
+	/**
+	 * 设置高度
+	 * @param {Number} value
+	 */
 	set height(value) 
 	{
         if(this[_height]==value || Number.isNaN(value)) return;  
@@ -213,6 +247,10 @@ export default class DisplayBase extends EventDispatcher
 		return this[_scaleX];
 	}
 	
+	/**
+	 * 设置X方向缩放比例
+	 * @param {Number} value
+	 */
 	set scaleX(value) 
 	{
         if(this[_scaleX]==value|| Number.isNaN(value)) return;
@@ -226,6 +264,10 @@ export default class DisplayBase extends EventDispatcher
 		return this[_scaleY];
 	}
 	
+	/**
+	 * 设置Y方向缩放比例
+	 * @param {Number} value
+	 */
 	set scaleY(value) 
 	{
         if(this[_scaleY]==value|| Number.isNaN(value)) return;
@@ -239,6 +281,10 @@ export default class DisplayBase extends EventDispatcher
 		return this[_rotation];
 	}
 	
+	/**
+	 * 设置旋转角度
+	 * @param {Number} value
+	 */
 	set rotation(value) 
 	{
         if(this[_rotation]==value || Number.isNaN(value)) return;
@@ -264,11 +310,20 @@ export default class DisplayBase extends EventDispatcher
 		this.resize=true;
     }
 	
+	/**
+	 * 获取中心点
+	 * @returns {Point} value
+	 */
 	get origin()
 	{
+		if(!this.register_point) this.register_point=ObjectPool.create(Point);
 		return this.register_point;
 	}
 	
+	/**
+	 * 设置中心点
+	 * @param {Point} value
+	 */
 	set origin(value) 
 	{
         if(value==undefined || value==null) return;
@@ -300,6 +355,10 @@ export default class DisplayBase extends EventDispatcher
 		return this._matrix ? this._matrix : this.getMatrix();
 	}
 	
+	/**
+	 * 设置2D矩阵数据
+	 * @param {Matrix} value
+	 */
 	set matrix(value) 
 	{
         if(value==undefined || value==null || !(value instanceof Matrix) ) return;
@@ -355,6 +414,11 @@ export default class DisplayBase extends EventDispatcher
 		if(this._stage && !this._stage.auto_fresh) this._stage.auto_fresh=true;
 	}
 	
+	/**
+	 * 设置尺寸宽高
+	 * @param {Number} w
+	 * @param {Number} h
+	 */
 	setSize(w,h)
 	{
 		if(w==undefined || Number.isNaN(w) || h==undefined || Number.isNaN(h) || (this[_width]==w && this[_height]==h)) return;
@@ -362,6 +426,11 @@ export default class DisplayBase extends EventDispatcher
 		this.width=w;
 	}
 	
+	/**
+	 * 获取相对矩阵数据
+	 * @param {DisplayObjectContainer} target
+	 * @param {Boolean} isDraw
+	 */
 	getMatrix (target,isDraw)
 	{
 		if(this._matrix && !this.updateMatrix && !target && isDraw) return this._matrix;
@@ -403,6 +472,12 @@ export default class DisplayBase extends EventDispatcher
 		return this._temp_matrix;
 	}
 	
+	/**
+	 * 本地坐标系坐标转换到全局坐标系坐标
+	 * @param {Number|Point} posX
+	 * @param {Number} posY
+	 * @returns {Point}
+	 */
 	localToGlobal (posX, posY)
 	{
 		if(posY==undefined && (posX instanceof Point)){
@@ -418,7 +493,13 @@ export default class DisplayBase extends EventDispatcher
 		ObjectPool.remove(mtx);
 		return point;
 	}
-			
+	
+	/**
+	 * 全局坐标系坐标转换到本地坐标系坐标
+	 * @param {Number|Point} posX
+	 * @param {Number} posY
+	 * @returns {Point}
+	 */	
 	globalToLocal (posX, posY)
 	{
 		if(posY==undefined && (posX instanceof Point)){
@@ -436,6 +517,13 @@ export default class DisplayBase extends EventDispatcher
 		return point;
 	}
 	
+	/**
+	 * 本地坐标系坐标转换到其它坐标系坐标
+	 * @param {Number|Point} posX
+	 * @param {Number} posY
+	 * @param {DisplayObjectContainer} target
+	 * @returns {Point}
+	 */	
 	localToTarget (posX, posY,target)
 	{
 		if(target==undefined || target==null) return this.localToGlobal(posX, posY);
@@ -452,6 +540,11 @@ export default class DisplayBase extends EventDispatcher
 		return Math.ceil(Math.abs(this.height * this.scaleY));
 	}
 	
+	/**
+	 * 获取相对位置尺寸
+	 * @param {DisplayObjectContainer} target
+	 * @returns {Rectangle}
+	 */
 	getBounds (target)
 	{
 		let w = (this.getWidth()/Math.abs(this.scaleX));
@@ -510,24 +603,39 @@ export default class DisplayBase extends EventDispatcher
 		return vertexs;
 	}
 	
+	/**
+	 * 返回在父对象中的图层
+	 * @returns {Number}
+	 */
 	getIndex()
 	{
 		if(this.parent==null || !this.parent.contains(this)) return -1;
 		return this.parent._children.indexOf(this);
 	}
 	
+	/**
+	 * 置顶
+	 */
 	toTop()
 	{
 		if(this.parent==null || !this.parent.contains(this)) return;
 		this.parent.setChildIndex(this,this.parent.numChildren-1);
 	}
 	
+	/**
+	 * 置底
+	 */
 	toBottom()
 	{
 		if(this.parent==null || !this.parent.contains(this)) return;
 		this.parent.setChildIndex(this,0);
 	}
 	
+	/**
+	 * 移动位置到坐标
+	 * @param {Number} x
+	 * @param {Number} y
+	 */
 	moveTo(x,y)
 	{
 		if(y==undefined && (x instanceof Point)){
@@ -543,6 +651,10 @@ export default class DisplayBase extends EventDispatcher
 		this.updateMatrix=true;
 	}
 	
+	/**
+	 * 从父级容器中移除
+	 * @param {Boolean} bool 是否销毁
+	 */
 	removeFromParent (bool)
 	{
 		if(this.parent==null || !this.parent.contains(this)) {

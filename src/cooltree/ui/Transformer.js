@@ -12,6 +12,11 @@ import Stage from '../display/Stage.js'
 import Factory from '../core/Factory.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module Transformer
+ * @extends DisplayObjectContainer
+ */
 export default class Transformer extends DisplayObjectContainer
 {
 	constructor()

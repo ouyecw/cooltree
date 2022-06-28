@@ -3,6 +3,10 @@ import ColorUtil from '../utils/ColorUtil.js'
 import MathUtil from '../utils/MathUtil.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module DropShadowFilter
+ */
 export default class DropShadowFilter
 {
 	constructor (distance=0, angle=0, blur=0, color="#000000", alpha=1, radius=0)

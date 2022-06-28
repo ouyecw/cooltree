@@ -1,3 +1,7 @@
+/**
+ * @class
+ * @module SystemType
+ */
 export default class SystemType{};
 
 SystemType.OS_PC = "pc";

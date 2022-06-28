@@ -5,6 +5,11 @@ import MathUtil from '../utils/MathUtil.js'
 import TouchItem from './TouchItem.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module GroupList
+ * @extends DisplayObjectContainer
+ */
 export default class GroupList extends DisplayObjectContainer
 {
 	constructor()

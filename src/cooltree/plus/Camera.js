@@ -1,6 +1,12 @@
 import Global from "../core/Global.js"
+import DOMDisplay from '../display/DOMDisplay.js'
 
-export default class Camera extends Camera
+/**
+ * @class
+ * @module Camera
+ * @extends DOMDisplay
+ */
+export default class Camera extends DOMDisplay
 {
 	constructor()
 	{

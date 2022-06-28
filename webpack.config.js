@@ -5,6 +5,9 @@ const path = require('path');
 
 module.exports = (env,argv) =>{
   return{
+  performance: {
+      hints:false
+  },
   entry: {
 	  main:['./src/cooltree/index.js'],
   },

@@ -2,6 +2,10 @@ import DisplayObject from '../display/DisplayObject.js'
 import Graphics from '../display/Graphics.js'
 import CanvasUtil from './CanvasUtil.js'
 
+/**
+ * @class
+ * @module DrawUtil
+ */
 export default class DrawUtil
 {
 	static rect(rect,target,color,alpha)

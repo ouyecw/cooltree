@@ -1,5 +1,9 @@
 import Compile from "./Compile.js"
 
+/**
+ * @class
+ * @module Storage
+ */
 export default class Storage
 {
 	constructor() 
@@ -15,10 +19,13 @@ export default class Storage
 	setItem(key, val, exp=3) 
 	{
 		exp=exp*3600000;
-		val=exp ? {data:val,time:new Date().getTime(),exp: exp} : val;
-		val=Compile.encode((typeof val=="object") ? JSON.stringify(val) : val);
+		val=typeof val=="object" ? JSON.stringify(val) : ""+val;
+		val=exp ? JSON.stringify({
+			data:val.length<Storage.maxLength ? Compile.encode(val) : val,time:new Date().getTime(),
+			exp: exp,encode:val.length<Storage.maxLength,
+			}) : val;
 		
-		this.removeItem(key);
+		this.removeLocal(key);
 		this.store.setItem(key, val);
 	}
 	
@@ -28,19 +35,25 @@ export default class Storage
 	 */
 	getItem(key) 
 	{
-	    let value,temp=this.store.getItem(key);
-		if(temp==null) return null;
-		temp=Compile.decode(temp);
-		
-	    try{
-	    	temp=JSON.parse(temp);
-	    }
-	    catch(e){};
-		
-	    if(typeof temp=="string" || !temp.hasOwnProperty("time")) value=temp;
-	    else if(temp.exp >0 && (new Date().getTime() - temp.time) > temp.exp) this.removeItem(key);
-	    else value=temp.data;
-	    return value;
+	   let value,temp=this.store.getItem(key);
+	   if(temp==null) return null;
+	   
+	   try{
+	   	temp=JSON.parse(temp);
+	   }
+	   catch(e){};
+	   
+	   if(typeof temp=="string" || !temp.hasOwnProperty("time")) value=temp;
+	   else if(temp.exp >0 && (new Date().getTime() - temp.time) > temp.exp) this.removeLocal(key);
+	   else {
+		   value=temp.encode ? Compile.decode(temp.data) : temp.data;
+			
+		   try{
+				value=JSON.parse(value);
+		   }
+		   catch(e){};
+	   }
+	   return value;
 	}
 	
 	/**
@@ -62,7 +75,8 @@ export default class Storage
 		if (!window.localStorage && !window.sessionStorage) return this.store.clear(label,index,exception);
 	
 		for(let str in this.store){
-			if((exception && exception.indexOf(str)>=0) || (label && (index<0 ? str.indexOf(label)<0 : str.indexOf(label)!=index))) 				continue;
+			if((exception && exception.indexOf(str)>=0) || (label && (index<0 ? str.indexOf(label)<0 : str.indexOf(label)!=index))) 				
+				continue;
 			
 			this.removeItem(str);
 		}
@@ -118,3 +132,4 @@ class Cookie
 }
 
 Storage.className="Storage";
+Storage.maxLength=800;

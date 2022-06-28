@@ -12,6 +12,10 @@ import ObjectUtil from '../utils/ObjectUtil.js'
 import ObjectPool from '../utils/ObjectPool.js'
 import StringUtil from '../utils/StringUtil.js'
 
+/**
+ * @class
+ * @module Rectangle
+ */
 export default class Rectangle
 {
 	constructor(x_=0, y_=0,width_=0,height_=0) 
@@ -99,6 +103,23 @@ export default class Rectangle
 		this.y=MathUtil.format(this.y*ratioY);
 		this.width=MathUtil.format(this.width*ratioX);
 		this.height=MathUtil.format(this.height*ratioY);
+	}
+	
+	/**
+	 * 矩形中心膨胀或缩小
+	 * @param {Object} w
+	 * @param {Object} h
+	 */
+	zoom(w,h)
+	{
+		if(w==0 && h==0) return;
+		w=(w<0 && Math.abs(w)>this.width*0.5 ? -this.width*0.5 : w);
+		h=(h<0 && Math.abs(h)>this.height*0.5 ? -this.height*0.5 : h);
+		
+		this.x=MathUtil.format(this.x-w);
+		this.y=MathUtil.format(this.y-h);
+		this.width=MathUtil.format(this.width+w);
+		this.height=MathUtil.format(this.height+h);
 	}
 	
 	/**

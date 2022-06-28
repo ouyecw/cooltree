@@ -4,6 +4,11 @@ import TouchScale from '../ui/TouchScale.js'
 import Factory from '../core/Factory.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module ImageEditor
+ * @extends DisplayObjectContainer
+ */
 export default class ImageEditor extends DisplayObjectContainer
 {
 	constructor()

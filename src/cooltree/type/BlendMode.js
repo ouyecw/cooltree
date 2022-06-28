@@ -1,4 +1,8 @@
 
+/**
+ * @class
+ * @module BlendMode
+ */
 export default class BlendMode {}
 
 //正常

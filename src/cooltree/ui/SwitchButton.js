@@ -10,6 +10,11 @@ import Point from '../geom/Point.js'
 import Global from '../core/Global.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module SwitchButton
+ * @extends DisplayObjectContainer
+ */
 export default class SwitchButton extends DisplayObjectContainer
 {
 	constructor()

@@ -8,7 +8,8 @@ const BottomLeftRule = 3; // /< -BL: Does the Tetris placement.
 const ContactPointRule = 4; // /< -CP: Choosest the placement where the Rectangle touches other Rectangles as much as possible.
 
 /**
- * MaxRectanglesBinPack
+ * @class
+ * @module MaxRectsBinPack
  */
 export default class MaxRectsBinPack {
     /**

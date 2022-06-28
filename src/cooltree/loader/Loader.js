@@ -14,6 +14,11 @@ import Global from '../core/Global.js'
 import Video from '../media/Video.js'
 import Sound from '../media/Sound.js'
 
+/**
+ * @class
+ * @module Loader
+ * @extends EventDispatcher
+ */
 export default class Loader extends EventDispatcher
 {
 	

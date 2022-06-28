@@ -1,5 +1,10 @@
 import Sprite from '../display/Sprite.js'
 
+/**
+ * @class
+ * @module UIBase
+ * @extends Sprite
+ */
 export default class UIBase extends Sprite
 {
 	constructor()

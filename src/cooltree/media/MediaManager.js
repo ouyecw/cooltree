@@ -1,6 +1,10 @@
 
 import ArrayUtil from '../utils/ArrayUtil.js'
 
+/**
+ * @class
+ * @module MediaManager
+ */
 export default class MediaManager
 {
 	constructor()

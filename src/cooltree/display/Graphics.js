@@ -15,6 +15,10 @@ import ShapeVO from '../model/ShapeVO.js'
 import Global from '../core/Global.js'
 import Point from '../geom/Point.js'
 
+/**
+ * @class
+ * @module Graphics
+ */
 export default class Graphics
 {
 	constructor(context=null)
@@ -29,22 +33,14 @@ export default class Graphics
 		}
 		
 		this.name=UniqueUtil.getName("Graphics");
+		
 		Global.proxy( this , this.context , "arc");
-		Global.proxy( this , this.context , "rect");
-		Global.proxy( this , this.context , "clip");
-		Global.proxy( this , this.context , "fill");
-		Global.proxy( this , this.context , "arcTo");
-		Global.proxy( this , this.context , "stroke");
 		Global.proxy( this , this.context , "moveTo");
 		Global.proxy( this , this.context , "lineTo");
 		Global.proxy( this , this.context , "beginPath");
 		Global.proxy( this , this.context , "closePath");
-		Global.proxy( this , this.context , "createPattern");
 		Global.proxy( this , this.context , "bezierCurveTo");
-		Global.proxy( this , this.context , "createLinearGradient");
-		Global.proxy( this , this.context , "createRadialGradient");
-		Global.proxy( this , this.context , "quadraticCurveTo", "curveTo");
-		
+		Global.proxy( this , this.context , "quadraticCurveTo","curveTo");
 	}
 	
 	/**
@@ -94,11 +90,11 @@ export default class Graphics
 		return this;
 	}
 	
-	endFill()
+	endFill(fill=true)
 	{
 		const old_alpha=this.context.globalAlpha;
 		
-		if (this.fill_style)
+		if (fill && this.fill_style)
 		{
 			this.context.fillStyle=this.fill_style;
 			this.context.globalAlpha=old_alpha*this.fill_alpha;
@@ -128,7 +124,7 @@ export default class Graphics
 	*/
 	beginBitmapFill(image, repetitionStyle, alpha)
 	{
-		this.fill_style=this.createPattern(image, repetitionStyle || "no-repeat");
+		this.fill_style=this.context.createPattern(image, repetitionStyle || "no-repeat");
 		this.fill_alpha=(alpha==undefined) ? 1 : alpha;
 		this.context.fillStyle=this.fill_style;
 	}
@@ -143,7 +139,7 @@ export default class Graphics
 	*/		
 	linearGradientFill(xStart, yStart, xEnd, yEnd, offsetlist, colorList)
 	{
-		let fillStyle=this.createLinearGradient(xStart, yStart, xEnd, yEnd);
+		let fillStyle=this.context.createLinearGradient(xStart, yStart, xEnd, yEnd);
 	    let len=Math.min(offsetlist.length,colorList.length);
 		for (let i=0 ; i<len ; i++) fillStyle.addColorStop(offsetlist[i], colorList[i]+"");
 		this.fill_style=fillStyle;
@@ -162,7 +158,7 @@ export default class Graphics
 	*/
 	radialGradientFill(xStart, yStart, radiusStart, xEnd, yEnd, radiusEnd, offsetlist, colorList)
 	{
-		let fillStyle=this.createRadialGradient(xStart, yStart, radiusStart, xEnd, yEnd, radiusEnd);
+		let fillStyle=this.context.createRadialGradient(xStart, yStart, radiusStart, xEnd, yEnd, radiusEnd);
 		let len=Math.min(offsetlist.length,colorList.length);
 		for (let i=0 ; i<len ; i++) fillStyle.addColorStop(offsetlist[i], colorList[i]+"");
 		this.fill_style=fillStyle;
@@ -175,45 +171,42 @@ export default class Graphics
 	drawRect(x, y, width, height)
 	{
 		this.beginPath();
-		this.rect(x, y, width, height);
+		this.context.rect(x, y, width, height);
 		this.closePath();
 	}
 	
 	/**
 	绘制圆角矩形路径
-	@param ellipseRadius number 圆角半径
+	@param rx,ry number 圆角半径
 	*/
 	drawRoundRect(x, y, width, height, rx,ry)
 	{
-		ry=ry ? ry : rx;
 		this.beginPath();
-		this.moveTo(x+width, y+height-ry);
-	    this.curveTo(x+width, y+height, x+width - rx, y+height);
-	    this.lineTo(x + rx, y+height);
-	    this.curveTo(x, y+height, x, y+height - ry);
-	    this.lineTo(x, y + ry);
-	    this.curveTo(x, y, x + rx, y);
-	    this.lineTo(x+width - rx, y);
-	    this.curveTo(x+width, y, x+width, y + ry);
-	    this.lineTo(x+width, y+height-ry);
-		this.closePath();
 		
-	//	this.beginPath();  
-	//	let w = width-rx*2, 
-	//	h = height-ry*2, 
-	//	C = 0.5522847498307933, 
-	//	cx = C * rx, 
-	//	cy = C * ry;
-	//
-	//	this.moveTo(x + width, y+ry);
-	//	this.bezierCurveTo(x + width, y+ry - cy, x+w+rx+ cx, y, x+w+rx, y);
-	//	this.lineTo(x+rx,y);  
-	//	this.bezierCurveTo(x+rx - cx, y, x, y+ry - cy, x, y+ry);
-	//	this.lineTo(x,y+h+ry);
-	//	this.bezierCurveTo(x, y+h+ ry + cy, x+rx - cx, y+height, x+rx, y+height);
-	//	this.lineTo(x+rx+w,y+height);
-	//	this.bezierCurveTo(x+w+rx + cx, y+height, x+width, y+h+ry + cy, x+width, y+h+ry);
-	//	this.closePath(); 
+		if(ry && ry!=rx){
+			this.moveTo(x+width, y+height-ry);
+			this.curveTo(x+width, y+height, x+width - rx, y+height);
+			this.lineTo(x + rx, y+height);
+			this.curveTo(x, y+height, x, y+height - ry);
+			this.lineTo(x, y + ry);
+			this.curveTo(x, y, x + rx, y);
+			this.lineTo(x+width - rx, y);
+			this.curveTo(x+width, y, x+width, y + ry);
+			this.lineTo(x+width, y+height-ry);
+		}
+		else{
+			this.moveTo(x + rx, y);
+			this.lineTo(x + width - rx, y);
+			this.arc(x + width - rx, y + rx, rx, -Math.PI / 2, 0, false);
+			this.lineTo(x + width, y + height - rx);
+			this.arc(x + width - rx, y + height - rx, rx, 0, Math.PI / 2, false);
+			this.lineTo(x + rx, y + height);
+			this.arc(x + rx, y + height - rx, rx, Math.PI / 2, Math.PI, false);
+			this.lineTo(x, y + rx);
+			this.arc(x + rx, y + rx, rx, Math.PI, Math.PI * 3 / 2, false);
+		}
+		
+		this.closePath();
 	}
 	
 	/**
@@ -221,11 +214,11 @@ export default class Graphics
 	 * @param {Array} array
 	 * @param {Boolean} isClose
 	 */
-	drawPath(array,isClose)
+	drawPath(array,isClose=true)
 	{
 		if(array==undefined || array.length<2) return;
 		
-		this.beginPath();
+		if(isClose) this.beginPath();
 		let isArray=(array[0] instanceof Array);
 		this.moveTo((isArray ? array[0][0] : array[0].x), (isArray ? array[0][1] : array[0].y));
 		

@@ -1,6 +1,11 @@
 import StringUtil from './StringUtil.js'
+import MathUtil from './MathUtil.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module ColorUtil
+ */
 export default class ColorUtil
 {
 	static getRed(color)
@@ -30,6 +35,19 @@ export default class ColorUtil
 		const blue  = Math.min(255, ColorUtil.getBlue(color)*factor);
 	
 		return ColorUtil.toInt(red,green,blue);
+	}
+	
+	static RGB2Color(rgb)
+	{
+		if(StringUtil.isEmpty(rgb)) return rgb;
+		const str=StringUtil.replaceAll(rgb,["rgb","(",")"],["","",""]);
+		const arr=str.split(",");
+		
+		const hexs = [Number(StringUtil.trim(arr[0])).toString(16), 
+		Number(StringUtil.trim(arr[1])).toString(16), 
+		Number(StringUtil.trim(arr[2])).toString(16)];
+		for (let i = 0; i < 3; i++) if (hexs[i].length == 1) hexs[i] = "0" + hexs[i];
+		return "#" + hexs.join("");	
 	}
 	
 	static colorToRGBA (color, alpha)

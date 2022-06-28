@@ -5,6 +5,10 @@ import ObjectPool from './ObjectPool.js'
 import ClassUtil from './ClassUtil.js'
 import MathUtil from './MathUtil.js'
 
+/**
+ * @class
+ * @module CanvasUtil
+ */
 export default class CanvasUtil
 {
 	static create(t)
@@ -156,7 +160,7 @@ export default class CanvasUtil
 			c = self._children[i];
 			if(c instanceof DisplayObjectContainer){
 				try{
-					if(ClassUtil.getQualifiedSuperclassName(c).split('.').indexOf('Sprite')>=0 || c.name.indexOf('sprite')==0) 
+					if(ClassUtil.getQualifiedSuperclassName(c).split('.').indexOf('Sprite')>=0 || (c.name && (''+c.name).indexOf('sprite')==0)) 
 						c.render(target,container);
 					else 
 						CanvasUtil._renderContainer(target,c,container)

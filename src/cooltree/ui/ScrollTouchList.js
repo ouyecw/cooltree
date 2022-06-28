@@ -12,6 +12,11 @@ import Global from '../core/Global.js'
 import Point from '../geom/Point.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module ScrollTouchList
+ * @extends Sprite
+ */
 export default class ScrollTouchList extends Sprite
 {
 	constructor()

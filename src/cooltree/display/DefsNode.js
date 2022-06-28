@@ -2,6 +2,11 @@ import DOMDisplay from './DOMDisplay.js'
 import SVGUtil from '../utils/SVGUtil.js' 
 import ShapeVO from '../model/ShapeVO.js'
 
+/**
+ * @class
+ * @module DefsNode
+ * @extends DOMDisplay
+ */
 export default class DefsNode extends DOMDisplay
 {
 	constructor()

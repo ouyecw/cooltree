@@ -12,6 +12,11 @@ import SVGLabel from '../type/SVGLabel.js'
 import DefsNode from './DefsNode.js'
 import Point from '../geom/Point.js'
 
+/**
+ * @class
+ * @module Sprite
+ * @extends DisplayObjectContainer
+ */
 export default class Sprite extends DisplayObjectContainer
 {
 	constructor()
@@ -107,11 +112,18 @@ export default class Sprite extends DisplayObjectContainer
     	}
     }
 	
+	/**
+	 * 获取遮罩图形
+	 */
 	get mask()
 	{
 		return this._mask;
 	}
 	
+	/**
+	 * 设置遮罩图形
+	 * @param {ShapeVO|Rectangle} value
+	 */
 	set mask(value) 
 	{
     	if(value && (value instanceof ShapeVO)) {

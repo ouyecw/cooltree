@@ -5,6 +5,11 @@ import SVGUtil from '../utils/SVGUtil.js'
 import GColor from '../model/GColor.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module SVGText
+ * @extends DOMDisplay
+ */
 export default class SVGText extends DOMDisplay
 {
 	constructor(w,h)

@@ -1,6 +1,10 @@
 import ObjectPool from './ObjectPool.js'
 import StringUtil from './StringUtil.js'
 
+/**
+ * @class
+ * @module ObjectUtil
+ */
 export default class ObjectUtil
 {
 	static getType(o) 
@@ -91,7 +95,7 @@ export default class ObjectUtil
 	 * @param {array} miss
 	 * @param {Boolean} clone
 	 */
-	static copyAttribute(target,data,must,miss,clone)
+	static copyAttribute(target,data,must=false,miss=null,clone=false)
 	{
 		if(target==null || data==null) return;
 		
@@ -117,7 +121,7 @@ export default class ObjectUtil
 				    break;
 				    
 				case "boolean":
-				    target[i]=(item!=undefined && (typeof(item)=="string" ? (item=="true") : item));
+				    target[i]=(item!=undefined && (typeof(item)=="string" ? (item=="true") : item))==true;
 				    break;
 	 
 				case "string":
@@ -136,32 +140,46 @@ export default class ObjectUtil
 	static cloneObj(origin)
 	{
 		if(origin==undefined || origin==null) return null;
-		let originProto = Object.getPrototypeOf(origin);
-		return Object.assign(Object.create(originProto), origin);
+		return JSON.parse(JSON.stringify(origin));
+	}
+	
+	static getAttribute(obj,attr)
+	{
+		if(!obj || !attr || typeof attr!="string") return null;
+		const array=attr.split(".");
+		
+		for(let str of array){
+			if(typeof obj!="object" || !obj.hasOwnProperty(str) || !obj[str]) return null;
+			obj=obj[str];
+		}
+		
+		return obj;
 	}
 	
 	static equal(objA,objB)
 	{
 		if(objA==null || objB==null) return (objA==objB);
-		if(typeof objA != typeof objB) return false;
 		if(typeof objA!="object") return (objA==objB);
 		
 		let aProps,bProps,i,propName;
-		
-		if(objA instanceof Array && objB instanceof Array) {
+		if(objA instanceof Array && objB instanceof Array && objA.hasOwnProperty("length") && objB.hasOwnProperty("length")) {
 			if(objA.length!=objB.length) return false;
+				
 			for(i=0,l=objA.length;i<l;i++){
 				if(!ObjectUtil.equal(objA[i],objB[i])) return false;
 			}
 		}else{
-			if(objA instanceof Array || objB instanceof Array) return false;
-			aProps = Object.getOwnPropertyNames(objA);//Reflect.ownKeys(objA);
-			bProps = Object.getOwnPropertyNames(objB);//Reflect.ownKeys(objB);
-			if(aProps.length != bProps.length) return;
+			aProps = ArrayUtil.removeChild(Object.getOwnPropertyNames(objA),"__ob__");//Reflect.ownKeys(objA);
+			bProps = ArrayUtil.removeChild(Object.getOwnPropertyNames(objB),"__ob__");//Reflect.ownKeys(objB);
+			
+			if(objA instanceof Array) aProps = ArrayUtil.removeChild(aProps,"length");
+			if(objB instanceof Array) bProps = ArrayUtil.removeChild(bProps,"length");
+			if(aProps.length != bProps.length) return false;
+				
 			for (i = 0; i < aProps.length; i++) {
-	        	propName = aProps[i];
-	        	if (!ObjectUtil.equal(objA[propName],objB[propName])) return false;
-	        }
+		    	propName = aProps[i];
+		    	if (!ObjectUtil.equal(objA[propName],objB[propName])) return false;
+		    }
 		}
 		
 		return true;
@@ -198,5 +216,46 @@ export default class ObjectUtil
 		
 		if (d) for (e in d)  c[e] = d[e];
 		return c
+	}
+	
+	static pushFormData(data)
+	{
+		const form=new FormData();
+		let i,bool,sub,item;
+		
+		for (i in data) {
+			sub=data[i];
+			bool=(typeof sub==="object" && (sub instanceof Array || sub instanceof FileList));
+			
+			if(!bool) {
+				form.append(i, sub instanceof File || sub.constructor.name=="File" ||typeof sub!="object" ? sub :JSON.stringify(sub));
+				continue;
+			}
+			
+			for(item of sub){
+				if(item instanceof File || item.constructor.name=="File") {
+					form.append(i,item);
+					bool=false;
+				}
+			}
+			
+			if(!bool) continue;
+			form.append(i, JSON.stringify(sub));
+		}
+		
+		return form;
+	}
+	
+	static getAttribute(obj,attr)
+	{
+		if(!obj || !attr || typeof attr!="string") return null;
+		const array=attr.split(".");
+		
+		for(let str of array){
+			if(typeof obj!="object" || !obj.hasOwnProperty(str) || !obj[str]) return null;
+			obj=obj[str];
+		}
+		
+		return obj;
 	}
 }

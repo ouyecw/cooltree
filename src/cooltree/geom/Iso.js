@@ -2,6 +2,10 @@ import Point from './Point.js'
 import Matrix from './Matrix.js'
 import StringUtil from '../utils/StringUtil.js'
 
+/**
+ * @class
+ * @module Iso
+ */
 export default class Iso
 {
 	static screenToSpace(point)

@@ -1,5 +1,10 @@
 import EventDispatcher from '../events/EventDispatcher.js'
 
+/**
+ * @class
+ * @module BDMap
+ * @extends EventDispatcher
+ */
 export default class BDMap extends EventDispatcher
 {
 	
@@ -17,12 +22,10 @@ export default class BDMap extends EventDispatcher
 	 * @param {String} key
 	 * @param {Boolean} hideLogo
 	 * @param {Object}  options
-	 * @param {Boolean} server
 	 */
-	init(version,key,hideLogo,options,server)
+	init(version,key,hideLogo,options)
 	{
 		let _this=this;
-		server=(server==undefined) ? "" : server;
 		this.options=(options==undefined) ? this.getDefaultOptions() : options;
 		
 		if(!((version=="" || version==null) && (key=="" || key==null))){

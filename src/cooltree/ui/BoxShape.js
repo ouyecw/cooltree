@@ -11,6 +11,11 @@ import GColor from '../model/GColor.js'
 import Global from '../core/Global.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module BoxShape
+ * @extends DisplayObjectContainer
+ */
 export default class BoxShape extends DisplayObjectContainer
 {
 	
@@ -253,7 +258,7 @@ export default class BoxShape extends DisplayObjectContainer
 			if(this._pattern) this.instance.graphics.beginBitmapFill(...this._pattern);
 			else this.instance.graphics.beginFill(this._color,this._fill_alpha);
 			
-			if(this._redius>0) this.instance.graphics.drawRoundRect(thickness*0.5,thickness*0.5,w,h,this._redius);
+			if(this._redius>0) this.instance.graphics.drawRoundRect(thickness*0.5,thickness*0.5,w,h,this._redius,this._redius);
 			else               this.instance.graphics.drawRect(thickness*0.5,thickness*0.5,w,h);
 			
 			this.instance.graphics.endFill();

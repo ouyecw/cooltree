@@ -1,4 +1,7 @@
-
+/**
+ * @class
+ * @module TimeUtil
+ */
 export default class TimeUtil
 {
 	static format (date,fmt='yyyy-MM-dd hh:mm:ss') 

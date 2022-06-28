@@ -6,12 +6,20 @@ DOMMovie Class
 import Source from '../core/Source.js'
 import Event from '../events/Event.js'
 import DOMDisplay from './DOMDisplay.js'
+import MathUtil from '../utils/MathUtil.js'
 import DisplayObject from './DisplayObject.js'
 import ObjectPool from '../utils/ObjectPool.js'
 import StringUtil from '../utils/StringUtil.js'
 
-const reverse_play=Symbol("reversePlay");
+const _rate=Symbol("rate");
+const _swing_play=Symbol("swingPlay");
+const _reverse_play=Symbol("reversePlay");
 
+/**
+ * @class
+ * @module DOMMovie
+ * @extends DOMDisplay
+ */
 export default class DOMMovie extends DOMDisplay
 {
 	constructor(s=null)
@@ -22,15 +30,26 @@ export default class DOMMovie extends DOMDisplay
 		this._frames=[];
 		this._paused=true;
 		this._replay_time=0;
-		this[reverse_play]=false;
-		this._frame=this._current_frame=1;
+		this[_swing_play]=false;
+		this[_reverse_play]=false;
+		this._count=this[_rate]=this._frame=this._current_frame=1;
 		
 		if(s) this.setFrames(s);
 	}
 	
+	get rate()
+	{
+		return this[_rate];
+	}
+	
+	get swing()
+	{
+		return this[_swing_play];
+	}
+	
 	get reverse()
 	{
-		return this[reverse_play];
+		return this[_reverse_play];
 	}
 	
 	/**
@@ -39,9 +58,21 @@ export default class DOMMovie extends DOMDisplay
      */
 	set reverse(value) 
 	{
-        if(value==undefined || value==null || value==this[reverse_play]) return;
-		this[reverse_play]=Boolean(value);
+        if(value==undefined || value==null || value==this[_reverse_play]) return;
+		this[_reverse_play]=Boolean(value);
     }
+	
+	set swing(value)
+	{
+		if(value==undefined || value==null || value==this[_swing_play]) return;
+		this[_swing_play]=Boolean(value);
+	}
+	
+	set rate(value)
+	{
+	    if(value==undefined || value==null || value<=1 || value==this[_rate]) return;
+		this[_rate]=Math.abs(MathUtil.int(value));
+	}
 	
 	get totalFrame()
 	{
@@ -62,6 +93,10 @@ export default class DOMMovie extends DOMDisplay
 		this._paused=true;
 	}
 	
+	/**
+	 * 设置显示资源数组
+	 * @param {Array} data [Source]
+	 */
 	setFrames(data)
 	{
 		if(data==null) return;
@@ -69,6 +104,11 @@ export default class DOMMovie extends DOMDisplay
 		if(this._frames.length>0) this.gotoAndPlay(1);
 	}
 	
+	/**
+	 * 添加帧
+	 * @param {Object} f
+	 * @param {Object} i
+	 */
 	addFrame (f,i)
 	{
 		if(f==undefined || f==null || !(f instanceof Source)) return;
@@ -108,17 +148,28 @@ export default class DOMMovie extends DOMDisplay
 		}
 	}
 	
+	/**
+	 * 播放
+	 * @param {Number} time 循环次数
+	 */
 	play(time)
 	{
 		this._replay_time=(time==undefined) ? 0 : time;
 		this._paused=false;
 	}
 	
+	/**
+	 * 停止播放
+	 */
 	stop()
 	{
 		this._paused=true;
 	}
-		
+	
+	/**
+	 * 跳转到index帧停止播放
+	 * @param {Number} index
+	 */
 	gotoAndStop(index)
 	{
 		if(this._frames==undefined) return;
@@ -140,6 +191,10 @@ export default class DOMMovie extends DOMDisplay
 		this._paused=true;
 	}
 	
+	/**
+	 * 跳转到index帧开始播放
+	 * @param {Object} index
+	 */
 	gotoAndPlay(index)
 	{
 		this.gotoAndStop(index);
@@ -148,7 +203,7 @@ export default class DOMMovie extends DOMDisplay
 	
 	nextFrame()
 	{
-		this._frame=this[reverse_play] ? (this._current_frame<=1 ? this._frames.length : (this._current_frame-1)) : (this._current_frame>=this._frames.length ? 1 : (this._current_frame+1));
+		this._frame=this[_reverse_play] ? (this._current_frame<=1 ? this._frames.length : (this._current_frame-1)) : (this._current_frame>=this._frames.length ? 1 : (this._current_frame+1));
 	}
 	
 	render(object)
@@ -165,15 +220,30 @@ export default class DOMMovie extends DOMDisplay
 			this.label=target.animation+(StringUtil.isEmpty(target.label) ? "" :(":"+target.label));
 			
 			if(!this._paused){
-				this.nextFrame();
-				
-				if(((this[reverse_play] && this._current_frame<=1)||(!this[reverse_play] && this._current_frame>=this._frames.length)) && this._replay_time>0){
-					this._replay_time--;
-					if(this._replay_time==0) {
-						this._paused=true;
-						this.dispatchEvent(new Event(Event.PLAY_OVER));
+				this._count--;
+							
+				if(this._count<=0 ){
+					if(((this[_reverse_play] && this._current_frame<=1)||(!this[_reverse_play] && this._current_frame>=this._frames.length))){
+						
+						if(this[_swing_play]){
+							this.reverse=!this[_reverse_play];
+						}
+						
+						if(this._replay_time>0){
+							this._replay_time--;
+							if(this._replay_time==0) {
+								this._paused=true;
+								this.dispatchEvent(new Event(Event.PLAY_OVER));
+							}
+						}
+						else this.dispatchEvent(new Event(Event.PLAY_OVER));
 					}
+					
+					this.nextFrame();
 				}
+				
+				this._count=(this._count<=0) ? this[_rate] : this._count;
+				this.__checkDisplayUpdate();
 			}
 		}
 	
@@ -188,14 +258,15 @@ export default class DOMMovie extends DOMDisplay
 		this.label=null;
 		this._paused=true;
 		this._replay_time=0;
-		this[reverse_play]=false;
-		this._frame=this._current_frame=1;
+		this[_swing_play]=false,
+		this[_reverse_play]=false;
+		this._count=this[_rate]=this._frame=this._current_frame=1;
 	}
 	
 	dispose()
 	{
 		super.dispose();
-		delete this._frame,this[reverse_play],this._frames,this._paused,this._current_frame,this.label,this._replay_time;
+		delete this._count,this[_rate],this[_swing_play],this._frame,this[_reverse_play],this._frames,this._paused,this._current_frame,this.label,this._replay_time;
 	}
 	
 	toString()

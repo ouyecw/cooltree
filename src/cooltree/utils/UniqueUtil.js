@@ -1,4 +1,7 @@
-
+/**
+ * @class
+ * @module UniqueUtil
+ */
 export default class UniqueUtil
 {
 	static getName(label)

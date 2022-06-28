@@ -1,5 +1,9 @@
 import StringUtil from '../utils/StringUtil.js'
 
+/**
+ * @class
+ * @module FontManager
+ */
 export default class FontManager
 {
 	/**

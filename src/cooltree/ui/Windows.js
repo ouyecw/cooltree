@@ -7,6 +7,11 @@ import Global from '../core/Global.js'
 import SlideBar from './SlideBar.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module Windows
+ * @extends DisplayObjectContainer
+ */
 export default class Windows extends DisplayObjectContainer
 {
 	constructor()

@@ -1,3 +1,7 @@
+/**
+ * @class
+ * @module MapUtil
+ */
 export default class MapUtil
 {
 	static mapToObj(strMap,toArray=false)

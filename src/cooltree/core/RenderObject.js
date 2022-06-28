@@ -1,6 +1,11 @@
 import ObjectPool from '../utils/ObjectPool.js'
 import CanvasUtil from '../utils/CanvasUtil.js'
 
+
+/**
+ * @class
+ * @module RenderObject
+ */
 export default class RenderObject
 {
 	constructor()

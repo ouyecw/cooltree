@@ -1,4 +1,8 @@
 
+/**
+ * @class
+ * @module StringUtil
+ */
 export default class StringUtil
 {
 	static countLeftSpace(string)
@@ -74,8 +78,7 @@ export default class StringUtil
 	 */
 	static countToString(total,count)
 	{
-		let num=String(total).length-String(count).length;	
-		return (''+count).padStart(num, '0');
+		return (''+count).padStart(String(total).length, '0');
 	}
 	
 	/**
@@ -285,10 +288,10 @@ export default class StringUtil
 		return arr.join("-").toLowerCase();
 	}
 	
-	static buildParams(obj,is_style=false,type=true)
+	static buildParams(obj,is_style=false,type=0)
 	{
 		if(obj==null) return "";
-	    let i,b=false,str="",encode=(type ? encodeURIComponent : escape);
+	    let i,b=false,str="",encode=(type==1 ? encodeURIComponent : escape);
 	    for (i in obj){
 	        if(b) str+=(is_style ? ";" : "&");
 	        if(!StringUtil.isEmpty(i) && obj[i]) {

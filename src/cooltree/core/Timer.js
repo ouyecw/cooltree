@@ -7,6 +7,11 @@ import EventDispatcher from '../events/EventDispatcher.js'
 import Global from './Global.js'
 import Event from '../events/Event.js'
 
+/**
+ * @class
+ * @module Timer
+ * @extends EventDispatcher
+ */
 export default class Timer extends EventDispatcher
 {
 	constructor(r)

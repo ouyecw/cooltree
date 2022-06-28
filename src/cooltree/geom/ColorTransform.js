@@ -5,6 +5,10 @@ ColorTransform Class
 **/
 import ColorUtil from '../utils/ColorUtil.js'
 
+/**
+ * @class
+ * @module ColorTransform
+ */
 export default class ColorTransform
 {
 	constructor(redMultiplier, greenMultiplier, blueMultiplier, alphaMultiplier, redOffset, greenOffset, blueOffset, alphaOffset)

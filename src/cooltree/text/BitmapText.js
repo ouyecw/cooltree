@@ -6,6 +6,11 @@ import ColorUtil from '../utils/ColorUtil.js'
 import MathUtil from '../utils/MathUtil.js'
 import Global from '../core/Global.js'
 
+/**
+ * @class
+ * @module BitmapText
+ * @extends DisplayObjectContainer
+ */
 export default class BitmapText extends DisplayObjectContainer
 {	
 	constructor()

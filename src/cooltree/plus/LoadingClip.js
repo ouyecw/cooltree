@@ -5,6 +5,11 @@ import Factory from '../core/Factory.js'
 import Global from '../core/Global.js'
 import Source from '../core/Source.js'
 
+/**
+ * @class
+ * @module LoadingClip
+ * @extends DisplayObjectContainer
+ */
 export default class LoadingClip extends DisplayObjectContainer
 {
 	constructor(url,cb)

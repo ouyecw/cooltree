@@ -1,7 +1,15 @@
 import DisplayObjectContainer from '../display/DisplayObjectContainer.js'
+import DisplayObject from '../display/DisplayObject.js'
 import StringUtil from './StringUtil.js'
+import ObjectPool from './ObjectPool.js'
 import ClassUtil from './ClassUtil.js'
+import Global from '../core/Global.js'
+import SVGUtil from './SVGUtil.js'
 
+/**
+ * @class
+ * @module DisplayUtil
+ */
 export default class DisplayUtil
 {
 	/**
@@ -59,5 +67,25 @@ export default class DisplayUtil
 	    	tf.render();
 	    	sh=(bool ? tf.element : tf).scrollHeight;
 	    }
+	}
+	
+	static toSVG(xml,scale=1)
+	{
+		if(!xml) return null;
+		const rect=SVGUtil.getRect(xml);
+		let pic;
+		
+		if(Global.useCanvas){
+			pic=ObjectPool.create(DisplayObject);
+		    pic.context.drawSvg(xml,0,0,rect.width*scale,rect.height*scale);
+		   
+		}else{
+			pic=SVGUtil.getElement(xml);
+			pic.scale=scale;
+		}
+		
+		pic.height=rect.height*scale;
+		pic.width=rect.width*scale;
+		return pic;
 	}
 }

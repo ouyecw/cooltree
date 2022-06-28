@@ -21,11 +21,21 @@ import Point from '../geom/Point.js'
 
 const _graphics=Symbol("graphics");
 
+/**
+ * @class
+ * @module DisplayObject
+ * @extends DisplayBase
+ */
 export default class DisplayObject extends DisplayBase
 {
 	constructor()
 	{
 		super();
+		
+		/**
+		 * 是否严格渲染命令顺序
+		 */
+		this.strict=false;
 		
 		this.use_canvas=true;
 		this._repeat=false;
@@ -113,7 +123,11 @@ export default class DisplayObject extends DisplayBase
 	
 	get context()
 	{
-		this._context=(!this._context ? ObjectPool.create(ContextVO) : this._context)
+		if(!this._context){
+			this._context=ObjectPool.create(ContextVO);
+			this._context.strict=this.strict;
+		}
+
 		return this._context;
 	}
 	
@@ -155,6 +169,10 @@ export default class DisplayObject extends DisplayBase
 		_temp_context.globalAlpha*=this.alpha*this._parent_alpha;
 	}
 	
+	/**
+	 * 设置显示资源
+	 * @param {Source|Image} target
+	 */
 	setInstance(target)
 	{
 		if(target && (target instanceof Source) && !target.image) target=null;
@@ -195,23 +213,23 @@ export default class DisplayObject extends DisplayBase
 		return this.instance;
 	}
 	
-	do_actions(target,vo,bool=false)
+	do_actions(target,vo,is_graphics=false)
 	{
 		if(!target || !target.context || !vo) return;
-		const canvas=(bool ? target : target.context);
-		const params=vo.getValue();
+		const canvas=(is_graphics ? target : target.context);
 		let action;
 		
-		if(params){
-			for(let i in params) {
-				if(canvas[i]==params[i]) continue;
-				canvas[i]=params[i];
+		if(!vo.strict){
+			for(let i in vo.value) {
+				if(canvas[i]==vo.value[i]) continue;
+				canvas[i]=vo.value[i];
 			}
 		}
-		
+	
 		for(action of vo.actions)
 		{
-			canvas[action.method].apply(canvas,action.data);
+			if(action.type===1) canvas[action.method].apply(canvas,action.data);
+			else if(action.type===0) canvas[action.method]=action.data[0];
 		}
 	}
 	
@@ -331,13 +349,14 @@ export default class DisplayObject extends DisplayBase
 		this.mask=this.instance=this._cache=this[_graphics]=this.colorTransform=this._context=this.canvas=this._blendMode=null;
 		this.use_canvas=true;
 		this._repeat=false;
+		this.strict=false;
 		this.filters=[];
 	}
 	
 	dispose ()
 	{
 		super.dispose();
-		delete this._repeat,this._cache,this.filters,this._mask,this.instance,this.colorTransform,this._blendMode,this._context,this.canvas;
+		delete this.strict,this._repeat,this._cache,this.filters,this._mask,this.instance,this.colorTransform,this._blendMode,this._context,this.canvas;
 	}
 	
 	toString ()
