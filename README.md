@@ -1,5 +1,13 @@
 # cooltree
-这是一个很酷的JS开源框架，适用于H5应用或H5游戏（支持微信小程序）开发，同一个项目可以自由切换Canvas模式和DOM模式显示，内置很多简单实用的UI组件，无需了解CSS一样可以页面布局，兼容所有浏览器除IE8及以下版本。  同时框架支持精灵图动画，支持位图字体，支持外部字体加载，支持SVG图形显示，支持SVG图形遮罩，支持多媒体播放，支持移动端微信中浏览。   
+
+### What to Use cooltree for and When to Use It
+This is a very cool JS open source framework, which is applicable to the development of H5 applications or H5 games (supporting wechat applets). The same project can freely switch between canvas mode and DOM mode display. It has many simple and practical UI components built in. It does not need to understand CSS, and it can also layout pages. It is compatible with all browsers except IE8 and below. At the same time, the framework supports sprite animation, bitmap fonts, external font loading, SVG graphics display, SVG graphics mask, multimedia playback, and browsing in wechat on mobile terminals.
+
+### Learn ###
+- Website: Find out more about cooltree on the  [official website](http://cooltree.cn)
+- Docs: Get to know the cooltree  API by checking out the [docs](http://cooltree.cn/jsdoc/index.html).
+- Examples: Get stuck right in and play around with cooltree  code and features right [here](http://cooltree.cn/game.html).
+- E-mail:contact us  [here](mailto:ouye@163.com).
 
 ## NPM Install
 
@@ -29,7 +37,4 @@ import * as CT from 'cooltree'
 Global.useCanvas=true;
 ```
 
-官网：http://cooltree.cn
-微信号：ouyecw 
-联系邮箱：ouye@163.com
 (https://github.com/ouyecw/cooltree.git)
