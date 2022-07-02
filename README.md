@@ -9,10 +9,6 @@ npm i cooltree -S
 
 ## Quickstart
 
-```js
-import {Stage,Global} from 'cooltree'
-```
-
 #### import class
 
 ```js
