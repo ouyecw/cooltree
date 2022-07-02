@@ -6,12 +6,14 @@ export default class Hero extends DisplayObjectContainer
 		super();
 		
 		this._dead=this._move_complete=this._play_complete=false;
-		this._instance=this.__move_handler=this._plane_label=this._right_plane=this._left_plane=this._normal_plane=null;
+		this.__play_over=this._instance=this.__move_handler=this._plane_label=this._right_plane=this._left_plane=this._normal_plane=null;
 	}
 	
 	init()
 	{
 		this.__move_handler=Global.delegate(this._move_handler,this);
+		this.__play_over=Global.delegate(this._play_over,this);
+		
 		this._right_plane=MovieManager.getData("fighter_bankRight_");
 		this._left_plane=MovieManager.getData("fighter_bankLeft_");
 		this._normal_plane=MovieManager.getData("fighter_static");
@@ -47,15 +49,17 @@ export default class Hero extends DisplayObjectContainer
 		this._play_complete=false;
 		this._instance.play();
 		
-		this._instance.removeEventListener(Event.PLAY_OVER,this._play_over);
-		if(i>0) this._instance.addEventListener(Event.PLAY_OVER,this._play_over);
+		this._instance.removeEventListener(Event.PLAY_OVER,this.__play_over);
+		if(i>0) this._instance.addEventListener(Event.PLAY_OVER,this.__play_over);
 	}
 	
 	_play_over(e)
 	{
+		if(!this._instance) return;
+		
 		if(this._instance.reverse){
 			this.setState(0);
-			this._instance.removeEventListener(Event.PLAY_OVER,this._play_over);
+			this._instance.removeEventListener(Event.PLAY_OVER,this.__play_over);
 			return;
 		}
 		
