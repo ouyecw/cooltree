@@ -9,6 +9,12 @@ This is a very cool JS open source framework, which is applicable to the develop
 - Examples: Get stuck right in and play around with cooltree  code and features right [here](http://cooltree.cn/game.html).
 - E-mail:contact us  [here](mailto:ouye@163.com).
 
+## Embed Html
+
+```html
+<script type="text/javascript" src="bin/npm_cooltree.js" ></script>
+```
+
 ## NPM Install
 
 ```sh
@@ -35,12 +41,6 @@ import * as CT from 'cooltree'
 // * true canvas mode
 // * false DOM mode
 Global.useCanvas=true;
-```
-
-#### embed html
-
-```html
-<script type="text/javascript" src="bin/npm_cooltree.js" ></script>
 ```
 
 (https://github.com/ouyecw/cooltree.git)
