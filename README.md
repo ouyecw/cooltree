@@ -37,4 +37,10 @@ import * as CT from 'cooltree'
 Global.useCanvas=true;
 ```
 
+#### embed html
+
+```html
+<script type="text/javascript" src="bin/npm_cooltree.js" ></script>
+```
+
 (https://github.com/ouyecw/cooltree.git)
