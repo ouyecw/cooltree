@@ -229,6 +229,23 @@ export default class UIContainer extends UIBase
 		if(this._register_instance) this._register_instance.dispatchEvent(new Event(Event.RESIZE,{w:this._mask_width,h:this._mask_height},{x:this.x,y:this.y}));
 	}
 	
+	/**
+	 * 更新遮罩尺寸
+	 * @param {Number} w
+	 * @param {Number} h
+	 */
+	resizeMask(w,h)
+	{
+		this._initial_width=this._mask_width=w;
+		this._initial_height=this._mask_height=h;
+		
+		this.max_migration_length=Math.floor(Math.max(w,h)*1.2);
+		if(!this._register_instance) return;
+		
+		this._control_orientation();
+		this._register_instance.dispatchEvent(new Event(Event.RESIZE,{w:this._mask_width,h:this._mask_height},{x:this.x,y:this.y}));
+	}
+	
 	render  ()
 	{
 		if((this.scaleX!=1 && this.scaleX!=0) || (this.scaleY!=1 && this.scaleY!=0)) {
