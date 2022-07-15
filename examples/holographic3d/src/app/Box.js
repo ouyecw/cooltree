@@ -51,6 +51,7 @@ export default class Box
 	onTap(e=null)
 	{
 		if(this.video) {
+			trace(this.video)
 			if(!this.video.playing) this.video.play();
 			if(!Stage.current.hasEventListener(StageEvent.ENTER_FRAME)) 
 				Stage.current.addEventListener(StageEvent.ENTER_FRAME,Global.delegate(this.enterFrame,this));
@@ -116,7 +117,9 @@ export default class Box
 	playOver(e)
 	{
 		if(!this.video) return;
-		this.video.play();
+		setTimeout(() => {
+		    this.video.play();
+		}, 10 );
 	}
 	
 	resize(w,h)
