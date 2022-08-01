@@ -144,6 +144,51 @@ export default class MathUtil
 	};
 	
 	/**
+	 * mm转px
+	 * @param {Object} x_cm
+	 * @param {Object} y_cm
+	 */
+	static mm2px(x_cm,y_cm)
+	{
+		if(!MathUtil._DPI) MathUtil._DPI=MathUtil.getDPI();
+		return {x:parseInt(x_cm/25.4*MathUtil._DPI[0]),y:parseInt(y_cm/25.4*MathUtil._DPI[1])};
+	}
+	
+	/**
+	 * pxz转mm
+	 * @param {Object} x_px
+	 * @param {Object} y_px
+	 */
+	static px2mm(x_px,y_px)
+	{
+		if(!MathUtil._DPI) MathUtil._DPI=MathUtil.getDPI();
+		return {x:Math.ceil(x_px*25.4/MathUtil._DPI[0]),y:Math.ceil(y_px*25.4/MathUtil._DPI[1])};
+	}
+	
+	static getDPI()
+	{
+		const arrDPI = new Array();
+		
+		if (window.screen.deviceXDPI != undefined) 
+		{
+			//ie 9
+			arrDPI[0] = window.screen.deviceXDPI;
+			arrDPI[1] = window.screen.deviceYDPI;
+		}
+		else{
+			//chrome firefox
+			const tmpNode = document.createElement("div");
+			tmpNode.style.cssText = "width:1in;height:1in;position:absolute;left:0px;top:0px;z-index:99;visibility:hidden";
+			document.body.appendChild(tmpNode);
+			arrDPI[0] = parseInt(tmpNode.offsetWidth);
+			arrDPI[1] = parseInt(tmpNode.offsetHeight);
+			tmpNode.parentNode.removeChild(tmpNode);
+		}
+		
+		return arrDPI;
+	}
+	
+	/**
 	 * 得到对应角度值的sin近似值
 	 * @param value {number} 角度值
 	 * @returns {number} sin值
@@ -204,6 +249,7 @@ export default class MathUtil
 
 }
 
+MathUtil._DPI=null;
 MathUtil._sin_map={};
 MathUtil._cos_map={};
 
