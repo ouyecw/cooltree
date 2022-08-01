@@ -186,6 +186,7 @@ app.Transformer=require('./ui/Transformer.js').default
 
 app.UIContainer=require('./ui/UIContainer.js').default
 
+app.BlobUtil=require('./utils/BlobUtil.js').default
 
 app.ArrayUtil=require('./utils/ArrayUtil.js').default
 
