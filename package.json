@@ -10,7 +10,7 @@
     "web",
     "ui"
   ],
-  "version": "1.0.40",
+  "version": "1.0.41",
   "description": "https://github.com/ouyecw/cooltree",
   "main": "./bin/npm_cooltree.js",
   "module": "./src/cooltree/index.js",

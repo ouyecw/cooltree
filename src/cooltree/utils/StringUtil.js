@@ -146,6 +146,64 @@ export default class StringUtil
 	}
 	
 	/**
+	 * 格式化
+	 * @param {String} code
+	 * @param {Boolean} removeNotes
+	 */
+	static compressor(code,removeNotes=true)
+	{
+		let i,char,str="",first="",second="",pass=false;
+		
+		for(i=0;i<code.length;i++)
+		{
+			char=code.charAt(i);
+			
+			if(char==="`"){
+				pass=!pass;
+			}
+			
+			if(pass){
+				str+=char;
+				continue;
+			}
+			
+			if(removeNotes && char=="/" && i<code.length-1 && code.charAt(i+1)=="/"){
+				first="\n";
+				second="";
+			}
+			else if(removeNotes && char=="/" && i<code.length-1 && code.charAt(i+1)=="*")
+			{
+				first="*";
+				second="/";
+			}
+			
+			if(first){
+				if(char==first && (!second || (i<code.length-1 && code.charAt(i+1)==second))){
+					first="";
+					if(!second) continue;
+					
+					second="";
+					i++;
+					continue;
+				}else{
+					continue;
+				}
+			}
+			
+			if(char=="\n" || char=="\t") {
+				if(str.length && [",",";","{","}","[","]","(",")"].indexOf(str.charAt(str.length-1))<0 && str.charCodeAt(str.length-1)!=13){
+					str+=" ";
+				}
+				continue;
+			}
+			
+			str+=char;
+		}
+		
+		return str;
+	}
+	
+	/**
 	 * 分离字符串中的字符和数字
 	 * @param {String} string+number
 	 */

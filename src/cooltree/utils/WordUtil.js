@@ -1,10 +1,11 @@
+import StringUtil from './StringUtil.js'
 
 export class Language{}
 
 /**
  * 简体中文
  */
-Language.CN="zh";
+Language.CN="cn";
 
 /**
  * 日语

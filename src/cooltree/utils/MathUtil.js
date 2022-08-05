@@ -1,3 +1,5 @@
+import ArrayUtil from "./ArrayUtil";
+
 /**
  * @class
  * @module MathUtil
@@ -142,6 +144,32 @@ export default class MathUtil
 	static isNumber(value) {
 	    return typeof (value) === "number" && !isNaN(value);
 	};
+	
+	/**
+	 * 获取四分位数
+	 * @param {Array} array by number
+	 */
+	static getIQR(array)
+	{
+		if(!array || !array.length || array.length<3) return;
+		const copy=ArrayUtil.sort(array.slice(),null,false,null);
+		const data={};
+		
+		data.min=copy[0];
+		data.max=copy[copy.length-1];
+		
+		const list=[0.1,0.25,0.5,0.75,0.9];
+		let index,dot,i,p;
+		
+		for(i=0;i<list.length;i++){
+			p=list[i]
+			index=(copy.length+1)*p;
+			
+			dot=index%1;
+			data["q"+i]=(1-dot)*copy[index-dot-1]+dot*copy[index-dot];
+		}
+		return data;
+	}
 	
 	/**
 	 * mm转px
