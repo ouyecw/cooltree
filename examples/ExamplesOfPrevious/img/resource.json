@@ -1,0 +1,5 @@
+{
+    "preload": [
+        "img/map.png","img/map.json","img/config.json"
+    ]
+}

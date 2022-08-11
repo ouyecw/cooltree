@@ -1,0 +1,215 @@
+{
+    "config":{
+       "bg_color":"#F2F2F2",
+       "blank_color":"#FFFFFF",
+       
+       "item_color":"#FFFFFF",
+       "item_frame_color":"#999999",
+       "item_over_color":"#E6F4AC",
+   
+       "panel_color":"#FFFFFF",
+       "panel_line_color":"#FF8800",
+       
+       "window_color":"#31364A",
+       "window_text_color":"#FFFFFF",
+       "window_bg_color":"#FFFFFF",
+       
+       "combolist_color":"#FFFFFF",
+       "combolist_over_color":"#CCCCCC",
+       "combolist_frame_color":"#CCCCCC",
+       "combolist_text_color":"#CCCCCC",
+       "transformer_color":"#666666",
+       
+       "default_shape_color":"",
+       "default_shape_thickness":"5",
+       "slide_bottom_color":"#E0E0E0",
+       "slide_bar_color":"#999999",
+       "bottom_color":"#EAEAEA",
+       "bar_color":"#CCCCCC",
+       
+       "text_color":"#999999",
+       "input_bg_color":"#FFFFE1",
+       "text_font":"Microsoft YaHei",
+       "default_font_size":"36",
+       
+       "item_height":"80",
+       "item_width":"92",
+       "item_scale":"0.8",
+       "item_space":"0",
+       
+       "display_bar_color":"",
+       "display_bar_top":"1",
+       
+       "display_min_width":"200",
+       "display_min_height":"100",
+       
+       "shadow_blur_text":"模糊",
+       "shadow_aphla_text":"透明",
+       "shadow_color_text":"颜色",
+       "shadow_angle_text":"角度",
+       "shadow_distance_text":"距离",
+       
+       "display_aphla_text":"透明度",
+       "display_bind_text":"绑定字段",
+       "display_delete_text":"删除",
+       "display_up_text":"上移",
+       "display_down_text":"下移",
+       "display_zero_text":"水平",
+       
+       "font_leading_text":"字间距",
+       "font_spacing_text":"行间距",
+       "font_scale_text":"高度比",
+       "font_color_text":"颜色",
+       "font_text_height":"高度",
+       "font_text_width" :"宽度",
+       
+       "shape_angle_text":"圆角",
+       "shape_frame_text":"边框",
+       "shape_scale_text":"变形",
+       "shape_fill_text":"填充色",
+       "shape_color_text":"边框色",
+       "shape_image_text":"填充图",
+       
+       "window_text":"组件设置",
+       "color_text":"颜色选取",
+       
+       "text_panel_text":"文字选项",
+       "shape_panel_text":"图形选项",
+       "shadow_panel_text":"阴影选项",
+       "display_panel_text":"显示选项"
+    },
+    
+    "binding":[
+    	{"label":"仅显示","value":""},
+    	{"label":"主标题","value":"title"},
+    	{"label":"副标题","value":"title2"},
+    	{"label":"活动时间","value":"time"},
+    	{"label":"活动地点","value":"address"},
+    	{"label":"主办方","value":"host"},
+    	{"label":"系列子活动","value":"xchild"},
+    	{"label":"主题子活动","value":"zchild"},
+    	{"label":"仅显主标","value":"none_title"},
+    	{"label":"仅显主办","value":"none_host"},
+    	{"label":"仅显副标","value":"none_title2"},
+    	{"label":"仅显地址","value":"none_address"},
+    	{"label":"仅显时间","value":"none_time"},
+    	{"label":"仅显主子","value":"none_zchild"},
+    	{"label":"仅显系子","value":"none_xchild"}
+    ],
+    
+    "font": {
+       "typeface":[
+       		{"label":"微软雅黑","value":"Microsoft YaHei"},
+       		{"label":"黑体","value":"黑体"},
+       		{"label":"宋体","value":"宋体"},
+       		{"label":"楷体","value":"楷体"},
+       		{"label":"仿宋","value":"仿宋"},
+       		{"label":"幼圆","value":"幼圆"},
+       		{"label":"隶书","value":"隶书"},
+       		{"label":"方正兰亭","value":"方正兰亭"},
+       		{"label":"方正舒体","value":"方正舒体"},
+       		{"label":"方正姚体","value":"方正姚体"},
+       		{"label":"华文彩云","value":"华文彩云"},
+       		{"label":"华文琥珀","value":"华文琥珀"},
+       		{"label":"华文中宋","value":"华文中宋"},
+       		{"label":"Arial","value":"Arial"},
+       		{"label":"Impact","value":"Impact"},
+       		{"label":"Verdana","value":"Verdana"},
+       		
+       		{"label":"方正兰黑","value":"方正兰亭黑_GB18030"},
+       		{"label":"方正粗谭","value":"方正粗谭黑简体"},
+       		{"label":"酷高端黑","value":"站酷高端黑"},
+       		{"label":"思源黑体","value":"思源黑体 CN Light"},
+       		{"label":"造工尚雅","value":"造字工房尚雅体演示版常规体"},
+       		{"label":"方正像素","value":"方正基础像素"},
+       		{"label":"方正喵呜","value":"方正喵呜体"},
+       		{"label":"方正静蕾","value":"方正静蕾简体"},
+       		{"label":"A水瓶座","value":"Aa水瓶座"},
+       		
+       		{"label":"叶根简升","value":"叶根友特色简体升级版"},
+       		{"label":"钻石甜心","value":"钻石甜心手机字体"},
+       		{"label":"新蒂板报","value":"新蒂黑板报"},
+       		{"label":"造工悦黑","value":"造字工坊悦黑体验版常规体"},
+       		{"label":"方正卡通","value":"方正卡通简体"},
+       		{"label":"逐浪创意","value":"逐浪创意流珠体"},
+       		{"label":"经典趣体","value":"经典趣体简"},
+       		{"label":"单翼雪蝶","value":"文泉驿微米黑"},
+       		{"label":"花里胡哨","value":"Hope Made"},
+       		{"label":"清茶楷体","value":"清茶楷体预览版"},
+       		{"label":"田氏颜真","value":"田氏颜体大字库"},
+       		{"label":"迷你雪峰","value":"迷你简雪峰"},
+       		{"label":"迷你简丫","value":"迷你简丫丫"},
+       		{"label":"迷你硬行","value":"迷你简硬笔行书"},
+       		{"label":"锐云行楷","value":"锐字工房云字库行楷GBK"},
+       		{"label":"书锋行草","value":"书体坊禚效锋行草体"}
+       		
+       ],
+       "size":[
+       		{"label":"24px","value":"24"},
+       		{"label":"26px","value":"26"},
+       		{"label":"28px","value":"28"},
+       		{"label":"30px","value":"30"},
+       		{"label":"32px","value":"32"},
+       		{"label":"36px","value":"36"},
+       		{"label":"40px","value":"40"},
+       		{"label":"50px","value":"50"},
+       		{"label":"60px","value":"60"},
+       		{"label":"70px","value":"70"},
+       		{"label":"80px","value":"80"},
+       		{"label":"90px","value":"90"},
+       		{"label":"100px","value":"100"}
+       ],
+       "leading":[
+       		{"label":"0 px","value":"0"},
+       		{"label":"1 px","value":"1"},
+       		{"label":"2 px","value":"2"},
+       		{"label":"3 px","value":"3"},
+       		{"label":"4 px","value":"4"},
+       		{"label":"5 px","value":"5"},
+       		{"label":"6 px","value":"6"},
+       		{"label":"8 px","value":"8"},
+       		{"label":"10 px","value":"10"},
+       		{"label":"12 px","value":"12"},
+       		{"label":"14 px","value":"14"},
+       		{"label":"16 px","value":"16"},
+       		{"label":"18 px","value":"18"},
+       		{"label":"20 px","value":"20"},
+       		{"label":"24 px","value":"24"},
+       		{"label":"30 px","value":"30"}
+       ],
+       "line":[
+       		{"label":"1","value":"1"},
+       		{"label":"1.25","value":"1.25"},
+       		{"label":"1.5","value":"1.5"},
+       		{"label":"1.75","value":"1.75"},
+       		{"label":"2","value":"2"},
+       		{"label":"3","value":"3"},
+       		{"label":"4","value":"4"},
+       		{"label":"5","value":"5"}
+       ]
+    },
+    
+    "animation": {
+       "active":[
+       		{"label":"淡入","value":"1"},
+       		{"label":"移入","value":"2","datas":[
+       		    {"label":"从上到下","value":"1"},
+       		    {"label":"从下到上","value":"2"},
+       		    {"label":"从左到右","value":"3"},
+       		    {"label":"从右到左","value":"4"}
+       		]},
+       		{"label":"弹入","value":"3","datas":[
+       		    {"label":"从上到下","value":"1"},
+       		    {"label":"从下到上","value":"2"},
+       		    {"label":"从左到右","value":"3"},
+       		    {"label":"从右到左","value":"4"}
+       		]},
+       		{"label":"旋转进入","value":"4"},
+       		{"label":"中心放大","value":"5"},
+       		{"label":"中心弹大","value":"6"},
+       		{"label":"缩小进入","value":"7"}
+       ],
+       "time":{"min":0,"max":20},
+       "delay":{"min":0,"max":20}
+    }
+}
