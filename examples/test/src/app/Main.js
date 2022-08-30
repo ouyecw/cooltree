@@ -8,7 +8,7 @@ window.onload = function()
 	/**
 	 * 显示模式 true为canvas显示 false为DOM显示（默认为true）
 	 */
-	Global.useCanvas=true;
+	Global.useCanvas=false;
 	
 	/**
 	 * 初始化场景
@@ -85,19 +85,22 @@ function loadComplete(e)
 	//设置按钮显示
 	btn.instance=box;
 	
+	//设置中心点
+	box.origin={x:box.width*0.5,y:box.height*0.5};
+
 	//按钮设置特效
-	btn.setup([Factory.c("ef",[Effect.COLOR,"#ff88ff",0.5])],
-			  [Factory.c("ef",[Effect.COLOR,"#ff8800",1])],
+	btn.setup([Factory.c("ef",[Effect.COLOR,"#ff88ff",0.5]),Factory.c("ef",[Effect.SCALE,1,0.5])],
+			  [Factory.c("ef",[Effect.COLOR,"#ff8800",1]),Factory.c("ef",[Effect.SCALE,1.2,1])],
 			  [Factory.c("ef",[Effect.COLOR,"#ff5555",1])]);
 	
 	//添加到舞台
 	Stage.current.addChild(btn);
 	
 	//移动按钮位置
-	btn.moveTo(180,Stage.current.stageHeight-65);
+	btn.moveTo(Stage.current.stageWidth*0.5,Stage.current.stageHeight-65);
 	
 	//设置按钮文本
-	btn.setLabel({text:"NEW",size:26,color:"#FFFFFF",x:25},"#000000");
+	btn.setLabel({text:"NEW",size:26,color:"#FFFFFF",x:-30,y:-10},"#000000");
 	
 	//添加事件侦听器
 	btn.addEventListener(StageEvent.MOUSE_CLICK,click_handler);

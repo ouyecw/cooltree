@@ -41,9 +41,9 @@ module.exports = (env,argv) =>{
   },
   devServer: {
     port: 8118,
-    host: '192.168.0.122',
+    host: 'localhost',
     proxy: { 
-       '/': 'http://192.168.0.201:10000/'
+       '/': 'http://localhost:10000/'
     }
   },
   stats: { 

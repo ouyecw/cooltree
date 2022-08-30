@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cooltree": "^1.0.5"
+    "cooltree": "^1.0.41"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
