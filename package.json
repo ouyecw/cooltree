@@ -10,13 +10,13 @@
     "web",
     "ui"
   ],
-  "version": "1.0.41",
+  "version": "1.0.47",
   "description": "https://github.com/ouyecw/cooltree",
   "main": "./bin/npm_cooltree.js",
   "module": "./src/cooltree/index.js",
   "scripts": {
     "build": "webpack --mode=production",
-	"jsdoc": "jsdoc -r -c config/jsdoc-conf.json -R README.md -d build/jsdoc"
+    "jsdoc": "jsdoc -r -c config/jsdoc-conf.json -R README.md -d build/jsdoc"
   },
   "repository": {
     "type": "git",
@@ -33,13 +33,12 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "^6.24.1",
     "clean-webpack-plugin": "^3.0.0",
+    "html2markdown": "^1.1.0",
     "jsdoc": "^3.6.10",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.44.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
   },
-  "dependencies": {
-    "html2markdown": "^1.1.0"
-  }
+  "dependencies": {}
 }

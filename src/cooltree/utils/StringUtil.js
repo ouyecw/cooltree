@@ -397,8 +397,8 @@ export default class StringUtil
 	    if (node.childNodes.length > 0) {
 	        let items = [];
 	        for (let i = 0; i < node.childNodes.length; i++) {
-	            let node = node.childNodes.item(i);
-	            let item = StringUtil.html2object(node);
+	            let subnode = node.childNodes.item(i);
+	            let item = StringUtil.html2object(subnode);
 	            if (item) {
 	                items.push(item);
 	            }
@@ -500,5 +500,26 @@ export default class StringUtil
 			}
 		}
 		return out;
+	}
+	
+	static toUTF8(str)
+	{
+		if(window.TextEncoder){
+			var encoder = new TextEncoder('utf8');
+					
+			var bytes = encoder.encode(str);
+					
+			var result = '';
+					
+			for(var i = 0; i < bytes.length; ++i) {
+					
+				result += String.fromCharCode(bytes[i]);
+					
+			}
+					
+			return result;
+		}
+		
+		return eval('\''+encodeURI(str).replace(/%/gm, '\\x')+'\'');
 	}
 }

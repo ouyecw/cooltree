@@ -113,7 +113,7 @@ export default class File extends EventDispatcher
 		
 		for (i = 0; i<files.length; i++) {
 			f = files[i];
-			if (f.type.indexOf("image") == 0) {
+			if (f.type.indexOf("image") == 0 && f.type.indexOf("svg")<0) {
 				
 				p=URL.createObjectURL(f);
 				
@@ -124,7 +124,7 @@ export default class File extends EventDispatcher
 					t.onload = function(e) {
 					   URL.revokeObjectURL(t.src);
 					   list.push(t);
-					   if(i>=files.length-1) target.dispatchEvent(new Event(File.COMPLETE,list));
+					   if(list.length==files.length) target.dispatchEvent(new Event(File.COMPLETE,list));
 					}
 					continue;
 				}
@@ -139,7 +139,7 @@ export default class File extends EventDispatcher
 						t.src=evt.target.result;
 						list.push(t);
 					}
-					if(i>=files.length-1) target.dispatchEvent(new Event(File.COMPLETE,list));
+					if(list.length==files.length) target.dispatchEvent(new Event(File.COMPLETE,list));
 				}
 				target._reader.readAsDataURL(f);
 			}
@@ -148,14 +148,14 @@ export default class File extends EventDispatcher
 				target._reader.onload = function(evt) {
 					t=DOMUtil.createDOM("p",{id:evt.target.name,innerHTML:"<pre>"+evt.target.result.replace(/</g, "&lt;").replace(/>/g, "&gt;")+"</pre>"});
 					list.push(t);
-					if(i>=files.length-1) target.dispatchEvent(new Event(File.COMPLETE,list));
+					if(list.length==files.length) target.dispatchEvent(new Event(File.COMPLETE,list));
 				}
 				target._reader.readAsText(f);
 			}else {
 				target._reader = new FileReader();
 				target._reader.onload = function(evt) {
 					list.push(evt.target.result);
-					if(i>=files.length-1) target.dispatchEvent(new Event(File.COMPLETE,list));
+					if(list.length==files.length) target.dispatchEvent(new Event(File.COMPLETE,list));
 				}
 				target._reader.readAsBinaryString(f);
 			}

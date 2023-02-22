@@ -17,7 +17,22 @@ export default class SVGUtil
 	static getRect(xml)
 	{
 		if(xml==undefined) return null;
+		
+		if(typeof xml=="string"){
+			const node=DOMUtil.createDOM("div");
+			try{
+				node.innerHTML=xml;
+				xml=node.children[0];
+			}
+			catch(err){
+				return null;
+			}
+		}
+		
 		const xml_doc=xml.documentElement ? xml.documentElement : xml;
+		if(xml_doc.viewBox && typeof xml_doc.viewBox=="string"){
+			return Rectangle.toRectangle(xml_doc.viewBox);
+		}
 		
 		const w=xml_doc.width;
 		const h=xml_doc.height;
@@ -25,7 +40,7 @@ export default class SVGUtil
 		const w_bool=(w instanceof SVGAnimatedLength);
 		const h_bool=(h instanceof SVGAnimatedLength);
 		
-		return new Rectangle(w_bool ? w.baseVal.value : 0,h_bool ? h.baseVal.value : 0,w_bool ? w.animVal.value :MathUtil.int(w),h_bool ? h.animVal.value :MathUtil.int(h));
+		return new Rectangle(w_bool ? xml_doc.x.animVal.value : MathUtil.int(xml_doc.x || 0),h_bool ? xml_doc.y.animVal.value : MathUtil.int(xml_doc.y || 0),w_bool ? w.animVal.value :MathUtil.int(w),h_bool ? h.animVal.value :MathUtil.int(h));
 	}
 	
 	static getElement(xml)

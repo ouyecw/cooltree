@@ -262,20 +262,21 @@ export default class Rectangle
 	{
 		if(StringUtil.isEmpty(str)) return null;
 		
-		str=str.toLowerCase();
+		str=String(str).toLowerCase();
 		if(!StringUtil.exist(str,"x","y","w","h",":","=")){
-		
-		str=StringUtil.replaceAll(str,['(',')','{','}'],["","","",""]);
-		let array=str.split(",");
-		
-		return (array.length<4) ? null :new Rectangle(Number(array[0]),Number(array[1]),Number(array[2]),Number(array[3]));
-	}
-	
-	str=StringUtil.replaceAll(str,['(',')'],['{','}']);
-	str=(str.indexOf('height')==-1) ? StringUtil.replace(str,'h','height') : str;
-	str=(str.indexOf('width')==-1) ? StringUtil.replace(str,'w','width') : str;
-	str=(!StringUtil.exist(str,'"',"'",":")) ? StringUtil.replaceAll(str,['=','x','y','width','height'],[':','"x"','"y"','"width"','"height"']) : str;
-		
+			
+			str=StringUtil.replaceAll(str,['(',')','{','}'],["","","",""]);
+			let array=str.split(",");
+			if(array.length<2) array=str.split(" ");
+			
+			return (array.length<4) ? null :new Rectangle(Number(array[0]),Number(array[1]),Number(array[2]),Number(array[3]));
+		}
+			
+		str=StringUtil.replaceAll(str,['(',')'],['{','}']);
+		str=(str.indexOf('height')==-1) ? StringUtil.replace(str,'h','height') : str;
+		str=(str.indexOf('width')==-1) ? StringUtil.replace(str,'w','width') : str;
+		str=(!StringUtil.exist(str,'"',"'",":")) ? StringUtil.replaceAll(str,['=','x','y','width','height'],[':','"x"','"y"','"width"','"height"']) : str;
+			
 		let obj;
 		try{
 			obj=JSON.parse(str);

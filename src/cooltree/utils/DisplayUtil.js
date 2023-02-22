@@ -69,23 +69,32 @@ export default class DisplayUtil
 	    }
 	}
 	
-	static toSVG(xml,scale=1)
+	/**
+	 *  @param {String} xml 
+	 *  @param {Number} scale 
+	 *  @param {Boolean} useCanvas
+	 */
+	static getSVG(xml,scale=1,useCanvas=null)
 	{
 		if(!xml) return null;
+		useCanvas=useCanvas==null ? Global.useCanvas : useCanvas;
 		const rect=SVGUtil.getRect(xml);
 		let pic;
 		
-		if(Global.useCanvas){
+		if(useCanvas){
 			pic=ObjectPool.create(DisplayObject);
-		    pic.context.drawSvg(xml,0,0,rect.width*scale,rect.height*scale);
+		    pic.context.drawSvg(xml,0,0,rect ? rect.width*scale : null,rect ? rect.height*scale : null);
 		   
 		}else{
 			pic=SVGUtil.getElement(xml);
 			pic.scale=scale;
 		}
 		
-		pic.height=rect.height*scale;
-		pic.width=rect.width*scale;
+		if(rect){
+			pic.height=rect.height*scale;
+			pic.width=rect.width*scale;
+		}
+		
 		return pic;
 	}
 }

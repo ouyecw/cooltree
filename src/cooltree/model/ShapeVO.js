@@ -62,27 +62,37 @@ export default class ShapeVO
 	
 	/**
 	 * 节点转换成vo
-	 * @param {String} node_string
-	 * @param {Object} pos 坐标点
+	 * @param {Object|String} node_string 
+	 * @param {Object} pos 位移坐标点 
+	 * @param {Rectangle} rect 性状的矩形大小
 	 */
-	static create(node_string,pos)
+	static create(node_string,pos=null,rect=null)
 	{
-		if(StringUtil.isEmpty(node_string)) return null;
+		let vo,node;
 		pos=(pos ? (pos==true ? {x:0,y:0} : pos) : null);
 		
-		let vo=ObjectPool.create(ShapeVO);
-		let node=StringUtil.html2object(node_string);
-		if(!node) return null;
-		
-		if(node.children) delete node.children;
-		if(node.transform) delete node.transform;
+		if(typeof node_string =="string"){
+			if(StringUtil.isEmpty(node_string)) return null;
+
+			vo=ObjectPool.create(ShapeVO);
+			node=StringUtil.html2object(node_string);
+			if(!node) return null;
+			
+			if(node.children) delete node.children;
+			if(node.transform) delete node.transform;
+		}
+		else if(typeof node_string =="object"){
+			vo=ObjectPool.create(ShapeVO);
+			node=node_string;
+		}
+		else return null;
 		
 		vo.type=node.tagName;
 		delete node.tagName;
 		vo.properties=node;
 		
 		vo.rect=ObjectPool.create(Rectangle);
-		vo.rect.data=ShapeUtil.getShapeBounds(vo);
+		vo.rect.data=rect ? rect : ShapeUtil.getShapeBounds(vo);
 		
 		return pos ? ShapeUtil.replace(vo,pos) : vo;
 	}

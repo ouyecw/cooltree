@@ -64,6 +64,8 @@ app.Global=require('./core/Global.js').default
 
 app.Event=require('./events/Event.js').default
 
+app.Signal=require('./events/Signal.js').default
+
 app.EventDispatcher=require('./events/EventDispatcher.js').default
 
 app.Address=require('./core/Address.js').default

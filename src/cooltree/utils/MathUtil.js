@@ -218,7 +218,7 @@ export default class MathUtil
 	
 	/**
 	 * 得到对应角度值的sin近似值
-	 * @param value {number} 角度值
+	 * @param {number} value 角度值
 	 * @returns {number} sin值
 	 */
 	static sin(value) {
@@ -247,7 +247,7 @@ export default class MathUtil
 	};
 	/**
 	 * 得到对应角度值的cos近似值
-	 * @param value {number} 角度值
+	 * @param {number} value 角度值
 	 * @returns {number} cos值
 	 */
 	static cos(value) {

@@ -188,6 +188,9 @@ export default class Loader extends EventDispatcher
 		 xmlObj.send(null);
 	}
 	
+	/**
+	 * @param {Object | String} data Array or String
+	 */
 	load(data=null)
 	{
 		if(data==undefined && this._list==null) return false;

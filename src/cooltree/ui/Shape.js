@@ -142,11 +142,11 @@ export default class Shape extends DisplayObjectContainer
 	 * 设置图形及样式
 	 * @param {ShapeVO} vo 图形数据
 	 * @param {String} c 颜色 string 或者 GColor
-	 * @param {Number} t 边框线条粗细
 	 * @param {String} s 边框线条颜色
+	 * @param {Number} t 边框线条粗细
 	 * @param {Number} a 填充颜色的透明度
 	 */
-	setup (vo,c,t,s,a)
+	setup (vo,c,s,t=1,a=1)
 	{
 		if(!vo) return this;
 		if(this._vo && this._vo instanceof ShapeVO){

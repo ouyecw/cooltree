@@ -28,6 +28,18 @@ export default class ColorUtil
 		return (color >> 24) & 0xFF;
 	}
 	
+	/**
+	 * get random color
+	 */
+	static getColor(red=null,green=null,blue=null)
+	{
+		red   = red==null ? MathUtil.randomInt(255) : MathUtil.int(red);
+		blue  = blue==null ? MathUtil.randomInt(255) : MathUtil.int(blue);
+		green = green==null ? MathUtil.randomInt(255) : MathUtil.int(green);
+		
+		return ColorUtil.toHex(ColorUtil.toInt(red,green,blue));
+	}
+	
 	static darkenColor (color, factor)
 	{
 		const red   = Math.min(255, ColorUtil.getRed(color)*factor);
@@ -93,6 +105,8 @@ export default class ColorUtil
 		if(isNaN(Number(color))) return color;
 		return ColorUtil.toHex(Number(color));
 	}
+	
+	
 	
 	/**
 	 * 创建线性渐变

@@ -29,7 +29,7 @@ export default class ArrayUtil
 	 * @param {Boolean} order     true 由大到小 false||null 由小到大
 	 * @param {Number}  num       字符串位数
 	 */
-	static sort(array,property,order,num)
+	static sort(array,property=null,order=false,num=null)
 	{
 		if(array==null || array.length<2 ) return array;
 					

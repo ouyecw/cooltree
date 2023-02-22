@@ -58,15 +58,25 @@ export default class RouteUtil
 	 */
 	static async download(data,type="zip",name=null)
 	{
+		if(!data) return;
+	
+		const blob = (data instanceof Blob) ? data : new Blob([data], { type: "application/"+type });
+		const timestamp = (new Date()).valueOf();
+		
+		if (window.navigator.msSaveOrOpenBlob) {
+		    navigator.msSaveBlob(blob, (name || timestamp)+'.'+type);
+			return;
+		}
+		
 		const aLink = document.createElement("a");
 		const urlObject = window.URL || window.webkitURL;
-		const blob = new Blob([data], { type: "application/"+type });
-		const timestamp = (new Date()).valueOf();
+		
 		aLink.href = URL.createObjectURL(blob);
 		aLink.download = (name || timestamp)+'.'+type;
-		aLink.click();
 		
 		document.body.appendChild(aLink);
+		aLink.click();
+		
 		urlObject.revokeObjectURL(aLink.href);
 		document.body.removeChild(aLink);
 	}
