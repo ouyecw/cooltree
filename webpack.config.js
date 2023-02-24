@@ -13,7 +13,7 @@ module.exports = (env,argv) =>{
   },
   output: {
 	  libraryTarget: "commonjs2",
-	  filename: 'npm_cooltree.js',
+	  filename: 'cooltree_min.js',
       path: path.resolve(__dirname, 'bin')
   },
 	module: { 
@@ -23,7 +23,7 @@ module.exports = (env,argv) =>{
 		use:{
 			loader: 'babel-loader',
 			options: {
-				presets: ['env']
+				presets: ['es2015']
 		    }
 		}
 	  }] 

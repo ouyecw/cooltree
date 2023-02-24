@@ -7,12 +7,17 @@ This is a very cool JS open source framework, which is applicable to the develop
 - Website: Find out more about cooltree on the  [official website](http://cooltree.cn)
 - Docs: Get to know the cooltree  API by checking out the [docs](http://cooltree.cn/jsdoc/index.html).
 - Examples: Get stuck right in and play around with cooltree  code and features right [here](http://cooltree.cn/game.html).
-- E-mail:contact us  [here](mailto:ouye@163.com).
+- E-mail:contact me  [here](mailto:ouye@163.com).
 
 ## Embed Html
 
 ```html
-<script type="text/javascript" src="bin/npm_cooltree.js" ></script>
+<script type="text/javascript" src="bin/cooltree_min.js" ></script>
+```
+```js
+const {Stage,Global} = ct
+//or
+const stage=new ct.Stage();
 ```
 
 ## NPM Install
@@ -32,7 +37,9 @@ import {Stage,Global} from 'cooltree'
 #### import library
 
 ```js
-import * as CT from 'cooltree'
+import * as ct from 'cooltree'
+
+const stage=new ct.Stage();
 ```
 
 #### change display mode

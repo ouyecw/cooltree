@@ -1,18 +1,26 @@
 {
-  "author": "ShineChen",
+  "author": "Shine Chen",
+  "authors": [
+    {
+      "name": "Shine Chen",
+      "email": "ouye@163.com"
+    }
+   ],
   "name": "cooltree",
   "private": false,
   "keywords": [
-    "js",
-    "node",
+    "svg",
+	"javascript",
+    "node.js",
     "game",
     "framework",
     "web",
-    "ui"
+    "canvas"
   ],
-  "version": "1.0.47",
+  "license": "MIT",
+  "version": "1.0.48",
   "description": "https://github.com/ouyecw/cooltree",
-  "main": "./bin/npm_cooltree.js",
+  "main": "./bin/cooltree_min.js",
   "module": "./src/cooltree/index.js",
   "scripts": {
     "build": "webpack --mode=production",
