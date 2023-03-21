@@ -6,7 +6,8 @@ This is a very cool JS open source framework, which is applicable to the develop
 ### Learn ###
 - Website: Find out more about cooltree on the  [official website](http://cooltree.cn)
 - Docs: Get to know the cooltree  API by checking out the [docs](http://cooltree.cn/jsdoc/index.html).
-- Examples: Get stuck right in and play around with cooltree  code and features right [here](http://cooltree.cn/game.html).
+- All examples: Get stuck right in and play around with cooltree code and features right [here](http://cooltree.cn/edit/).
+- Game example using cooltree [here](http://cooltree.cn/game.html).
 - E-mail:contact me  [here](mailto:ouye@163.com).
 
 ## Embed Html

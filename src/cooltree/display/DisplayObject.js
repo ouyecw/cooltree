@@ -228,7 +228,14 @@ export default class DisplayObject extends DisplayBase
 	
 		for(action of vo.actions)
 		{
-			if(action.type===1) canvas[action.method].apply(canvas,action.data);
+			if(action.type===1) {
+				try{
+					canvas[action.method].apply(canvas,action.data);
+				}
+				catch(err){
+					trace("[ERROR]",err);
+				}
+			}
 			else if(action.type===0) canvas[action.method]=action.data[0];
 		}
 	}
