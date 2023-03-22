@@ -8,6 +8,7 @@ import QuickUI from '../utils/QuickUI.js'
 import DisplayUtil from '../utils/DisplayUtil.js'
 import MathUtil from '../utils/MathUtil.js'
 import ObjectPool from '../utils/ObjectPool.js'
+import UIContainer from '../ui/UIContainer.js'
 import Stage from '../display/Stage.js'
 import Factory from '../core/Factory.js'
 import Event from '../events/Event.js'
@@ -95,6 +96,11 @@ export default class Transformer extends DisplayObjectContainer
 	set target(value) 
 	{
     	if(this._target==value) return;
+		
+		if(this._target && this._target instanceof UIContainer){
+			this._target.resizeMask(this._target.width,this._target.height);
+		}
+		
         this._target=value;
         this.visible=(value!=null);
         
