@@ -1,10 +1,12 @@
 import DisplayObjectContainer from '../display/DisplayObjectContainer.js'
+import DOMDisplay from '../display/DOMDisplay.js'
 import StringUtil from '../utils/StringUtil.js'
 import FontManager from '../core/FontManager.js'
 import ObjectPool from '../utils/ObjectPool.js'
 import ColorUtil from '../utils/ColorUtil.js'
 import MathUtil from '../utils/MathUtil.js'
 import Global from '../core/Global.js'
+import Point from '../geom/Point.js'
 
 /**
  * @class

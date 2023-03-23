@@ -1,6 +1,8 @@
 
 import Source from '../core/Source.js'
+import Loader from '../loader/Loader.js'
 import ObjectPool from './ObjectPool.js'
+import StringUtil from './StringUtil.js'
 import BitmapFont from '../text/BitmapFont.js'
 import URLLoader from '../loader/URLLoader.js'
 import AssetManager from '../core/AssetManager.js'
