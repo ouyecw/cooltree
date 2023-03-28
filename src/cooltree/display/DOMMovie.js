@@ -37,6 +37,11 @@ export default class DOMMovie extends DOMDisplay
 		if(s) this.setFrames(s);
 	}
 	
+	get currentFrame()
+	{
+		return this._current_frame;
+	}
+	
 	get rate()
 	{
 		return this[_rate];
@@ -70,7 +75,7 @@ export default class DOMMovie extends DOMDisplay
 	
 	set rate(value)
 	{
-	    if(value==undefined || value==null || value<=1 || value==this[_rate]) return;
+	    if(value==undefined || value==null || value<1 || value==this[_rate]) return;
 		this[_rate]=Math.abs(MathUtil.int(value));
 	}
 	

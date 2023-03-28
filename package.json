@@ -18,7 +18,7 @@
     "canvas"
   ],
   "license": "MIT",
-  "version": "1.0.51",
+  "version": "1.0.52",
   "description": "https://github.com/ouyecw/cooltree",
   "main": "./bin/cooltree_min.js",
   "module": "./src/cooltree/index.js",

@@ -61,7 +61,7 @@ export default class MovieClip extends DisplayObject
 	
 	set rate(value) 
 	{
-        if(value==undefined || value==null || value<=1 || value==this[_rate]) return;
+        if(value==undefined || value==null || value<1 || value==this[_rate]) return;
 		this[_rate]=Math.abs(MathUtil.int(value));
     }
 	
