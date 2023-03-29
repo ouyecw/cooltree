@@ -219,11 +219,15 @@ export default class BoxShape extends DisplayObjectContainer
 			obj.fy=MathUtil.int(100*c.yStart/(c.radiusEnd*2))+"%";
 			obj.cx=MathUtil.int(100*c.xEnd/(c.radiusEnd*2))+"%";
 			obj.cy=MathUtil.int(100*c.yEnd/(c.radiusEnd*2))+"%";
-			obj.r=MathUtil.int(100*(c.radiusStart*2)/c.radiusEnd)+"%";
+			obj.r="50%";
 		}
 		
 		gradient=SVGUtil.create(c.type==0 ? "linearGradient" : "radialGradient",obj); 
 		let i,sc,len=c.offsetlist.length;
+		
+		if(c.type==1 && c.radiusStart>0 && c.offsetlist[0]<c.radiusStart/c.radiusEnd){
+			c.offsetlist[0]=c.radiusStart/c.radiusEnd;
+		}
 		
 		for(i=0;i<len;i++){
 			sc=SVGUtil.create("stop",{"offset":c.offsetlist[i],"stop-color":c.colorList[i]});

@@ -39,6 +39,11 @@ export default class GColor
 	{
 		delete this.type,this.xStart,this.yStart,this.xEnd,this.yEnd,this.offsetlist,this.colorList,this.radiusStart,this.radiusEnd;
 	}
+	
+	clone()
+	{
+		return new GColor(this.type,this.xStart,this.yStart,this.xEnd,this.yEnd,this.offsetlist,this.colorList,this.radiusStart,this.radiusEnd);
+	}
 }
 
 GColor.className="GColor";

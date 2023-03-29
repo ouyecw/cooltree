@@ -146,7 +146,7 @@ export default class Shape extends DisplayObjectContainer
 	 * @param {Number} t 边框线条粗细
 	 * @param {Number} a 填充颜色的透明度
 	 */
-	setup (vo,c,s,t=1,a=1)
+	setup (vo,c="#FF8800",s=null,t=0,a=1)
 	{
 		if(!vo) return this;
 		if(this._vo && this._vo instanceof ShapeVO){
@@ -210,11 +210,15 @@ export default class Shape extends DisplayObjectContainer
 			obj.fy=MathUtil.int(100*c.yStart/(c.radiusEnd*2))+"%";
 			obj.cx=MathUtil.int(100*c.xEnd/(c.radiusEnd*2))+"%";
 			obj.cy=MathUtil.int(100*c.yEnd/(c.radiusEnd*2))+"%";
-			obj.r=MathUtil.int(100*(c.radiusStart*2)/c.radiusEnd)+"%";
+			obj.r="50%";
 		}
 		
 		gradient=SVGUtil.create(c.type==0 ? "linearGradient" : "radialGradient",obj); 
 		let i,sc,len=c.offsetlist.length;
+		
+		if(c.type==1 && c.radiusStart>0 && c.offsetlist[0]<c.radiusStart/c.radiusEnd){
+			c.offsetlist[0]=c.radiusStart/c.radiusEnd;
+		}
 		
 		for(i=0;i<len;i++){
 			sc=SVGUtil.create("stop",{"offset":c.offsetlist[i],"stop-color":c.colorList[i]});
