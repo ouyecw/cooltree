@@ -174,4 +174,12 @@ export default class DOMUtil
 	    (node || document).dispatchEvent(evObj);
 	}
 	
+	static addMeta(content,name="keywords")
+	{
+	    const meta = document.createElement('meta');
+	    meta.content = content;
+	    meta.name = name;
+	    document.getElementsByTagName('head')[0].appendChild(meta);
+	}
+	
 }

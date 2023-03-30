@@ -98,6 +98,65 @@ export default class QuickUI
 	}
 	
 	/**
+	 * 快速加载图片
+	 * @param {String} url
+	 * @param {Object} config 
+	 *      {cors:"是否跨域",random:"是否添加随机参数"} 
+	 */
+	static loadImage(url,config=null)
+	{
+		return new Promise(resolve => {
+			if(!url || url.trim()=='') return resolve(null);
+			url=url.trim();
+			
+			const img=new Image();
+			
+			if(config){
+				if(config.cors) img.crossOrigin = "anonymous";
+				if(config.random) url=(url.indexOf("?")<0 ? url : url.split("?")[0])+"?"+Math.random();
+			}
+			
+			img.src=url;
+			if(img.complete) return resolve(img);
+	
+			img.onload=function(){
+				img.onerror=img.onload=null;
+				resolve(img);
+			}
+			
+			img.onerror=function(){
+				img.onerror=img.onload=null;
+				resolve(null);
+			}
+		});
+	}
+	
+	/**
+	 * 队列加载图片
+	 * @param {Array} list
+	 * @param {Object} config {cors:"是否跨域",random:"是否添加随机参数"} 
+	 */
+	static queue(list,config=null)
+	{
+		if(!list || !list.length) return new Error('[QuickUI] wrong args');
+		
+		let i=0,length=list.length;
+		const array=[];
+		
+		const func=async resolve => {
+			if(i==length) return resolve(array);
+			
+			const img=await QuickUI.loadImage(list[i],config);
+			if(img) array.push(img);
+			
+			i++;
+			func(resolve);
+		}
+		
+		return new Promise(func)
+	}
+	
+	/**
 	 * 获取一个简单的矩形显示对象
 	 * @param {Number} w 宽度
 	 * @param {Number} h 高度

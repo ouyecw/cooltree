@@ -9,6 +9,7 @@ import StageEvent from '../events/StageEvent.js'
 import StringUtil from '../utils/StringUtil.js'
 import ObjectUtil from '../utils/ObjectUtil.js'
 import ColorUtil from '../utils/ColorUtil.js'
+import GColor from '../model/GColor.js'
 import Global from '../core/Global.js'
 
 /**
@@ -29,7 +30,7 @@ export default class TextField extends DisplayObject
 	 * @param {String} stroke_color
 	 * @param {Number} leading
 	 */
-	constructor(s="",f="Microsoft YaHei,Arial",c="#000000",z=12,t="fill",c2="#000000",l=0)
+	constructor(s="",f="Microsoft YaHei,Arial",c="#000000",z=12,t="fill",c2="",l=0)
 	{
 		super();
 		this._text = s;
@@ -199,15 +200,16 @@ export default class TextField extends DisplayObject
 	
 	/**
 	 * 字体颜色 0xFFFFFF "#FFFFFF"
-	 * @param {Number} {String} c
+	 * @param {Number | GColor | String} c
 	 */
 	set color(value) 
 	{
-    	if(StringUtil.isEmpty(value)) return;
-    	value=ColorUtil.formatColor(value);
+    	if(value==null) return;
+    	if(!(typeof value =="string" && StringUtil.isEmpty(value))) value=value instanceof GColor ? ColorUtil.getGradientColor(value) : ColorUtil.formatColor(value);
         if(this._color==value) return;
 	
 		this._color=value;
+		this.fillType=value ? (this._color2 ? "both" : "fill") : (this._color2 ? "stroke" : this.fillType);
 		this.has_update=true;
     }
 	
@@ -222,10 +224,13 @@ export default class TextField extends DisplayObject
 	 */
 	set strokeColor(value) 
 	{
-    	value=ColorUtil.formatColor(value);
+    	if(value==null) return;
+    	if(!(typeof value =="string" && StringUtil.isEmpty(value)))  value=value instanceof GColor ? ColorUtil.getGradientColor(value) : ColorUtil.formatColor(value);
+		
         if(this._color2==value) return;
 	
 		this._color2=value;
+		this.fillType=value ? (this._color ? "both" : "stroke") : (this._color ? "fill" : this.fillType);
 		this.has_update=true;
     }
 	

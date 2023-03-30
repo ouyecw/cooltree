@@ -129,7 +129,7 @@ export default class SVGText extends DOMDisplay
     	if(this._color==value) return;
     	this._color=this._format_color(value);
     	
-		if(!StringUtil.isEmpty(this._color) && this._instance)
+		if(this._instance)
 			this._instance.style.fill=this._color;
     }
 	
@@ -246,7 +246,7 @@ export default class SVGText extends DOMDisplay
     	if(value==null || value==this._stroke_color) return;
     	this._stroke_color=this._format_color(value);
     	
-		if(!StringUtil.isEmpty(this._stroke_color) && this._instance)
+		if(this._instance)
 			this._instance.style.stroke=this._stroke_color;
     }
 	
