@@ -1,4 +1,5 @@
 import DisplayObjectContainer from '../display/DisplayObjectContainer.js'
+import DisplayObject from '../display/DisplayObject.js'
 import DOMDisplay from '../display/DOMDisplay.js'
 import StringUtil from '../utils/StringUtil.js'
 import FontManager from '../core/FontManager.js'
