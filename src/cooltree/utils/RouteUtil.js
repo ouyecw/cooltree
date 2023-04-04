@@ -68,11 +68,21 @@ export default class RouteUtil
 			return;
 		}
 		
+		RouteUtil.downloadByURL((name || timestamp)+'.'+type,URL.createObjectURL(blob));
+	}
+	
+	/**
+	 * 下载文件
+	 * @param {Object} name 文件名
+	 * @param {Object} url  文件地址
+	 */
+	static async downloadByURL(name,url)
+	{
 		const aLink = document.createElement("a");
 		const urlObject = window.URL || window.webkitURL;
 		
-		aLink.href = URL.createObjectURL(blob);
-		aLink.download = (name || timestamp)+'.'+type;
+		aLink.href = url;
+		aLink.download = name;
 		
 		document.body.appendChild(aLink);
 		aLink.click();

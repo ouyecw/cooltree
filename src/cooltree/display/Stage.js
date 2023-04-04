@@ -30,6 +30,11 @@ export default class Stage extends DisplayObjectContainer
 	
 		this.usePixelTrace = false;
 		this.traceMouseTarget = true;
+		
+		/**
+		 * this.cover={alpha:0.1,color:"#FFFFFF"}
+		 */
+		this.cover=null;
 		this.timer=this.dragTarget = this.mouseTarget = this._mouseDownTarget =null;
 		this.stageX=this.stageY=0;
 		this.mouseX=this.mouseY=0;
@@ -328,7 +333,15 @@ export default class Stage extends DisplayObjectContainer
 	clear ()
 	{
 		if(!this.context || !this.canvas || !this.canvas.parentNode) return;
-		this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
+		
+		if(!this.cover) this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
+		else{
+			this.context.globalAlpha=this.cover.alpha;
+			this.context.fillStyle=this.cover.color;
+			
+			this.context.fillRect(0,0,this.canvas.width,this.canvas.height);
+			this.context.globalAlpha=1;
+		}
 	}
 	
 	_touchHandler(e)
@@ -643,7 +656,7 @@ export default class Stage extends DisplayObjectContainer
 		if(this._graphics) this._graphics.dispose();
 		if(Stage.current==this) Stage.current=null;
 		
-		this.stage=this.context=this.canvas=this.div=null;
+		this.cover=this.stage=this.context=this.canvas=this.div=null;
 		super.dispose();
 		
 		delete this._graphics,this.traceMouseTarget,this._parent_node,this.dragTarget,this.mouseTarget,this._mouseDownTarget,this.timer;

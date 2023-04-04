@@ -126,7 +126,9 @@ export default class CanvasUtil
 	{
 		if(container==undefined) return;
 		
+		if(!w && !h) container._updateSize();
 		const target=ObjectPool.create(Graphics);
+		
 		target.canvas.width=Math.ceil(w || container.width);
 		target.canvas.height=Math.ceil(h || container.height);
 		

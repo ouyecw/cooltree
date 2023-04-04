@@ -444,7 +444,7 @@ export default class DisplayObjectContainer extends DisplayBase
 		const image=CanvasUtil.containerToImage(this);
 		this.removeAllChildren(true);
 		
-		let display_obj=Factory.c("do");
+		const display_obj=new (this.use_canvas ? DisplayObject : DOMDisplay)();
 		display_obj.setInstance(image);
 		this.addChild(display_obj);
 	}
