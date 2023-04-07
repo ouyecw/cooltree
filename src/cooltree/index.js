@@ -208,6 +208,8 @@ app.Popup=require('./ui/Popup.js').default
 
 app.TimeUtil=require('./utils/TimeUtil.js').default
 
+app.MaxRectsBinPack=require('./utils/MaxRectsBinPack.js').default
+
 app.MySocket=require('./net/MySocket.js').default
 
 module.exports=app;

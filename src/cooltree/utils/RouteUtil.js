@@ -84,11 +84,11 @@ export default class RouteUtil
 		aLink.href = url;
 		aLink.download = name;
 		
-		document.body.appendChild(aLink);
+		top.document.body.appendChild(aLink);
 		aLink.click();
 		
 		urlObject.revokeObjectURL(aLink.href);
-		document.body.removeChild(aLink);
+		top.document.body.removeChild(aLink);
 	}
 	
 	/**

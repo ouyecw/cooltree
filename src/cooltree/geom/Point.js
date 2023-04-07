@@ -17,6 +17,12 @@ import StringUtil from '../utils/StringUtil.js'
  */
 export default class Point
 {
+	/**
+	 * 新建点实例
+	 * @param {Number} x 点x坐标
+	 * @param {Number} y 点y坐标
+	 * @param {Number} z 点z坐标
+	 */
 	constructor(x_=0, y_=0,z_=0)
 	{
 		this.y=this.x=this.z=0;
@@ -35,11 +41,19 @@ export default class Point
 		return JSON.parse(str);
 	}
 	
+	/**
+	 * 返回点向量角弧度
+	 * @return {Number}
+	 */
 	get radians()
 	{
 		return Math.atan2(this.y,this.x);
 	}
-		
+	
+	/**
+	 * 点向量按照弧度旋转
+	 * @param {Number} radians 旋转弧度
+	 */
 	rotation(radians)
 	{
 		if(radians==0) return;
@@ -49,11 +63,19 @@ export default class Point
 		this.y=MathUtil.format(Math.sin(radians)*value);
 	}
 	
+	/**
+	 * 克隆点
+	 * @return {Point}
+	 */
 	clone() 
 	{
 		return ObjectPool.create(Point).set(this.x, this.y,this.z);
 	}
 	
+	/**
+	 * 点相加
+	 * @param {Point} v 
+	 */
 	add(v) 
 	{
 		this.x += v.x;
@@ -61,6 +83,11 @@ export default class Point
 		this.z += (v.z||0);
 	}
 	
+	/**
+	 * 点相减
+	 * @param {Point} v 
+	 * @return {Point}
+	 */
 	subtract(v) 
 	{
 		this.x -= v.x;
@@ -69,6 +96,10 @@ export default class Point
 		return this;
 	}
 	
+	/**
+	 * 点相乘
+	 * @param {Point} v 
+	 */
 	multiply(a) 
 	{
 		this.x *= a;
@@ -76,6 +107,12 @@ export default class Point
 		this.z *= a;
 	}
 	
+	/**
+	 * 增加坐标差值
+	 * @param {Number} dx
+	 * @param {Number} dy
+	 * @param {Number} dz
+	 */
 	offset(dx,dy,dz) 
 	{
 		this.x += dx;
@@ -83,6 +120,9 @@ export default class Point
 		this.z += dz;
 	}
 	
+	/**
+	 * 坐标取正数
+	 */
 	abs() 
 	{
 		this.x = Math.abs(this.x);
@@ -90,11 +130,18 @@ export default class Point
 		this.z = Math.abs(this.z);
 	}
 	
+	/**
+	 * 点向量长度
+	 * @return {Number}
+	 */
 	length()
 	{
 		return MathUtil.format(Math.hypot(this.x,this.y,this.z));
 	}
 	
+	/**
+	 * 标准化
+	 */
 	normalize() 
 	{
 		let length = this.length();
@@ -109,6 +156,10 @@ export default class Point
 		return MathUtil.format(length);
 	}
 	
+	/**
+	 * 最小点值
+	 * @param {Point} b
+	 */
 	min(b) 
 	{
 		this.x = this.x < b.x ? this.x : b.x;
@@ -116,6 +167,10 @@ export default class Point
 		this.z = this.z < b.z ? this.z : b.z;
 	}
 	
+	/**
+	 * 最大点值
+	 * @param {Point} b
+	 */
 	max(b) 
 	{
 		this.x = this.x > b.x ? this.x : b.x;
@@ -123,6 +178,12 @@ export default class Point
 		this.z = this.z > b.z ? this.z : b.z;
 	}
 	
+	/**
+	 * 设置点实例
+	 * @param {Number} x 点x坐标
+	 * @param {Number} y 点y坐标
+	 * @param {Number} z 点z坐标
+	 */
 	set(x,y,z) 
 	{
 		this.x = MathUtil.format(x || 0);
@@ -131,16 +192,30 @@ export default class Point
 		return this;
 	}
 	
+	/**
+	 * 点是否相等
+	 * @param {Point} pt
+	 * @return {Boolean}
+	 */
 	equals(pt)
 	{
 		return (this.x==pt.x && this.y==pt.y && this.z==pt.z);
 	}
 	
+	/**
+	 * 字符串
+	 */
 	toString ()
 	{
 		return String('{"x":'+this.x+',"y":'+this.y+',"z":'+this.z+'}');
 	}
 	
+	/**
+	 * 重置点实例
+	 * @param {Number} x 点x坐标
+	 * @param {Number} y 点y坐标
+	 * @param {Number} z 点z坐标
+	 */
 	reset(x_=0, y_=0,z_=0) 
 	{
 		this.set(x_,y_,z_);
@@ -150,11 +225,21 @@ export default class Point
 	// Static Function
 	//****************************************
 	
+	/**
+	 * 返回两点间的距离
+	 * @param {Point} pointA 
+	 * @param {Point} pointB
+	 * @return {Number}
+	 */
 	static distance(pointA,pointB=new Point())
 	{
 		return Math.hypot(pointA.x-pointB.x,pointA.y-pointB.y,(pointA.hasOwnProperty("z") && pointB.hasOwnProperty("z") ? pointA.z-pointB.z : 0));
 	}
 	
+	/**
+	 * 字符串转点实例
+	 * @param {String} str
+	 */
 	static toPoint(str)
 	{	
 		if(str && str instanceof Array && str.length){
@@ -179,11 +264,24 @@ export default class Point
 		return obj ? ObjectPool.create(Point).set(obj.x,obj.y,obj.z) : null;
 	}
 	
+	/**
+	 * 返回两点间的中间点
+	 * @param {Point} point1
+	 * @param {Point} point2
+	 * @return {Point}
+	 */
 	static getMiddlePoint(point1,point2)
 	{
 		return new Point((point1.x+point2.x)*0.5,(point1.y+point2.y)*0.5,(point1.z+point2.z)*0.5);
 	}
 	
+	/**
+	 * 点坐标设置最小和最大值
+	 * @param {Point} point
+	 * @param {Number} min
+	 * @param {Number} max
+	 * @return {Point}
+	 */
 	static clamp(point,min,max)
 	{
 		if(min>0 && (Math.abs(point.x)<min || Math.abs(point.y)<min)){
@@ -216,6 +314,7 @@ export default class Point
 	 * @param {Number} radians 弧度
 	 * @param {Boolean} is_subtract (true逆时针 false顺时针)
 	 * @param {Boolean} is_new 最后返回一个新生成的点
+	 * @return {Point}
 	 */
 	static rotate(point,center,radians,is_subtract,is_new)
 	{
@@ -244,6 +343,7 @@ export default class Point
 	 * @param {Point} center 中心点
 	 * @param {Number} radians 弧度数
 	 * @param {Boolean} is_subtract (true逆时针 false顺时针)
+	 * @return {Point}
 	 */
 	static rotateLine(length,center,radians,is_subtract)
 	{
@@ -252,7 +352,7 @@ export default class Point
 	
 	/**
 	 * 缩放点
-	 * @param {Object} points
+	 * @param {Array} points 
 	 * @param {Number} scaleX
 	 * @param {Number} scaleY
 	 */
@@ -270,7 +370,7 @@ export default class Point
 	
 	/**
 	 * 移动点
-	 * @param {Object} points
+	 * @param {Array} points
 	 * @param {Number} scaleX
 	 * @param {Number} scaleY
 	 */
@@ -286,6 +386,11 @@ export default class Point
 		}
 	}
 	
+	/**
+	 * 点集合根据数据调整坐标
+	 * @param {Array} points
+	 * @param {Object} data 数据例如{x:0,y:0,scaleX:1,scaleY:1,rotation:0,center:{x:0,y:0}}
+	 */
 	static matrix(points,data)
 	{
 		if(!points || !data) return;
@@ -306,6 +411,7 @@ export default class Point
 	 * @param {Point} a
 	 * @param {Point} b
 	 * @param {Point} c
+	 * @return {Point} 
 	 */
 	static verticalPoint(a,b,c)
 	{
@@ -335,6 +441,7 @@ export default class Point
 	 * @param {Point} b
 	 * @param {Point} d
 	 * @param {Boolean} on_line
+	 * @return {Boolean}
 	 */
 	static interval(a,b,d,on_line)
 	{
@@ -354,6 +461,7 @@ export default class Point
 	 * @param line1_p2 直线1的B点
 	 * @param line2_p1 直线2的A点
 	 * @param line2_p2 直线2的B点
+	 * @return {Point}
 	 */
 	static intersection(line1_p1,line1_p2,line2_p1,line2_p2)
 	{
@@ -372,6 +480,7 @@ export default class Point
 	 * 将连续线扩展offsetx2成图形
 	 * @param {Array} dots      连续点
 	 * @param {Number} offset   扩大尺寸
+	 * @return {Array}
 	 */
 	static lineExpandArea(dots,offset)
 	{
@@ -424,6 +533,7 @@ export default class Point
 	 * @param {Object} left   左侧线
 	 * @param {Object} right  右侧线
 	 * @param {Number} offset 扩大尺寸
+	 * @return {Array}
 	 */
 	static _expand_point(start,end,type,left,right,offset)
     {

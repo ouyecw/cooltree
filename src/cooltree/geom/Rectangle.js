@@ -18,6 +18,13 @@ import StringUtil from '../utils/StringUtil.js'
  */
 export default class Rectangle
 {
+	/**
+	 * 新建矩形实例
+	 * @param {Number} x 矩形x坐标
+	 * @param {Number} y 矩形y坐标
+	 * @param {Number} w 矩形宽度
+	 * @param {Number} h 矩形高度
+	 */
 	constructor(x_=0, y_=0,width_=0,height_=0) 
 	{
 		this.x=this.y=this.width=this.height=0;
@@ -70,6 +77,13 @@ export default class Rectangle
 		return this.y+this.height;
 	}
 
+	/**
+	 * 设置矩形数据
+	 * @param {Number} x 矩形x坐标
+	 * @param {Number} y 矩形y坐标
+	 * @param {Number} w 矩形宽度
+	 * @param {Number} h 矩形高度
+	 */
 	set(x,y,width,height)
 	{
 		this.x = MathUtil.format(x||0);
@@ -80,13 +94,22 @@ export default class Rectangle
 		return this;
 	}
 	
+	/**
+	 * 移动矩形
+	 * @param {Number | Point} x 点对象或矩形x坐标
+	 * @param {Number} y 矩形y坐标
+	 */
 	move(offset,y)
 	{
 		this.x=MathUtil.format(y==undefined ? offset.x : offset+this.x);
 		this.y=MathUtil.format(y==undefined ? offset.y : y+this.y);
 		return this;
 	}
-		
+	
+	/**
+	 * 矩形相加
+	 * @param {Rectangle} rect 矩形
+	 */
 	add(rect)
 	{
 		this.x=MathUtil.format(rect.x+this.x);
@@ -107,8 +130,8 @@ export default class Rectangle
 	
 	/**
 	 * 矩形中心膨胀或缩小
-	 * @param {Object} w
-	 * @param {Object} h
+	 * @param {Number} w
+	 * @param {Number} h
 	 */
 	zoom(w,h)
 	{
@@ -123,10 +146,12 @@ export default class Rectangle
 	}
 	
 	/**
-	矩形是否包括坐标点或者矩形
-	return boolean
+	* 矩形是否包括坐标点或者矩形
+	* @param {Rectangle | Point | Number} p 矩形/点对象/点x坐标
+	* @param {Number} 点y坐标(仅p是点x坐标情况)
+	* @return {Boolean}
 	*/
-	contains(p,y)
+	contains(p,y=null)
 	{
 		if(p==null) return false;
 		
@@ -143,8 +168,8 @@ export default class Rectangle
 	}
 	
 	/**
-	两个矩形是否相交
-	return boolean
+	* 两个矩形是否相交
+	* @return boolean
 	*/
 	intersects(r)
 	{
@@ -152,8 +177,9 @@ export default class Rectangle
 	}
 	
 	/**
-	返回两个矩形相交的交集矩形
-	return Rectangle
+	* 返回两个矩形相交的交集矩形
+	* @param {Rectangle} r 矩形
+	* @return {Rectangle}
 	*/
 	intersection (r)
 	{
@@ -169,10 +195,10 @@ export default class Rectangle
 	}
 	
 	/**
-	返回四个点坐标的数组
-	@param {Boolean} reflectionX true镜像相反
-	@param {Boolean} reflectionY true镜像相反
-	return Array
+	* 返回四个点坐标的数组
+	* @param {Boolean} reflectionX true镜像相反
+	* @param {Boolean} reflectionY true镜像相反
+	* @return {Array}
 	*/
 	getPoints(reflectionX,reflectionY)
 	{
@@ -182,11 +208,12 @@ export default class Rectangle
 	
 	/**
 	 * 返回四个点坐标的数组 
-	 * return Array
-	 * @param {Number} radians
-	 * @param {Object} point
-	 * @param {Object} offset
-	 * @param {Boolean} reflection
+	 * @param {Number} radians 弧度数
+	 * @param {Point} point   中心坐标
+	 * @param {Point} offset  相对差值
+	 * @param {Boolean} reflectionX true镜像X相反
+	 * @param {Boolean} reflectionY true镜像Y相反
+	 * @return {Array}
 	 */
 	rotation(radians,point,offset,reflectionX,reflectionY)
 	{
@@ -210,8 +237,10 @@ export default class Rectangle
 	}
 	
 	/**
-	返回两个矩形两个矩形组合在一起的最大矩形
-	return Rectangle
+	* 返回两个矩形两个矩形组合在一起的最大矩形
+	* @param {Rectangle} r 矩形
+	* @param {Boolean} n true返回一个新矩形实例
+	* @return {Rectangle}
 	*/
 	union(r,n=true)
 	{
@@ -230,16 +259,32 @@ export default class Rectangle
 		return this;
 	}
 	
+	/**
+	 * 克隆矩形实例
+	 * @return {Rectangle}
+	 */
 	clone()
 	{
 		return new Rectangle(this.x,this.y,this.width,this.height);
 	}
 	
+	/**
+	 * 重置矩形数据
+	 * @param {Number} x 矩形x坐标
+	 * @param {Number} y 矩形y坐标
+	 * @param {Number} w 矩形宽度
+	 * @param {Number} h 矩形高度
+	 */
 	reset(x_=0, y_=0,width_=0,height_=0)
 	{
 		this.set(x_, y_,width_,height_);
 	}
 	
+	/**
+	 * 矩形转数组
+	 * @param {Boolean} b true返回矩形的左上角x,左上角y,右下角x,右下角y false返回矩形的x,y,width,height
+	 * @return {Array}
+	 */
 	toArray(b)
 	{
 		return [this.x,this.y,b ? this.right : this.width,b ? this.bottom :this.height];
@@ -366,6 +411,11 @@ export default class Rectangle
 		return points;
 	}
 	
+	/**
+	 * 根据点数组获取一个最大矩形
+	 * @param {Array} points
+	 * @return {Rectangle}
+	 */
 	static getPointsBounds(points)
 	{
 		if(!points || !points.length) return null;

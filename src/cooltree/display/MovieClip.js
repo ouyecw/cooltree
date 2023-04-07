@@ -21,6 +21,10 @@ const _current_frame=Symbol("currentFrame");
  */
 export default class MovieClip extends DisplayObject
 {
+	/**
+	 * 新建动画实例
+	 * @param {Array} data [Source|DisplayObject]
+	 */
 	constructor(s=null)
 	{
 		super();
@@ -44,11 +48,17 @@ export default class MovieClip extends DisplayObject
 		return this[_swing_play];
 	}
 	
+	/**
+	 * 总帧数
+	 */
 	get totalFrame()
 	{
 		return this._frames.length;
 	}
 	
+	/**
+	 * 当前帧数
+	 */
 	get currentFrame()
 	{
 		return this[_current_frame];
@@ -59,6 +69,10 @@ export default class MovieClip extends DisplayObject
 		return this[_rate];
 	}
 	
+	/**
+	 * 动画播放频率
+	 * @param {Number} value
+	 */
 	set rate(value) 
 	{
         if(value==undefined || value==null || value<1 || value==this[_rate]) return;
@@ -71,6 +85,7 @@ export default class MovieClip extends DisplayObject
 	}
 	
 	/**
+	 * 反序/正序
      * movie reverse play
      * @param {Boolean} value
      */
@@ -80,12 +95,19 @@ export default class MovieClip extends DisplayObject
 		this[_reverse_play]=Boolean(value);
     }
 	
+	/**
+	 * 是否摇摆播放
+	 * @param {Boolean} value
+	 */
 	set swing(value)
 	{
 		if(value==undefined || value==null || value==this[_swing_play]) return;
 		this[_swing_play]=Boolean(value);
 	}
 	
+	/**
+	 * 清除全部帧
+	 */
 	clearAllFrames()
 	{
 		if(this._frames==undefined) return;
@@ -113,6 +135,11 @@ export default class MovieClip extends DisplayObject
 		if(this._frames.length>0) this.gotoAndPlay(1);
 	}
 	
+	/**
+	 * 动画添加帧
+	 * @param {Source | DisplayObject} f 帧内容
+	 * @param {Number} i 第几帧
+	 */
 	addFrame (f,i)
 	{
 		if(f==undefined || f==null) return;
@@ -126,12 +153,18 @@ export default class MovieClip extends DisplayObject
 		this.name=bool ? this.name : f.animation+(StringUtil.isEmpty(f.label) ? "" :(":"+f.label));
 	}
 	
+	/**
+	 * 获取帧内容
+	 * @param {Number} i 帧数
+	 * @return {DisplayObject | Source} 
+	 */
 	getFrame (i)
 	{
 		return (i>=0 && i<this._frames.length) ? this._frames[i] : null;
 	}
 	
 	/**
+	 * 删除帧
 	 * remove frame 
 	 * @param {Number} i
 	 */
@@ -174,7 +207,7 @@ export default class MovieClip extends DisplayObject
 	
 	/**
 	 * 跳转到index帧停止播放
-	 * @param {Object} index
+	 * @param {Number} index
 	 */
 	gotoAndStop(index)
 	{
@@ -199,7 +232,7 @@ export default class MovieClip extends DisplayObject
 	
 	/**
 	 * 跳转到index帧开始播放
-	 * @param {Object} index
+	 * @param {Number} index
 	 */
 	gotoAndPlay(index)
 	{
@@ -207,6 +240,9 @@ export default class MovieClip extends DisplayObject
 		this._paused=false;
 	}
 	
+	/**
+	 * 跳至下一帧
+	 */
 	nextFrame()
 	{
 		this._frame=this[_reverse_play] ? (this[_current_frame]<=1 ? this._frames.length : (this[_current_frame]-1)) : (this[_current_frame]>=this._frames.length ? 1 : (this[_current_frame]+1));
@@ -265,6 +301,9 @@ export default class MovieClip extends DisplayObject
 		super.render(...arguments);
 	}
 	
+	/**
+	 * 重置
+	 */
 	reset(s=null)
 	{
 		super.reset();
@@ -279,6 +318,9 @@ export default class MovieClip extends DisplayObject
 		if(s) this.setFrames(s);
 	}
 	
+	/**
+	 * 销毁
+	 */
 	dispose()
 	{
 		super.dispose();

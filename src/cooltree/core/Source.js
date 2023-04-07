@@ -16,6 +16,9 @@ import Global from './Global.js'
  */
 export default class Source
 {
+	/**
+	 * 新建资源实例
+	 */
 	constructor(img=null,obj=null,isJson=false)
 	{
 		this.x=this.y=this.regX=this.regY=this.index=this.width=this.height=this.frame_width=this.frame_height=0;
@@ -27,6 +30,12 @@ export default class Source
 			this.setup(img,obj,isJson);
 	}
 	
+	/**
+	 * 设置
+	 * @param {Image} img
+	 * @param {Object} obj 资源属性
+	 * @param {Boolean} isJson
+	 */
 	setup (img,obj,isJson=false)
 	{
 		if(!img) return;
@@ -70,6 +79,9 @@ export default class Source
 		this.isClone=false;
 	}
 	
+	/**
+	 * 克隆
+	 */
 	clone()
 	{
 		let copy=ObjectPool.create(Source);
@@ -92,6 +104,9 @@ export default class Source
 		return copy;
 	}
 	
+	/**
+	 * 重置
+	 */
 	reset(img=null,obj=null)
 	{
 		this.x=this.y=this.regX=this.regY=this.index=this.width=this.height=this.frame_width=this.frame_height=0;
@@ -102,6 +117,9 @@ export default class Source
 		if(img && obj) this.setup(img,obj);
 	}
 	
+	/**
+	 * 销毁
+	 */
 	dispose()
 	{
 		this.reset();

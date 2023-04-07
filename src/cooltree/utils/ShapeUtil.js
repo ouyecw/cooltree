@@ -18,6 +18,7 @@ export default class ShapeUtil
 	 * @param {Array} points
 	 * @param {Boolean} is_close
 	 * @param {Boolean} is_node
+	 * @return {String}
 	 */
 	static pointsToPath(points,is_close,is_node)
 	{
@@ -38,6 +39,7 @@ export default class ShapeUtil
 	 * 矩形或者圆角矩形换成路径
 	 * @param {Object} properties
 	 * @param {Boolean} is_node
+	 * @return {String}
 	 */
 	static rectToPath(properties,is_node)
 	{
@@ -81,6 +83,7 @@ export default class ShapeUtil
 	 * 椭圆或者正圆换成路径
 	 * @param {Object} properties
 	 * @param {Boolean} is_node
+	 * @return {String}
 	 */
 	static ellipseToPath(properties,is_node)
 	{
@@ -110,6 +113,7 @@ export default class ShapeUtil
 	 * 获取图形数据的矩形边框
 	 * @param {ShapeVO} vo
 	 * @param {Boolean} only_pts 是否仅仅为了获取点坐标集合
+	 * @return {String}
 	 */
 	static getShapeBounds(vo,only_pts)
 	{
@@ -170,6 +174,7 @@ export default class ShapeUtil
 	 * 改变图形坐标
 	 * @param {ShapeVO} vo
 	 * @param {Object} pos
+	 * @return {ShapeVO}
 	 */
 	static replace(vo,pos)
 	{
@@ -266,6 +271,7 @@ export default class ShapeUtil
 	 * @param {Number} h
 	 * @param {Number} rx
 	 * @param {Number} ry
+	 * @return {ShapeVO}
 	 */
 	static getRect(x,y,w,h,rx,ry)
 	{
@@ -281,6 +287,7 @@ export default class ShapeUtil
 	 * @param {Number} y
 	 * @param {Number} rx
 	 * @param {Number} ry
+	 * @return {ShapeVO}
 	 */
 	static getCircle(x,y,rx,ry)
 	{
@@ -292,6 +299,7 @@ export default class ShapeUtil
 	 * 获取多边形的ShapeVO
 	 * @param {Array} points 
 	 * 例如[[11,22],[90,120],[180,3]] 或者[{x:11,y:22},{x:90,y:120},{x:180,y:3}]
+	 * @return {ShapeVO}
 	 */
 	static getPolygon(points)
 	{
@@ -308,6 +316,7 @@ export default class ShapeUtil
 	 * 获取折线的ShapeVO
 	 * @param {Array} points 
 	 * 例如[[11,22],[90,120],[180,3]] 或者[{x:11,y:22},{x:90,y:120},{x:180,y:3}]
+	 * @return {ShapeVO}
 	 */
 	static getLine(points)
 	{

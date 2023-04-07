@@ -11,6 +11,11 @@ import Rectangle from '../geom/Rectangle.js'
  */
 export default class ShapeVO
 {
+	/**
+	 * 图形数据实例
+	 * @param {String} type
+	 * @param {Object} properties
+	 */
 	constructor(type=null,properties=null)
 	{
 		this.id=UniqueUtil.getName("shape_vo");
@@ -21,7 +26,8 @@ export default class ShapeVO
 	/**
 	 * 设置
 	 * @param {String} type 图形节点标签名参看SVGLabel
-	 * @param {Object} properties
+	 * @param {Object} properties 图形节点属性项
+	 * @return {ShapeVO}
 	 */
 	setup(type,properties)
 	{
@@ -32,6 +38,11 @@ export default class ShapeVO
 		return this;
 	}
 	
+	/**
+	 * 重置
+	 * @param {String} type 图形节点标签名参看SVGLabel
+	 * @param {Object} properties 图形节点属性项
+	 */
 	reset(type=null,properties=null)
 	{
 		this.id=UniqueUtil.getName("shape_vo");
@@ -40,6 +51,9 @@ export default class ShapeVO
 		if(type && properties) this.setup(type,properties);
 	}
 	
+	/**
+	 * 克隆
+	 */
 	clone()
 	{
 		let clone=ObjectPool.create(ShapeVO);
@@ -49,6 +63,9 @@ export default class ShapeVO
 		return clone;
 	}
 	
+	/**
+	 * 销毁
+	 */
 	dispose()
 	{
 		if(this.rect) ObjectPool.remove(this.rect);
@@ -65,6 +82,7 @@ export default class ShapeVO
 	 * @param {Object|String} node_string 
 	 * @param {Object} pos 位移坐标点 
 	 * @param {Rectangle} rect 性状的矩形大小
+	 * @return {ShapeVO}
 	 */
 	static create(node_string,pos=null,rect=null)
 	{
@@ -100,6 +118,7 @@ export default class ShapeVO
 	/**
 	 * vo转换成节点字符串
 	 * @param {ShapeVO} vo
+	 * @return {String}
 	 */
 	static string(vo)
 	{

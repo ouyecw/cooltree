@@ -13,6 +13,10 @@ import Global from './Global.js'
  */
 export default class AssetManager
 {
+	/**
+	 * 添加加载完成的文件数据
+	 * @param {Object} files
+	 */
 	static addFiles(files)
 	{
 		if(files==null) return;
@@ -68,6 +72,10 @@ export default class AssetManager
 		}
 	}
 	
+	/**
+	 * 添加资源
+	 * @param {Array} sources
+	 */
 	static addSources(sources)
 	{
 		if(sources==null || sources.length<1) return;
@@ -90,7 +98,7 @@ export default class AssetManager
 	}
 	
 	/**
-	 * 
+	 * 获取资源
 	 * @param {String} label
 	 * @param {Boolean} clone
 	 */
@@ -117,7 +125,7 @@ export default class AssetManager
 	
 	static __clone_image(img)
 	{
-		let temp=ObjectPool.create(Image);
+		let temp=new Image();
 		temp.src=img.src;
 		temp.width=img.width;
 		temp.height=img.height;
@@ -125,6 +133,10 @@ export default class AssetManager
 		return temp;
 	}
 	
+	/**
+	 * 删除资源
+	 * @param {String} label
+	 */
 	static removeSource(label)
 	{
 		if(!AssetManager._cache.hasOwnProperty(label)) return;
@@ -132,11 +144,18 @@ export default class AssetManager
 		delete AssetManager._cache[label];
 	}
 	
+	/**
+	 * 清除全部资源
+	 */
 	static clear()
 	{
 		AssetManager._cache={};
 	}
 	
+	/**
+	 * 根据图片生成资源
+	 * @param {Image} img
+	 */
 	static fromImage(img)
 	{
 		const source=ObjectPool.create(Source);

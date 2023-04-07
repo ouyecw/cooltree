@@ -3,6 +3,8 @@ import ObjectUtil from '../utils/ObjectUtil.js'
 import AssetManager from './AssetManager.js'
 import MathUtil from '../utils/MathUtil.js'
 import Factory from './Factory.js'
+import MovieClip from '../display/MovieClip.js'
+import Source from './Source.js'
 
 /**
  * @class
@@ -51,6 +53,7 @@ export default class MovieManager
 	 * @param {Boolean} dom      true是DOM false是CANVAS
 	 * @param {Number} length    动画长度 帧
 	 * @param {Number} begin     动画起始帧
+	 * @return {MovieClip}
 	 */
 	static getInstance(label,animation,dom,length,begin)
 	{
@@ -67,6 +70,12 @@ export default class MovieManager
 		return mc;
 	}
 	
+	/**
+	 * 根据标签动画名称获取动画数据
+	 * @param {String} label
+	 * @param {String} animation
+	 * @return {Array}
+	 */
 	static getData(label,animation)
 	{
 		animation=animation || "";
@@ -86,6 +95,12 @@ export default class MovieManager
 		return datas;
 	}
 	
+	/**
+	 * 根据标签动画名称查找动画数据
+	 * @param {String} label
+	 * @param {String} animation
+	 * @return {Array | Source}
+	 */
 	static findData(label,animation)
 	{
 		if(StringUtil.isEmpty(label) && StringUtil.isEmpty(animation)) return null;
@@ -101,6 +116,11 @@ export default class MovieManager
 		return null;
 	}
 	
+	/**
+	 * 根据标签动画名称删除动画数据
+	 * @param {String} label
+	 * @param {String} animation
+	 */
 	static removeData(label,animation)
 	{
 		animation=animation || "";
@@ -123,6 +143,9 @@ export default class MovieManager
 		delete (MovieManager._dic[animation])[label];
 	}
 	
+	/**
+	 * 清空
+	 */
 	static clear()
 	{
 		MovieManager._dic={};

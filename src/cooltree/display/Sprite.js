@@ -30,7 +30,11 @@ export default class Sprite extends DisplayObjectContainer
 	{
 		return this._blendMode;
 	}
-	
+	/**
+	 * Blend模式
+	 * display/BlendMode
+	 * @param {String} str
+	 */
 	set blendMode(str)
 	{
 		if(this._blendMode==str) return;
@@ -38,11 +42,18 @@ export default class Sprite extends DisplayObjectContainer
 		this.__checkDisplayUpdate();
 	}
 	
+	/**
+	 * 获取遮罩矩形区域
+	 */
 	get maskRect()
 	{
 		return (this._mask ? (this._mask instanceof Rectangle ? this._mask : this._rect) : null);
 	}
 	
+	/**
+	 * 设置遮罩矩形区域
+	 * @param {Rectangle} value
+	 */
 	set maskRect(value) 
 	{
 		if(value) {
@@ -318,6 +329,9 @@ export default class Sprite extends DisplayObjectContainer
 		return CollisionUtil.hitTestPoint(data, x, y,usePixelTrace)<0;
 	}
 	
+	/**
+	 * 重置实例数据
+	 */
 	reset()
 	{
 		if(this._mask && this._mask instanceof ShapeVO) {

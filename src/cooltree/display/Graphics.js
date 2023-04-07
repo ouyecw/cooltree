@@ -218,7 +218,7 @@ export default class Graphics
 	{
 		if(array==undefined || array.length<2) return;
 		
-		if(isClose) this.beginPath();
+		this.beginPath();
 		let isArray=(array[0] instanceof Array);
 		this.moveTo((isArray ? array[0][0] : array[0].x), (isArray ? array[0][1] : array[0].y));
 		
