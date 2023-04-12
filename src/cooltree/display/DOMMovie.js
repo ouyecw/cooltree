@@ -7,9 +7,10 @@ import Source from '../core/Source.js'
 import Event from '../events/Event.js'
 import DOMDisplay from './DOMDisplay.js'
 import MathUtil from '../utils/MathUtil.js'
-import DisplayObject from './DisplayObject.js'
+import ClassUtil from '../utils/ClassUtil.js'
 import ObjectPool from '../utils/ObjectPool.js'
 import StringUtil from '../utils/StringUtil.js'
+import AssetManager from '../core/AssetManager.js'
 
 const _rate=Symbol("rate");
 const _swing_play=Symbol("swingPlay");
@@ -111,12 +112,23 @@ export default class DOMMovie extends DOMDisplay
 	
 	/**
 	 * 添加帧
-	 * @param {Object} f
-	 * @param {Object} i
+	 * @param {Source | Image} f
+	 * @param {Number} i
 	 */
 	addFrame (f,i)
 	{
-		if(f==undefined || f==null || !(f instanceof Source)) return;
+		if(f==undefined || f==null) return;
+		if(f instanceof Image || ClassUtil.getQualifiedClassName(f)=="HTMLImageElement") f=AssetManager.fromImage(f);
+		if(!(f instanceof Source) && !(f instanceof DOMDisplay && f.instance && (f.instance instanceof Source || f.instance instanceof Image))) return;
+		
+		if(f instanceof DOMDisplay){
+			if(f.instance instanceof Source){
+				f=f.instance.clone();
+				f.isClone=false;
+			}else{
+				f=AssetManager.fromImage(f.instance);
+			}
+		}
 		
 		if(i==undefined) this._frames.push(f);
 		else             this._frames.splice(i, 0, f);
@@ -147,9 +159,6 @@ export default class DOMMovie extends DOMDisplay
 		
 		if(frame instanceof Source && frame.isClone){
 			ObjectPool.remove(frame);
-		}
-		else if(frame instanceof DisplayObject){
-			frame.removeFromParent(true);
 		}
 	}
 	

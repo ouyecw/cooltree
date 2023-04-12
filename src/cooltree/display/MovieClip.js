@@ -5,9 +5,11 @@ MovieClip Class
 **/
 import Source from '../core/Source.js'
 import MathUtil from '../utils/MathUtil.js'
-import ObjectPool from '../utils/ObjectPool.js'
+import ClassUtil from '../utils/ClassUtil.js'
 import DisplayObject from './DisplayObject.js'
 import StringUtil from '../utils/StringUtil.js'
+import ObjectPool from '../utils/ObjectPool.js'
+import AssetManager from '../core/AssetManager.js'
 
 const _rate=Symbol("rate");
 const _swing_play=Symbol("swingPlay");
@@ -46,6 +48,12 @@ export default class MovieClip extends DisplayObject
 	get swing()
 	{
 		return this[_swing_play];
+	}
+	
+	set frame(value)
+	{
+		this._frame=value;
+		this.__checkDisplayUpdate();
 	}
 	
 	/**
@@ -124,7 +132,7 @@ export default class MovieClip extends DisplayObject
 	
 	/**
 	 * 设置显示资源数组
-	 * @param {Array} data [Source|DisplayObject]
+	 * @param {Array} data [Source|DisplayObject|Image]
 	 */
 	setFrames(data)
 	{
@@ -137,20 +145,25 @@ export default class MovieClip extends DisplayObject
 	
 	/**
 	 * 动画添加帧
-	 * @param {Source | DisplayObject} f 帧内容
+	 * @param {Source | DisplayObject | Image } f 帧内容
 	 * @param {Number} i 第几帧
 	 */
 	addFrame (f,i)
 	{
 		if(f==undefined || f==null) return;
-		if(!(f instanceof Source) && !(f instanceof DisplayObject)) return;
+		if(f instanceof Image || ClassUtil.getQualifiedClassName(f)=="HTMLImageElement") f=AssetManager.fromImage(f);
+		if(!(f instanceof Source) && !(f instanceof DisplayObject && f.instance)) return;
+		
+		if(f instanceof DisplayObject){
+			f=f.instance.clone();
+			f.isClone=false;
+		}
+		
 		if(i==undefined) this._frames.push(f);
 		else             this._frames.splice(i, 0, f);
-		
-		const bool=(f instanceof DisplayObject);	
-		this.width=bool ? f.width : Math.max(this.width,f.frame_width,f.width);
-		this.height=bool ? f.height : Math.max(this.height,f.frame_height,f.height);
-		this.name=bool ? this.name : f.animation+(StringUtil.isEmpty(f.label) ? "" :(":"+f.label));
+			
+		this.width=Math.max(this.width,f.frame_width,f.width);
+		this.height=Math.max(this.height,f.frame_height,f.height);
 	}
 	
 	/**
@@ -181,9 +194,6 @@ export default class MovieClip extends DisplayObject
 		
 		if(frame instanceof Source && frame.isClone){
 			ObjectPool.remove(frame);
-		}
-		else if(frame instanceof DisplayObject){
-			frame.removeFromParent(true);
 		}
 	}
 	
@@ -226,7 +236,7 @@ export default class MovieClip extends DisplayObject
 		}
 		
 		if(index<1 || index>this._frames.length) return;
-		this._frame=index;
+		this.frame=index;
 		this._paused=true;
 	}
 	
@@ -245,7 +255,7 @@ export default class MovieClip extends DisplayObject
 	 */
 	nextFrame()
 	{
-		this._frame=this[_reverse_play] ? (this[_current_frame]<=1 ? this._frames.length : (this[_current_frame]-1)) : (this[_current_frame]>=this._frames.length ? 1 : (this[_current_frame]+1));
+		this.frame=this[_reverse_play] ? (this[_current_frame]<=1 ? this._frames.length : (this[_current_frame]-1)) : (this[_current_frame]>=this._frames.length ? 1 : (this[_current_frame]+1));
 	}
 	
 	render()
@@ -256,15 +266,7 @@ export default class MovieClip extends DisplayObject
 			this.label=this.name;
 			this[_current_frame]=this._frame;
 			let target=this._frames[this[_current_frame]-1];
-			
-			if(target && (target instanceof DisplayObject)){
-				this.setInstance(target.instance);
-				
-				this.height=target.getHeight();
-				this.width=target.getWidth();
-		    }else{
-		    	this._frames[this[_current_frame]-1]=this.setInstance(target);
-		    }
+			this.setInstance(target);
 		    
 			let temp=this.label;
 			this.label=this.name;
