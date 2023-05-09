@@ -274,21 +274,7 @@ export default class Graphics
 	createPolygon(x, y,radius,n) 
 	{
 		if(n<3) return;
-		
-	    let dx,dy,i;
-	    this.beginPath();
-	    dx = Math.sin(0);
-	    dy = Math.cos(0);
-	    
-	    const dig = Math.PI / n * ((n%2==0) ? 2 : (n-1));
-	    
-	    for (i = 0; i < n; i++) {
-	        dx = Math.sin(i * dig);
-	        dy = Math.cos(i * dig);
-	        this.lineTo(x + dx * radius, y + dy * radius);
-	    }
-	    
-	    this.closePath();
+	    this.drawPath(Point.polygonPoints(x, y,radius,n));
 	}
 	
 	/**

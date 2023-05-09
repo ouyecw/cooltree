@@ -407,6 +407,33 @@ export default class Point
 	}
 	
 	/**
+	 * 返回n边形的所有点
+	 * @param {Number} x
+	 * @param {Number} y
+	 * @param {Number} radius
+	 * @param {Number} n
+	 * @return {Array} 
+	 */
+	static polygonPoints(x, y,radius,n) 
+	{
+		if(n<3) return;
+		
+		let dx,dy,i,pts=[];
+		dx = Math.sin(0);
+		dy = Math.cos(0);
+		
+		const dig = Math.PI / n * ((n%2==0) ? 2 : (n-1));
+		
+		for (i = 0; i < n; i++) {
+		    dx = Math.sin(i * dig);
+		    dy = Math.cos(i * dig);
+		    pts.push({x:MathUtil.format(x + dx * radius), y:MathUtil.format(y + dy * radius)});
+		}
+		
+		return pts;
+	}
+	
+	/**
 	 * a,b点为一直线，c,d点为垂直与ab的直线，d点为交点
 	 * @param {Point} a
 	 * @param {Point} b
