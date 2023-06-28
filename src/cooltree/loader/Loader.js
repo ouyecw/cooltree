@@ -8,6 +8,7 @@ import ObjectUtil from '../utils/ObjectUtil.js'
 import StringUtil from '../utils/StringUtil.js'
 import WebAudio from '../media/WebAudio.js'
 import URLLoader from './URLLoader.js'
+import WasmFile from './WasmFile.js'
 import Event from '../events/Event.js'
 import Media from '../media/Media.js'
 import Global from '../core/Global.js'
@@ -247,6 +248,7 @@ export default class Loader extends EventDispatcher
 		let sound;
 		let video;
 		let font;
+		let wasm;
 		let img;
 		
 		switch(type){
@@ -300,6 +302,14 @@ export default class Loader extends EventDispatcher
 				url_loader.addEventListener(Event.ERROR,this.__error_handler);
 				url_loader.addEventListener(Event.COMPLETE,this.__load_handler);
 				url_loader.load(url);
+				break;
+				
+			case "wasm":
+				wasm=new WasmFile();
+				this._files[name]=wasm;
+				wasm.addEventListener(Event.ERROR,this.__error_handler);
+				wasm.addEventListener(Event.COMPLETE,this.__load_handler);
+				wasm.load(url);
 				break;
 				
 			case "mp4":

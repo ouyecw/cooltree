@@ -68,6 +68,8 @@ app.Signal=require('./events/Signal.js').default
 
 app.EventDispatcher=require('./events/EventDispatcher.js').default
 
+app.WasmFile=require('./loader/WasmFile.js').default
+
 app.Address=require('./core/Address.js').default
 
 app.QRCode=require('./plus/QRCode.js').default
