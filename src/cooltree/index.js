@@ -76,6 +76,8 @@ app.QRCode=require('./plus/QRCode.js').default
 
 app.Storage=require('./plus/Storage.js').default
 
+app.DBManage=require('./plus/DBManage.js').default
+
 app.MovieManager=require('./core/MovieManager.js').default
 
 app.DropShadowFilter=require('./filters/DropShadowFilter.js').default

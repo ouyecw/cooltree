@@ -60,6 +60,8 @@ export default class Global
 		Global.supportOrientation = "orientation" in Global.root;
 		Global.supportDeviceMotion = "ondevicemotion" in Global.root;
 		Global.supportTouch = "ontouchstart" in Global.root;
+		Global.supportIndexedDB ='indexedDB' in Global.root;
+		Global.supportWebAssembly ='WebAssembly' in Global.root;
 		
 		Global.pixelRatio=Global.root.devicePixelRatio;
 		Global.canUseWebAudio =  (Global.root["AudioContext"] || Global.root[Global.cssPrefix+"AudioContext"]);
