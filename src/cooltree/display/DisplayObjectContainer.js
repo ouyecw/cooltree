@@ -90,7 +90,7 @@ export default class DisplayObjectContainer extends DisplayBase
         if(this._updateMatrix==value) return;
 		this._updateMatrix=value;
 		
-		if(value && this._bounds) this._bounds.width=this._bounds.heigth=0;
+		if(value && this._bounds) this._bounds.width=this._bounds.height=0;
 		
 		if(!value || this._children.length<1) return;
 		let i,c,l;

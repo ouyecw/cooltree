@@ -143,7 +143,7 @@ export default class DisplayBase extends EventDispatcher
         if(this._updateMatrix==value) return;
 		this._updateMatrix=value;
 		
-		if(value && this._bounds) this._bounds.width=this._bounds.heigth=0;
+		if(value && this._bounds) this._bounds.width=this._bounds.height=0;
     }
 	
 	get skewX()

@@ -227,7 +227,7 @@ BitmapText.prototype._update=function()
 	if(Global.useCanvas){
 		this._instance._catchToContext();
 		this._instance.canvas.width  = (this.stage ? this.stage : Stage.current).canvas.width;
-		this._instance.canvas.heigth = (this.stage ? this.stage : Stage.current).canvas.height;
+		this._instance.canvas.height = (this.stage ? this.stage : Stage.current).canvas.height;
 	}else{
 		this.removeAllChildren(true);
 	}

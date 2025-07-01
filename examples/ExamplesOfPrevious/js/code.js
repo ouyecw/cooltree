@@ -8856,7 +8856,7 @@ Object.defineProperty(DisplayBase.prototype,"updateMatrix",{
         if(this._updateMatrix==value) return;
 		this._updateMatrix=value;
 		
-		if(value && this._bounds) this._bounds.width=this._bounds.heigth=0;
+		if(value && this._bounds) this._bounds.width=this._bounds.height=0;
     },
     enumerable: true,
     configurable: true
@@ -10719,7 +10719,7 @@ Object.defineProperty(DisplayObjectContainer.prototype,"updateMatrix",{
         if(this._updateMatrix==value) return;
 		this._updateMatrix=value;
 		
-		if(value && this._bounds) this._bounds.width=this._bounds.heigth=0;
+		if(value && this._bounds) this._bounds.width=this._bounds.height=0;
 		
 		if(!value || this._children.length<1) return;
 		var i,c,l;
@@ -13952,7 +13952,7 @@ BitmapText.prototype._update=function()
 	if(Global.useCanvas){
 		this._instance._catchToContext();
 		this._instance.canvas.width=Global.canvas.width;
-		this._instance.canvas.heigth=Global.canvas.height;
+		this._instance.canvas.height=Global.canvas.height;
 	}else{
 		this.removeAllChildren(true);
 	}
