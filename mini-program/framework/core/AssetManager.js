@@ -1,0 +1,180 @@
+
+import ObjectPool from '../utils/ObjectPool.js'
+import ClassUtil from '../utils/ClassUtil.js'
+import AssetUtil from '../utils/AssetUtil.js'
+import MovieManager from './MovieManager.js'
+import FontManager from './FontManager.js'
+import Loader from '../loader/Loader.js'
+import Source from './Source.js'
+
+/**
+ * @class
+ * @module AssetManager
+ */
+export default class AssetManager
+{
+	static _cache={};
+	static className="AssetManager";
+	/**
+	 * 添加加载完成的文件数据
+	 * @param {Object} files
+	 * @param {Boolean} isMovie
+	 */
+	static addFiles(files,isMovie=false)
+	{
+		if(files==null) return;
+		let i,f,x,s,j,a,b;
+		
+		for(i in files){
+			f=files[i];
+			a=i.split("@");
+
+			j=a[0];
+			if(f==undefined) continue;
+			
+			if(ClassUtil.isImage(f)){
+				if(files.hasOwnProperty(j+"@xml") || files.hasOwnProperty(j+"@json") || files.hasOwnProperty(j+"@plist")){
+					b=files.hasOwnProperty(j+"@xml") ? 1 : (files.hasOwnProperty(j+"@plist") ? 2 : 0);
+					x=files[j+(b==1 ? "@xml" : (!b ? "@json" : "@plist"))];
+					
+					if(x==undefined) {
+						AssetManager._cache[i]=f;
+						continue;
+					}
+					
+					s=AssetUtil.parseSheet(f,x,b);
+					if(s==undefined || s.length<=0) {
+						AssetManager._cache[i]=f;
+						continue;
+					}
+					
+					if(b==1){
+						if(AssetManager._cache.hasOwnProperty(j+"@xml")){
+							delete AssetManager._cache[j+"@xml"];
+						}
+					}
+					else if(!b && AssetManager._cache.hasOwnProperty(j+"@json")){
+						delete AssetManager._cache[j+"@json"];
+					}
+					else if(AssetManager._cache.hasOwnProperty(j+"@plist")){
+						delete AssetManager._cache[j+"@plist"];
+					}
+					
+					if(s[0].width>0 && isMovie) 
+						MovieManager.addSources(s);
+					else
+						AssetManager.addSources(s,isMovie);
+				}
+				else AssetManager._cache[i]=f;
+			}
+			else if(String(a[1]).toLowerCase()=="fnt"){
+				s=AssetUtil.parseFont(f,files);
+				if(s==undefined)continue;
+				FontManager.add(s);
+			}
+			else AssetManager._cache[i]=f;
+		}
+	}
+	
+	/**
+	 * 添加资源
+	 * @param {Array} sources
+	 * @param {Boolean} isMovie
+	 */
+	static addSources(sources,isMovie)
+	{
+		if(sources==null || sources.length<1) return;
+		let i,len,source;
+		const movie=[];
+		
+		for(i=0,len=sources.length;i<len;i++){
+			source=sources[i];
+			if(source==undefined || !(source instanceof Source)) continue;
+			
+			if(source.width>0 && isMovie) {
+				movie.push(source);
+				continue;
+			}
+			
+			AssetManager._cache[source.name]=source;
+		}
+		
+		if(movie.length>0) MovieManager.addSources(movie);
+	}
+	
+	/**
+	 * 获取资源
+	 * @param {String} label
+	 * @param {Boolean} clone
+	 */
+	static getSource(label,clone=false)
+	{
+		let source=AssetManager._cache[label];
+		
+		if(!source) {
+			source=MovieManager.findData(label);
+	    	source=(source && source.length==1) ? source[0] : source;
+			return source;
+		}
+	    
+	    if(clone && source){
+	    	if(source instanceof Source){
+	    		source=source.clone();
+	    		source.image=AssetManager.__clone_image(source.image);
+	    	}
+			else if(ClassUtil.isImage(source)) source=AssetManager.__clone_image(source);
+	    }
+	    
+		return source;
+	}
+	
+	static __clone_image(img)
+	{
+		let temp=Loader.loadImg(img.src,()=>{
+			temp.height=img.height;
+			temp.width=img.width;
+		});
+		return temp;
+	}
+	
+	/**
+	 * 删除资源
+	 * @param {String} label
+	 */
+	static removeSource(label)
+	{
+		if(!AssetManager._cache.hasOwnProperty(label)) return;
+		if(typeof AssetManager._cache[label].dispose=="function") AssetManager._cache[label].dispose();
+		delete AssetManager._cache[label];
+	}
+	
+	/**
+	 * 清除全部资源
+	 */
+	static clear()
+	{
+		AssetManager._cache={};
+	}
+	
+	/**
+	 * 根据图片生成资源
+	 * @param {Image} img
+	 */
+	static fromImage(img)
+	{
+		const source=ObjectPool.create(Source);
+		const config={
+			x:0,y:0,
+			width:img.width,
+			height:img.height,
+			frameWidth:img.width,
+			frameHeight:img.height,
+			name:img.name ||img.src
+		}
+		source.setup(img,config);
+		return source;
+	}
+
+}
+
+module.exports = AssetManager;

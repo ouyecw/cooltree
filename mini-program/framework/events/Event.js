@@ -1,0 +1,56 @@
+/**
+Shine Chen 
+s_c@live.com 2015/05/04
+
+===================================================================
+Event Class
+===================================================================
+**/
+
+/**
+ * @class
+ * @module Event
+ */
+export default class Event
+{
+	static className="Event";
+	static PLAY_OVER="play_over";
+	static COMPLETE="complete";
+	static RESIZE="resize";
+	static ERROR="error";
+	static CLOSE="close";
+	static INIT="init";
+
+	constructor(type,params=null,label=null,target=null)
+	{
+		this.type   = type;
+		this.label  = label;
+		this.params = params;
+		this.target = target;
+	}
+	
+	clone()
+	{
+		return new Event(this.type,this.params,this.label,this.target);
+	}
+	
+	reset(type=null,params=null,label=null,target=null)
+	{
+		this.type   = type;
+		this.label  = label;
+		this.params = params;
+		this.target = target;
+	}
+	
+	dispose()
+	{
+		delete this.type, this.target, this.params,this.label;
+	}
+	
+	toString()
+	{
+		return '{"type":' + this.type + ',label":' + (this.label ? this.label.toString() :'') + ',"target":' +(this.target ? this.target.toString() : '')+ ',"params":' +(this.params ? this.params.toString() :'')+'}';
+	}
+}
+
+module.exports = Event;
