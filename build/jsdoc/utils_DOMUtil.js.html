@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/DOMUtil.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/DOMUtil.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import StringUtil from './StringUtil.js'
+
+/**
+ * @class
+ * @module DOMUtil
+ */
+export default class DOMUtil
+{
+	/**
+	 * 根据id获得DOM对象。
+	 * @param {String} id DOM对象的id。
+	 * @return {HTMLElement} DOM对象。
+	 */
+	static getDOM (id)
+	{
+		return document.getElementById(id);
+	};
+	
+	/**
+	 * 创建一个指定类型type和属性props的DOM对象。
+	 * @param {String} type 指定DOM的类型。比如canvas，div等。
+	 * @param {Object} props 指定生成的DOM的属性对象。
+	 * @return {HTMLElement} 新生成的DOM对象。
+	 */
+	static createDOM (type, props)
+	{
+		const dom = document.createElement(type);
+		if(props==undefined) return dom;
+		return DOMUtil.setAttributes(dom,props);
+	};
+	
+	static setAttributes(dom,props)
+	{
+		if(dom==null || props==null) return;
+		
+		for(let p in props) 
+		{
+			let val = props[p];
+			if(p == "style")
+			{
+				if(!dom.style) dom.style={};
+				for(let s in val) dom.style[s] = val[s];
+			}else if(val)
+			{
+				dom[p] = val;
+			}
+		}
+		return dom;
+	}
+	
+	/**
+	 * 创建一个可渲染的DOM，可指定tagName，如canvas或div。
+	 * @param {Object} disObj 一个DisplayObject或类似的对象。
+	 * @param {Object} imageObj 指定渲染的image及相关设置，如绘制区域rect。
+	 * @return {HTMLElement} 新创建的DOM对象。
+	 */
+	static createDOMDrawable (disObj, imageObj)
+	{
+		let tag = disObj.tagName || "div";
+		let img = imageObj.image;
+		let w = disObj.width || (img &amp;&amp; img.width);
+		let h =  disObj.height || (img &amp;&amp; img.height);
+	
+		let elem = DOMUtil.createDOM(tag);
+		if(disObj.id) elem.id = disObj.id;
+		elem.style.position = "absolute";
+		elem.style.left = (disObj.left || 0) + "px";
+		elem.style.top = (disObj.top || 0) + "px";
+		elem.style.width = w + "px";
+		elem.style.height = h + "px";
+	
+		if(tag == "canvas")
+		{
+			elem.width = w;
+			elem.height = h;
+			if(img)
+			{
+				let ctx = elem.getContext("2d");
+				let rect = imageObj.rect || [0, 0, w, h];		
+				ctx.drawImage(img, rect[0], rect[1], rect[2], rect[3], 
+							 (disObj.x || 0), (disObj.y || 0), 
+							 (disObj.width || rect[2]), 
+							 (disObj.height || rect[3]));
+			}
+		}else
+		{
+			elem.style.opacity = disObj.alpha != undefined ? disObj.alpha : 1;
+			elem.style.overflow = "hidden";
+			if(img &amp;&amp; img.src)
+			{
+				elem.style.backgroundImage = "url(" + img.src + ")";
+				let bgX = disObj.rectX || 0, bgY = disObj.rectY || 0;
+				elem.style.backgroundPosition = (-bgX) + "px " + (-bgY) + "px";
+			}
+		}
+		return elem;
+	}
+	
+	/**
+	 * 获取某个DOM元素在页面中的位置偏移量。格式为:{left: leftValue, top: topValue}。
+	 * @param {HTMLElement} elem DOM元素。
+	 * @return {Object} 指定DOM元素在页面中的位置偏移。格式为:{left: leftValue, top: topValue}。
+	 */
+	static getElementOffset (elem)
+	{
+		let left = elem.offsetLeft, top = elem.offsetTop;
+		while((elem = elem.offsetParent) &amp;&amp; elem != document)
+		{
+			left += elem.offsetLeft;
+			top += elem.offsetTop;
+		}
+		return {left:left, top:top};
+	};
+	
+	static contains(container,target)
+	{
+		if(!container || !target) return false;
+		if(container===target) return true;
+		
+		if(!("compareDocumentPosition" in document || "contains" in document)) return DOMUtil._contains_manual(container,target);
+		
+		let adown = container.nodeType === 9 ? container.documentElement : container, 
+		    bup   = target &amp;&amp; target.parentNode;
+		    
+		return  container === bup || !!( bup &amp;&amp; bup.nodeType === 1 &amp;&amp; (
+					adown.contains ?
+						adown.contains( bup ) :
+						container.compareDocumentPosition &amp;&amp; container.compareDocumentPosition( bup ) &amp; 16
+				));
+	}
+	
+	static _contains_manual(a,b)
+	{
+		if ( !b ) return false;
+		while ( (b = b.parentNode) ) {
+			if ( b === a ) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	static each(str,func)
+	{
+		if(StringUtil.isEmpty(str) || !func || typeof func!="function") return;
+		let node=document.createElement("div");
+	    node.innerHTML=str;
+	    DOMUtil._each_do(node,func);
+	    return node.innerHTML;
+	}
+	
+	static _each_do(node,func)
+	{
+		let child,count= node.childElementCount;
+		 for(let i=0;i&lt;count;i++){ 
+	        if(node==undefined || node.children[i]==undefined){ 
+	            continue; 
+	        } 
+	        
+	        child=node.children[i];
+	        
+	        if(child.childElementCount>0){
+	            DOMUtil._each_do(child,func);
+	        }
+	        
+	        if(func) func(child);
+	    } 
+	}
+	
+	static dispatchEvent(eventClass,eventType,node)
+	{
+		let evObj = document.createEvent(eventClass);
+	    evObj.initEvent( eventType, true, false);
+	    (node || document).dispatchEvent(evObj);
+	}
+	
+	static addMeta(content,name="keywords")
+	{
+	    const meta = document.createElement('meta');
+	    meta.content = content;
+	    meta.name = name;
+	    document.getElementsByTagName('head')[0].appendChild(meta);
+	}
+	
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

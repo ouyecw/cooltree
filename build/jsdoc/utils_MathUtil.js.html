@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/MathUtil.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/MathUtil.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import ArrayUtil from "./ArrayUtil";
+
+/**
+ * @class
+ * @module MathUtil
+ */
+export default class MathUtil
+{
+
+	/**
+	 * 获取树形数据数组的最大分支数
+	 * @param {Array} array  树形数据数组
+	 * @param {String} attribute 子节点数据对象属性 为null表示整个都是子节点数据
+	 */
+	static countTreeMax(array,attribute,num)
+	{
+		let i,c,l=array.length;
+		let length=(l>0) ? 1 : 0;
+		num=(num==null) ? length : num;
+		
+		for (i = 0;i&lt;l;i++) {
+			c=(attribute==null) ? array[i] : array[i][attribute];
+			
+			if(c &amp;&amp; (c instanceof Array) &amp;&amp; c.length>0){
+				length=Math.max(length,num+MathUtil.countTreeMax(c,attribute,num));
+			}
+		}
+		
+		return length;
+	}
+	
+	static sort(arr,func)
+	{
+		if(arr==null || arr.length&lt;2 ) return arr;
+		
+		let flag,value1,value2,temp;
+	    for(let i=0;i&lt;arr.length-1;i++){
+	        flag =false;
+	        for(let j=0;j&lt;arr.length-1;j++){
+	        	value1 =arr[j];
+	        	value2 =arr[j+1];
+	        	
+	        	if(func? func(value1,value2) : value2&lt;value1){
+	                temp = arr[j+1];
+	                arr[j+1] = arr[j];
+	                arr[j] = temp;
+	                flag = true;
+	            }
+	        }
+	        
+	        if(!flag){
+	            return arr;
+	        } 
+	    }
+	    
+	    return arr;
+	}
+	
+	static int(num)
+	{
+		if(typeof num==="string") return parseInt(num);
+		
+		let rounded = (0.5 + num) | 0;
+		rounded = ~~ (0.5 + num);
+		rounded = (0.5 + num) &lt;&lt; 0;
+		return rounded;
+	}
+	
+	static format(number,digit=3)
+	{
+		return isNaN(number) ? 0 : Number(Number(number).toFixed(digit));
+	}
+	
+	static randomInt(max)
+	{
+		max=max || 100;
+		return MathUtil.int(max*Math.random());
+	}
+	
+	static clamp(number,min,max)
+	{
+		if (number &lt; Math.min(max,min))
+			return min;
+		if (number > Math.max(max,min))
+			return max;
+		return number;
+	}
+	
+	/**
+	 * 弧度转角度
+	 * @param {Number} radians
+	 */
+	static getDegreesFromRadians(radians)
+	{
+		return radians * 180 / Math.PI;
+	}
+	
+	/**
+	 * 角度转弧度
+	 * @param {Number} degrees
+	 */
+	static getRadiansFromDegrees(degrees)
+	{
+		return degrees % 360 / 180 * Math.PI ;
+	}
+	
+	static getAngle(x1,y1,x2,y2)
+	{
+		let radians=Math.atan2((y2 - y1), (x2 - x1));
+		return radians&lt;0 ? (radians+2*Math.PI) : radians;
+	}
+	
+	static normalizeRadian(value) 
+	{
+	    value = (value + Math.PI) % (Math.PI * 2.0);
+	    value += value > 0 ? -Math.PI : Math.PI;
+	    return value;
+	};
+	
+	static isEquivalent(a,b)
+	{
+		let epsilon=0.0001;
+		return (a - epsilon &lt; b) &amp;&amp; (a + epsilon > b);
+	}
+	
+	/**
+	 * 根据框架尺寸获得缩放比例
+	 * @param {Number} img_width
+	 * @param {Number} img_height
+	 * @param {Number} frame_width
+	 * @param {Number} frame_height
+	 * @param {Boolean} fit
+	 */
+	static getSizeScale(img_width,img_height,frame_width,frame_height,fit)
+	{
+		fit=(fit==undefined) ? true : fit;
+		let scale1=img_width/img_height;
+		let scale2=frame_width/frame_height;
+		
+		if(fit ? scale1>scale2 : scale1&lt;scale2) return MathUtil.format(frame_width/img_width,3);
+		return MathUtil.format(frame_height/img_height,3);
+	}
+	
+	static isNumber(value) {
+	    return typeof (value) === "number" &amp;&amp; !isNaN(value);
+	};
+	
+	/**
+	 * 获取四分位数
+	 * @param {Array} array by number
+	 */
+	static getIQR(array)
+	{
+		if(!array || !array.length || array.length&lt;3) return;
+		const copy=ArrayUtil.sort(array.slice(),null,false,null);
+		const data={};
+		
+		data.min=copy[0];
+		data.max=copy[copy.length-1];
+		
+		const list=[0.1,0.25,0.5,0.75,0.9];
+		let index,dot,i,p;
+		
+		for(i=0;i&lt;list.length;i++){
+			p=list[i]
+			index=(copy.length+1)*p;
+			
+			dot=index%1;
+			data["q"+i]=(1-dot)*copy[index-dot-1]+dot*copy[index-dot];
+		}
+		return data;
+	}
+	
+	/**
+	 * mm转px
+	 * @param {Object} x_cm
+	 * @param {Object} y_cm
+	 */
+	static mm2px(x_cm,y_cm)
+	{
+		if(!MathUtil._DPI) MathUtil._DPI=MathUtil.getDPI();
+		return {x:parseInt(x_cm/25.4*MathUtil._DPI[0]),y:parseInt(y_cm/25.4*MathUtil._DPI[1])};
+	}
+	
+	/**
+	 * pxz转mm
+	 * @param {Object} x_px
+	 * @param {Object} y_px
+	 */
+	static px2mm(x_px,y_px)
+	{
+		if(!MathUtil._DPI) MathUtil._DPI=MathUtil.getDPI();
+		return {x:Math.ceil(x_px*25.4/MathUtil._DPI[0]),y:Math.ceil(y_px*25.4/MathUtil._DPI[1])};
+	}
+	
+	static getDPI()
+	{
+		const arrDPI = new Array();
+		
+		if (window.screen.deviceXDPI != undefined) 
+		{
+			//ie 9
+			arrDPI[0] = window.screen.deviceXDPI;
+			arrDPI[1] = window.screen.deviceYDPI;
+		}
+		else{
+			//chrome firefox
+			const tmpNode = document.createElement("div");
+			tmpNode.style.cssText = "width:1in;height:1in;position:absolute;left:0px;top:0px;z-index:99;visibility:hidden";
+			document.body.appendChild(tmpNode);
+			arrDPI[0] = parseInt(tmpNode.offsetWidth);
+			arrDPI[1] = parseInt(tmpNode.offsetHeight);
+			tmpNode.parentNode.removeChild(tmpNode);
+		}
+		
+		return arrDPI;
+	}
+	
+	/**
+	 * 得到对应角度值的sin近似值
+	 * @param {number} value 角度值
+	 * @returns {number} sin值
+	 */
+	static sin(value) {
+	    let valueFloor = Math.floor(value);
+	    let valueCeil = valueFloor + 1;
+	    let resultFloor = MathUtil.sinInt(valueFloor);
+	    let resultCeil = MathUtil.sinInt(valueCeil);
+	    return (value - valueFloor) * resultCeil + (valueCeil - value) * resultFloor;
+	};
+	
+	static sinInt(value) {
+	    value = value % 360;
+	    if (value &lt; 0) {
+	        value += 360;
+	    }
+	    if (value &lt; 90) {
+	        return MathUtil._sin_map[value];
+	    }
+	    if (value &lt; 180) {
+	        return MathUtil._cos_map[value - 90];
+	    }
+	    if (value &lt; 270) {
+	        return -MathUtil._sin_map[value - 180];
+	    }
+	    return -MathUtil._cos_map[value - 270];
+	};
+	/**
+	 * 得到对应角度值的cos近似值
+	 * @param {number} value 角度值
+	 * @returns {number} cos值
+	 */
+	static cos(value) {
+	    let valueFloor = Math.floor(value);
+	    let valueCeil = valueFloor + 1;
+	    let resultFloor = MathUtil.cosInt(valueFloor);
+	    let resultCeil = MathUtil.cosInt(valueCeil);
+	    return (value - valueFloor) * resultCeil + (valueCeil - value) * resultFloor;
+	};
+	
+	static cosInt(value) {
+	    value = value % 360;
+	    if (value &lt; 0) {
+	        value += 360;
+	    }
+	    if (value &lt; 90) {
+	        return MathUtil._cos_map[value];
+	    }
+	    if (value &lt; 180) {
+	        return -MathUtil._sin_map[value - 90];
+	    }
+	    if (value &lt; 270) {
+	        return -MathUtil._cos_map[value - 180];
+	    }
+	    return MathUtil._sin_map[value - 270];
+	}		
+
+}
+
+MathUtil._DPI=null;
+MathUtil._sin_map={};
+MathUtil._cos_map={};
+
+for (let NumberUtils_i = 0; NumberUtils_i &lt;= 90; NumberUtils_i++) {
+    MathUtil._sin_map[NumberUtils_i] = Math.sin(MathUtil.getRadiansFromDegrees(NumberUtils_i));
+    MathUtil._cos_map[NumberUtils_i] = Math.cos(MathUtil.getRadiansFromDegrees(NumberUtils_i));
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

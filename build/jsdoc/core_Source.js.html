@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/Source.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/Source.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+===================================================================
+Source Class
+===================================================================
+**/
+
+import StringUtil from '../utils/StringUtil.js'
+import CanvasUtil from '../utils/CanvasUtil.js'
+import ObjectPool from '../utils/ObjectPool.js'
+import MathUtil from '../utils/MathUtil.js'
+import Global from './Global.js'
+
+/**
+ * @class
+ * @module Source
+ */
+export default class Source
+{
+	/**
+	 * 新建资源实例
+	 */
+	constructor(img=null,obj=null,isJson=false)
+	{
+		this.x=this.y=this.regX=this.regY=this.index=this.width=this.height=this.frame_width=this.frame_height=0;
+		this.image=this.name=this.animation=this.label=this.url=null;
+		this.isClone=false;
+		this.scale=1;
+		
+		if(img &amp;&amp; obj) 
+			this.setup(img,obj,isJson);
+	}
+	
+	/**
+	 * 设置
+	 * @param {Image} img
+	 * @param {Object} obj 资源属性
+	 * @param {Boolean} isJson
+	 */
+	setup (img,obj,isJson=false)
+	{
+		if(!img) return;
+		
+		let bool=isJson ? !(obj.sourceSize.w==obj.spriteSourceSize.w &amp;&amp; obj.sourceSize.h==obj.spriteSourceSize.h) : false;
+		let labels=String(isJson &amp;&amp; obj.name.indexOf(".")>=0 ? StringUtil.replaceAll(obj.name,[".png",".jpg",".gif"],["","",""]) : obj.name).split("|");
+		
+		this.animation=labels.length>1 ? labels[0] : "";
+		this.name=labels.length>1 ? labels[1] : labels[0];
+		
+		labels=StringUtil.getNumber(this.name);
+		this.label=labels.length>0 ? labels[0] : "";
+		this.index=labels.length>1 ? MathUtil.int(labels[1]) : 0;
+		
+		this.x=MathUtil.format(isJson ? obj.frame.x : obj.x);
+		this.y=MathUtil.format(isJson ? obj.frame.y : obj.y);
+		
+		this.width=MathUtil.format(isJson ? obj.frame.w : obj.width);
+		this.height=MathUtil.format(isJson ? obj.frame.h : obj.height);
+		
+		this.frame_width=isJson ? (bool ? obj.sourceSize.w : 0) :(obj.hasOwnProperty("frameWidth") ? MathUtil.format(obj.frameWidth) : 0);
+		this.frame_height=isJson ? (bool ? obj.sourceSize.h : 0) :(obj.hasOwnProperty("frameHeight") ? MathUtil.format(obj.frameHeight) : 0);
+		
+		this.regX=MathUtil.format(isJson ? (obj.hasOwnProperty("pivot") ? Number(obj.pivot)*(this.frame_width>0 ? this.frame_width : this.width) :
+			(obj.spriteSourceSize ? obj.spriteSourceSize.x*Source.defaultOffset : 0)) : (obj.frameX || 0));
+		
+		this.regY=MathUtil.format(isJson ? (obj.hasOwnProperty("pivot") ? Number(obj.pivot)*(this.frame_height>0 ? this.frame_height : this.height) : 
+			(obj.spriteSourceSize ? obj.spriteSourceSize.y*Source.defaultOffset : 0)) : (obj.frameY || 0));
+	    
+		this.url=img.src;
+		if(Global.useCanvas &amp;&amp; Global.useCache &amp;&amp; (this.width!=img.width || this.height!=img.height)){
+			const canvas=CanvasUtil.splitFrames(img,this.x,this.y,this.width,this.height);
+			if(canvas){
+				this.image=CanvasUtil.toImage(canvas);
+				this.x=this.y=0;
+			}
+			else this.image=img;
+		}
+		else this.image=img;
+		
+		this.isClone=false;
+	}
+	
+	/**
+	 * 克隆
+	 */
+	clone()
+	{
+		let copy=ObjectPool.create(Source);
+		copy.animation=this.animation;
+		copy.name=this.name;
+		copy.label=this.label;
+		copy.index=this.index;
+		copy.regX=this.regX;
+		copy.regY=this.regY;
+		copy.x=this.x;
+		copy.y=this.y;
+		copy.scale=this.scale;
+		copy.image=this.image;
+		copy.width=this.width;
+		copy.height=this.height;
+		copy.frame_width=this.frame_width;
+		copy.frame_height=this.frame_height;
+		copy.url=this.url;
+		copy.isClone=true;
+		return copy;
+	}
+	
+	/**
+	 * 重置
+	 */
+	reset(img=null,obj=null)
+	{
+		this.x=this.y=this.regX=this.regY=this.index=this.width=this.height=this.frame_width=this.frame_height=0;
+		this.image=this.name=this.animation=this.label=this.url=null;
+		this.isClone=false;
+		this.scale=1;
+		
+		if(img &amp;&amp; obj) this.setup(img,obj);
+	}
+	
+	/**
+	 * 销毁
+	 */
+	dispose()
+	{
+		this.reset();
+		delete this.x,this.y,this.scale,this.name,this.animation,this.label,this.url,this.regX,this.regY,this.frame_width,this.frame_height,this.image,this.index,this.width,this.height,this.isClone;
+	}
+	
+	toString()
+	{
+		let str="{";
+		str+='"name":'+this.name+',';
+		str+='"regX":'+this.regX+',';
+		str+='"regY":'+this.regY+',';
+		str+='"label":'+this.label+',';
+		str+='"index":'+this.index+',';
+		str+='"width":'+this.width+',';
+		str+='"height":'+this.height+',';
+		str+='"animation":'+this.animation+',';
+		str+='"frame_width":'+this.frame_width+',';
+		str+='"frame_height":'+this.frame_height+',';
+		
+		str+='"x":'+this.x+',';
+		str+='"y":'+this.y+',';
+		str+='"url":'+this.url+',';
+		str+='"scale":'+this.scale;
+		return str+"}";
+	}
+}
+
+Source.defaultOffset=-1;
+Source.className="Source";</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

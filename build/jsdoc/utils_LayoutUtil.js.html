@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/LayoutUtil.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/LayoutUtil.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @class
+ * @module LayoutUtil
+ */
+export default class LayoutUtil
+{
+	/**
+	 * item UI数组排列平铺
+	 * 
+	 * @param {Array} array
+	 * 全部UI数组列表
+	 * 
+	 * @param {Number} num
+	 * UI 列表排列个数
+	 * 
+	 * @param {Boolean} isX
+	 * UI 列表扩展方向 是X方向
+	 * 
+	 * @param {Rectangle} rect
+	 * list标准化矩形
+	 * x,y 起始点坐标
+	 * width，height 格式化每item尺寸
+	 * 
+	 * @param {Point} space
+	 * Xspace X方向间隙 
+	 * Yspace Y方向间隙
+	 * 例如new Point(Xspace,Yspace);
+	 * 
+	 * @param {Point} focus
+	 * item焦点描述
+	 * x 坐标 0~1
+	 * y 坐标 0~1
+	 * 例如中心点  new Point(0.5,0.5);
+	 * 
+	 * @param {Boolean} isForward
+	 * UI 列表 是否正向扩展
+	 */
+	static tile(array,num,isX,rect,space,focus,isForward)
+	{
+		if(array==undefined || array.length&lt;1 || num==undefined || num&lt;1)return;
+		if(isX==true) LayoutUtil._row(array,num,rect,space,focus,isForward);
+		else  LayoutUtil._tier(array,num,rect,space,focus,isForward);
+	}
+	
+	/**
+	 * line X orientation
+	 */
+	static _row(array,tier,rect,space,focus,isForward)
+	{
+		focus=(focus==undefined) ? {x:0,y:0} : focus;
+		let i,item,_width,_height,length=array.length;
+		
+		let _x=(rect &amp;&amp; rect.x || 0);
+		let _y=(rect &amp;&amp; rect.y || 0);
+	
+		let Xspace=(space &amp;&amp; space.x || 0);
+		let Yspace=(space &amp;&amp; space.y || 0);
+		
+		let reverseHeight=(isForward==undefined || !isForward) ? 0 : LayoutUtil._countSize(array,rect,(tier-1),Yspace);
+		
+		for(i=0;i&lt;length;i++)
+		{
+			item=array[i];
+			
+		    _width=(rect==undefined || rect.width==0) ? (item ? item.getWidth() : 0) : rect.width;
+		    _height=(rect==undefined || rect.height==0) ? (item ? item.getHeight() : 0) : rect.height;
+			
+			if(_width==0 &amp;&amp; _height==0) continue;
+			
+			if(!(item==null || !(("x" in item) &amp;&amp; ("y" in item)))){
+				item.x=Math.round(_x+_width*focus.x); 
+				item.y=Math.round(reverseHeight==0 ? _y : (_y+reverseHeight));
+			}
+			
+		    _y+=(reverseHeight==0) ? Math.round(_height+Yspace) : Math.round((_height+Yspace)*-1);
+			
+		    if((i+1)%tier==0){
+				_y=(rect==undefined ? 0 : rect.y);
+				_x+=Math.round(_width+Xspace);
+			}
+		    
+		}
+	}
+	
+	/**
+	 * line Y orientation
+	 */
+	static _tier(array,row,rect,space,focus,isForward)
+	{
+		focus=(focus==undefined) ? {x:0,y:0} : focus;
+		let i,item,_width,_height,length=array.length;
+		
+		let _x=(rect &amp;&amp; rect.x || 0);
+		let _y=(rect &amp;&amp; rect.y || 0);
+	
+		let Xspace=(space &amp;&amp; space.x || 0);
+		let Yspace=(space &amp;&amp; space.y || 0);
+		
+		let reverseWidth=(isForward==undefined || !isForward) ? 0 : LayoutUtil._countSize(array,rect,(row-1),Xspace,true);
+		    
+		for(i=0;i&lt;length;i++)
+		{
+			item=array[i];
+	
+		    _width=(rect==undefined || rect.width==0) ? (item ? item.getWidth(): 0) : rect.width;
+		    _height=(rect==undefined || rect.height==0) ? (item ? item.getHeight(): 0) : rect.height;
+			
+			if(_width==0 &amp;&amp; _height==0) continue;
+			
+			if(!(item==null || !(("x" in item) &amp;&amp; ("y" in item)))){
+				item.x=Math.round(reverseWidth==0 ? _x : (_x+reverseWidth)); 
+				item.y=Math.round(_y+_height*focus.y);
+			}
+		    
+		    _x+=(reverseWidth==0) ? Math.round(_width+Xspace) : Math.round((_width+Xspace)*-1);
+			
+		    if((i+1)%row==0){
+		    	_x=(rect==undefined ? 0 : rect.x);
+		    	_y+=Math.round(_height+Yspace);
+		    }
+		    
+		}
+	}
+	
+	static _countSize(array,rect,n,space,isWidth)
+	{
+		if(n&lt;1) return 0;
+				
+		if(isWidth &amp;&amp; rect &amp;&amp; rect.width!=0) return Math.round((rect &amp;&amp; rect.x || 0)+Math.abs(rect.width*n+(n-1)*space));
+		if(!isWidth &amp;&amp; rect &amp;&amp; rect.height!=0) return Math.round((rect &amp;&amp; rect.y || 0)+Math.abs(rect.height*n+(n-1)*space));
+		
+		let i,size=(rect &amp;&amp; (isWidth ? rect.x : rect.y) || 0);
+		for(i=0;i&lt;n;i++)
+		{
+			size+=isWidth ? Math.round(array[i].width) : Math.round(array[i].height);
+			if(i&lt;n-1) size+=space;
+		}
+		
+		return size;
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

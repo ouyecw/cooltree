@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: display/DisplayObject.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: display/DisplayObject.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+===================================================================
+DisplayObject Class
+===================================================================
+**/
+
+import ShapeVO from '../model/ShapeVO.js'
+import DisplayBase from './DisplayBase.js'
+import UniqueUtil from '../utils/UniqueUtil.js'
+import CollisionUtil from '../utils/CollisionUtil.js'
+import ObjectPool from '../utils/ObjectPool.js'
+import GraphicsVO from '../model/GraphicsVO.js'
+import StringUtil from '../utils/StringUtil.js'
+import ContextVO from '../model/ContextVO.js'
+import ClassUtil from '../utils/ClassUtil.js'
+import RenderObject from '../core/RenderObject.js'
+import BlendMode from '../type/BlendMode.js'
+import Event from '../events/Event.js'
+import Source from '../core/Source.js'
+import Point from '../geom/Point.js'
+
+const _graphics=Symbol("graphics");
+
+/**
+ * @class
+ * @module DisplayObject
+ * @extends DisplayBase
+ */
+export default class DisplayObject extends DisplayBase
+{
+	constructor()
+	{
+		super();
+		
+		/**
+		 * 是否严格渲染命令顺序
+		 */
+		this.strict=false;
+		
+		this.use_canvas=true;
+		this._repeat=false;
+		this._mask=null;
+	
+		this.name=UniqueUtil.getName("display_object");
+		this.colorTransform=null;
+		this[_graphics]=null;
+		this._blendMode=null;
+		this._context=null;
+		this.polyArea=null;
+		this._cache=null;
+		this.canvas=null;
+		this.filters=[];
+	}
+	
+	get blendMode()
+	{
+		return this._blendMode;
+	}
+	
+	set blendMode(str)
+	{
+		if(this._blendMode==str) return;
+		this._blendMode=str;
+		this.__checkDisplayUpdate();
+	}
+	
+	set cache(bool)
+	{
+		if(!bool &amp;&amp; !this._cache) return;
+		this.canvas=null;
+		
+		if(!bool){
+			ObjectPool.remove(this._cache);
+			this._cache=null;
+			return;
+		}
+		
+		if(bool &amp;&amp; bool instanceof RenderObject){
+			if(this._cache) ObjectPool.remove(this._cache);
+			
+			this._cache=bool;
+			this.canvas=this._cache.canvas;
+			return;
+		}
+		
+		if(!this._cache) {
+			this._cache=RenderObject.instance;
+			if(!this._cache) return;
+		}
+		else this._cache.clear();
+		
+		this._cache.setSize(this.width,this.height);
+		this._render(this._cache,true);
+		this.canvas=this._cache.canvas;
+	}
+	
+	get mask()
+	{
+		return this._mask;
+	}
+	
+	set mask(value) 
+	{
+		if(!value || !(value instanceof ShapeVO) || !this.instance){
+			this._mask=null;
+			return;
+		}
+		
+		this._mask=value;
+		this.__checkDisplayUpdate();
+    }
+	
+	get graphics()
+	{
+		this[_graphics] =(!this[_graphics] ? ObjectPool.create(GraphicsVO) : this[_graphics]);
+		return this[_graphics];
+	}
+	
+	set graphics(value) 
+	{
+        this[_graphics] =(value &amp;&amp; !(value instanceof GraphicsVO) ? null : value);
+    }
+	
+	get context()
+	{
+		if(!this._context){
+			this._context=ObjectPool.create(ContextVO);
+			this._context.strict=this.strict;
+		}
+
+		return this._context;
+	}
+	
+	set context(value)
+	{
+		this._context=value;
+	}
+	
+	/**
+	 * repeat display
+	 * @param {Number} w
+	 * @param {Number} h
+	 * @param {String} t repeat|repeat-x|repeat-y|no-repeat
+	 */
+	repeat(w,h,t)
+	{
+		if(this.instance==undefined || t=="no-repeat" || (w&lt;=this.instance.width &amp;&amp; h&lt;=this.instance.height)){
+			this._repeat=false;
+			return;
+		}
+		
+		t = t || "repeat";
+		
+		this.width=w;
+		this.height=h;
+		this._repeat=true;
+		
+		this.graphics.reset();
+		this.graphics.beginBitmapFill(this.instance.image,t);
+		this.graphics.drawRect(0,0,this.width,this.height);
+		this.graphics.endFill();
+	}
+	
+	_transform (target,obj)
+	{
+		let _temp_context=(obj==undefined ? this.stage.context : obj.context);
+		let mtx=this.getMatrix(target,true);
+	    _temp_context.transform(mtx.a, mtx.b, mtx.c, mtx.d, mtx.tx, mtx.ty);
+		_temp_context.globalAlpha*=this.alpha*this._parent_alpha;
+	}
+	
+	/**
+	 * 设置显示资源
+	 * @param {Source|Image} target
+	 */
+	setInstance(target)
+	{
+		if(target &amp;&amp; (target instanceof Source) &amp;&amp; !target.image) target=null;
+		
+		if(this.instance!=target){
+			if(this.instance &amp;&amp; (this.instance instanceof Source) &amp;&amp; this.instance.isClone){
+				ObjectPool.remove(this.instance);
+			}
+			this.instance=null;
+			this.width=this.height=0;
+		}
+		
+		if(target==undefined || target==null || this.instance==target) return target;
+		
+		if(target instanceof Image || ClassUtil.getQualifiedClassName(target)=="HTMLImageElement"){
+			const temp=target;
+			target=ObjectPool.create(Source);
+			target.image=temp;
+			target.isClone=true;
+			target.width=temp.width;
+			target.height=temp.height;
+		}
+		
+		if(this.instance &amp;&amp; (this.instance instanceof Source) &amp;&amp; this.instance.isClone){
+			ObjectPool.remove(this.instance);
+		}
+		
+		this.instance=target;
+		if(!StringUtil.isEmpty(target.name)) this.name=target.name;
+		
+		this.width=this.instance.width;
+		this.height=this.instance.height;
+		this.origin={x:target.regX,y:target.regY};
+
+		this.updateMatrix=true;
+		this.__checkDisplayUpdate();
+		this.dispatchEvent(new Event(DisplayBase.RESET_INSTANCE));
+		return this.instance;
+	}
+	
+	do_actions(target,vo,is_graphics=false)
+	{
+		if(!target || !target.context || !vo) return;
+		const canvas=(is_graphics ? target : target.context);
+		let action;
+		
+		if(!vo.strict){
+			for(let i in vo.value) {
+				if(canvas[i]==vo.value[i]) continue;
+				canvas[i]=vo.value[i];
+			}
+		}
+	
+		for(action of vo.actions)
+		{
+			if(action.type===1) {
+				try{
+					canvas[action.method].apply(canvas,action.data);
+				}
+				catch(err){
+					trace("[ERROR]",err);
+				}
+			}
+			else if(action.type===0) canvas[action.method]=action.data[0];
+		}
+	}
+	
+	/**
+	 * 刷新呈现
+	 * @param {CanvasRenderingContext2D} context
+	 * @param {Boolean} initial
+	 * @param {DisplayObjectContainer} upper
+	 */
+	_render (target=null,initial=false,upper=null)
+	{
+		if (!this.visible || this.alpha &lt;= 0 || (!target &amp;&amp; !this.stage))  return;
+		if (target==undefined) this.stage.context.save();
+		if(!initial) this._transform(upper,target);
+		
+		if(this._mask){
+			(target ? target : this.stage.graphics).drawShape(this._mask);
+			(target ? target.context : this.stage.context).clip();
+		}
+		
+		if(this._blendMode!=null){
+			(target ? target.context : this.stage.context).globalCompositeOperation=this._blendMode;
+		}
+		
+		if(this.filters &amp;&amp; this.filters.length>0){
+			let filter;
+			for (filter of this.filters)
+			{
+				if(filter==undefined) continue;
+				filter.show(target!=undefined ? target.context : this.stage.context);
+			}
+		}
+		
+		if(this.canvas){
+			(target!=undefined ? target.context : this.stage.context).drawImage(this.canvas,0,0);
+		}
+		else if(this[_graphics]){
+			this.do_actions(target ? target : this.stage.graphics,this.graphics,true);
+		}
+		else if(this.instance){
+			(target!=undefined ? target.context : this.stage.context).drawImage(
+				                 this.instance.image,
+		                         this.instance.x,
+		                         this.instance.y,
+		                         this.instance.width,
+		                         this.instance.height,
+		                         0,0,this.instance.width/this.instance.scale,
+		                         this.instance.height/this.instance.scale);
+		    
+		}
+		else if(this.context){
+			this.do_actions(target ? target : this.stage,this.context);
+		}
+		
+		if (target==undefined) this.stage.context.restore();
+	}
+	
+	render ()
+	{
+		this._render.apply(this,arguments);
+	}
+	
+	/**
+	 * 碰撞点测试 (注意是全局坐标)
+	 * @param {Number} x
+	 * @param {Number} y
+	 */
+	hitTestPoint (x,y) 
+	{
+		return CollisionUtil.hitTestPoint(this,x,y, this.usePolyCollision)>0 ;
+	}
+	
+	/**
+	 * 碰撞测试
+	 * @param {displayObject} obj
+	 */
+	hitTestObject (obj) 
+	{
+		if(obj==null || !(obj instanceof DisplayBase) ) return false;
+		if(obj==this) return true;
+		
+		return CollisionUtil.hitTestObject(this,obj,this.usePolyCollision);
+	}
+	
+	reset ()
+	{	
+		super.reset();
+		
+		if(this._parent){
+			this.removeFromParent(false);
+		}
+		
+		if(this.canvas &amp;&amp; this.canvas.parentNode) {
+			this.canvas.parentNode.removeChild(this.canvas);
+		}
+		
+		if(this.instance &amp;&amp; (this.instance instanceof Source) &amp;&amp; this.instance.isClone){
+			ObjectPool.remove(this.instance);
+		}
+		
+		if(this._mask &amp;&amp; this._mask instanceof ShapeVO){
+			ObjectPool.remove(this._mask);
+		}
+		
+		if(this[_graphics])  {
+	        ObjectPool.remove(this[_graphics]);
+		}
+		
+		if(this.context){
+			ObjectPool.remove(this.context);
+		}
+		
+		if(this._cache){
+			ObjectPool.remove(this._cache);
+		}
+		
+		this.mask=this.instance=this._cache=this[_graphics]=this.colorTransform=this._context=this.canvas=this._blendMode=null;
+		this.use_canvas=true;
+		this._repeat=false;
+		this.strict=false;
+		this.filters=[];
+	}
+	
+	dispose ()
+	{
+		super.dispose();
+		delete this.strict,this._repeat,this._cache,this.filters,this._mask,this.instance,this.colorTransform,this._blendMode,this._context,this.canvas;
+	}
+	
+	toString ()
+	{
+		return DisplayObject.name;
+	}
+}
+
+DisplayObject.className="DisplayObject";</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

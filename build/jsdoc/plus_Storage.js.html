@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: plus/Storage.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: plus/Storage.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Compile from "./Compile.js"
+
+/**
+ * @class
+ * @module Storage
+ */
+export default class Storage
+{
+	constructor() 
+	{
+		this.store=window.localStorage || window.sessionStorage || new Cookie();
+	}
+	
+	/**
+	 * @param {String} key
+	 * @param {Object} val
+	 * @param {Number} exp 默认有效时间为3小时，0为始终有效
+	 */
+	setItem(key, val, exp=3) 
+	{
+		exp=exp*3600000;
+		val=typeof val=="object" ? JSON.stringify(val) : ""+val;
+		val=exp ? JSON.stringify({
+			data:val.length&lt;Storage.maxLength ? Compile.encode(val) : val,time:new Date().getTime(),
+			exp: exp,encode:val.length&lt;Storage.maxLength,
+			}) : val;
+		
+		this.removeLocal(key);
+		this.store.setItem(key, val);
+	}
+	
+	
+	/**
+	 * @param {String} key
+	 */
+	getItem(key) 
+	{
+	   let value,temp=this.store.getItem(key);
+	   if(temp==null) return null;
+	   
+	   try{
+	   	temp=JSON.parse(temp);
+	   }
+	   catch(e){};
+	   
+	   if(typeof temp=="string" || !temp.hasOwnProperty("time")) value=temp;
+	   else if(temp.exp >0 &amp;&amp; (new Date().getTime() - temp.time) > temp.exp) this.removeLocal(key);
+	   else {
+		   value=temp.encode ? Compile.decode(temp.data) : temp.data;
+			
+		   try{
+				value=JSON.parse(value);
+		   }
+		   catch(e){};
+	   }
+	   return value;
+	}
+	
+	/**
+	 * @param {String} key
+	 */
+	removeItem(key) 
+	{
+	    this.store.removeItem(key);
+	}
+	
+	/**
+	 * @param {String} label
+	 * @param {Number} index 
+	 * @param {exception} Array 
+	 */
+	clear(label=null,index=-1,exception=null)
+	{
+		if(!label &amp;&amp; !exception) return this.store.clear();
+		if (!window.localStorage &amp;&amp; !window.sessionStorage) return this.store.clear(label,index,exception);
+	
+		for(let str in this.store){
+			if((exception &amp;&amp; exception.indexOf(str)>=0) || (label &amp;&amp; (index&lt;0 ? str.indexOf(label)&lt;0 : str.indexOf(label)!=index))) 				
+				continue;
+			
+			this.removeItem(str);
+		}
+	}
+}
+
+class Cookie
+{
+	constructor(){}
+	
+	setItem(c_name, value)
+	{
+	    let exdate = new Date(),expiredays = 30;
+	    exdate.setDate(exdate.getDate() + expiredays);
+	    document.cookie = c_name + "=" + escape(value) + ((expiredays == null) ? "" : ";expires=" + exdate.toGMTString());
+	}
+	
+	getItem(c_name) 
+	{
+	    if (document.cookie.length &lt;=0) return "";
+		let c_start = document.cookie.indexOf(c_name + "=");
+		if (c_start != -1) {
+		    c_start = c_start + c_name.length + 1; 
+		    let c_end = document.cookie.indexOf(";", c_start); 
+		    if (c_end == -1) c_end = document.cookie.length;
+		    return unescape(document.cookie.substring(c_start, c_end));
+		}
+	    return "";
+	}
+	
+	removeItem(name) 
+	{
+	    let exp = new Date();
+	    exp.setTime(exp.getTime() - 1);
+	    let cval = this.getItem(name);
+	    if (cval==null || cval=="") return;
+	    document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
+	}
+	
+	clear(label=null,index=-1,exception=null) 
+	{
+		let i,str,keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+		if(!keys) return;
+		
+		for(i = keys.length; i > 0; i--) {
+			str=keys[i];
+			
+			if((exception &amp;&amp; exception.indexOf(str)>=0) || (label &amp;&amp; (index&lt;0 ? str.indexOf(label)&lt;0 : str.indexOf(label)!=index))) 				continue;
+			
+			document.cookie = keys[i] + '=0;expires=' + new Date(0).toUTCString()
+		}
+	}
+}
+
+Storage.className="Storage";
+Storage.maxLength=800;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

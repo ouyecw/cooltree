@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/CanvasUtil.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/CanvasUtil.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import DisplayObjectContainer from '../display/DisplayObjectContainer.js'
+import Graphics from '../display/Graphics.js'
+import StringUtil from './StringUtil.js'
+import ObjectPool from './ObjectPool.js'
+import ClassUtil from './ClassUtil.js'
+import MathUtil from './MathUtil.js'
+
+/**
+ * @class
+ * @module CanvasUtil
+ */
+export default class CanvasUtil
+{
+	static create(t)
+	{
+		let s = t||{};
+		
+		if (!s.canvas) {
+			s.canvas = document.createElement("canvas");
+			s.context = s.canvas.getContext("2d");
+		}
+		
+		return s;
+	}
+	
+	static getCache(image,type)
+	{
+		let target=CanvasUtil.create();
+		target.canvas.width=image.width;
+		target.canvas.height=image.height;
+		target.context.drawImage(image, 0, 0, image.width, image.height);
+		return target.canvas.toDataURL(type || "image/png");
+	}
+	
+	static splitFrames(image,x,y,w,h)
+	{
+		if(!image || !w || !h) return null;
+		let canvas = document.createElement("canvas");
+		let context= canvas.getContext("2d");
+		
+		canvas.height=h;
+		canvas.width=w;
+		
+		context.drawImage(image, x, y, w, h,0,0,w, h);
+		return canvas;
+	}
+	
+	/**
+	 * canvas to Image
+	 * @param {HTMLCanvasElement} canvas 
+	 * @param {String} type 参数type在image/png，image/jpeg,image/svg+xml等 MIME类型中选择（可以不填，默认是image/png）。
+	 * */
+	static toImage(canvas,type)
+	{
+		if(canvas==null) return;
+		const image    = new Image();
+		
+		try{
+			image.src    = canvas.toDataURL(type || "image/png");
+		}
+		catch(error){
+			trace("[ERROR]",error);
+			return null;
+		}
+		
+		image.height = MathUtil.int(canvas.height);
+		image.width  = MathUtil.int(canvas.width);
+		return image;
+	}
+	
+	/**
+	 * 
+	 * @param {Image} img image target
+	 * @param {Number} w frame's width
+	 * @param {Number} h frame's height
+	 * @param {Boolean} fit fit to frame
+	 */
+	static cutImage(img,w,h,fit)
+	{
+		if(img==null || (img.width==w &amp;&amp; img.height==h)) return img;
+		let scale=MathUtil.getSizeScale(img.width,img.height,w,h,fit);
+		let obj=CanvasUtil.create();
+		
+		obj.canvas.width=w;
+		obj.canvas.height=h;
+		obj.context.scale(scale, scale);
+		obj.context.translate((w-img.width*scale)*0.5, (h-img.height*scale)*0.5);
+		obj.context.drawImage(img,0,0,img.width,img.height,0,0,img.width,img.height);
+		return CanvasUtil.toImage(obj.canvas);
+	}
+	
+	static toCanvas(img,target,clear)
+	{
+		if(img==null) return;
+		
+		clear=(clear==undefined || clear==true);
+		target= target||CanvasUtil.create();
+		
+		if(clear) target.context.clearRect(0, 0, target.canvas.width, target.canvas.height);
+		target.canvas.height = img.height;
+		target.canvas.width  = img.width;
+		
+		target.context.drawImage(img, 0, 0);
+		return target.canvas;
+	}
+	
+	static getPixelAphla(context,x,y)
+	{
+		if(context==null || x>context.width || y>context.height) return 255;
+		return context.getImageData(x,y,1,1).data[3];
+	}
+	
+	static clearContext(context)
+	{
+		if(context) context.clear(0,0,context.width,context.height);
+	}
+	
+	/**
+	 * @param {DisplayObjectContainer} container
+	 * @param {String} type 为null返回图片，否则返回图片数据
+	 * @param {Number} w 宽度
+	 * @param {Number} h 高度
+	 * @param {String} fill_color 填充色
+	 */
+	static containerToImage(container,type,w,h,fill_color)
+	{
+		if(container==undefined) return;
+		
+		if(!w &amp;&amp; !h) container._updateSize();
+		const target=ObjectPool.create(Graphics);
+		
+		target.canvas.width=Math.ceil(w || container.width);
+		target.canvas.height=Math.ceil(h || container.height);
+		
+		if(!StringUtil.isEmpty(fill_color)) {
+			target.beginFill(fill_color);
+			target.drawRect(0,0,target.canvas.width,target.canvas.height);
+			target.endFill();
+		}
+		
+		CanvasUtil._renderContainer(target,container,container);
+		let data;
+		
+		if(type){
+			try{
+				data=target.canvas.toDataURL(type|| "image/png");
+			}catch(error){
+				trace("[ERROR]",error);
+				return null;
+			}
+		}
+		else data=CanvasUtil.toImage(target.canvas,!StringUtil.isEmpty(fill_color) ? "image/jpg" : null);
+		
+		ObjectPool.remove(target);
+		return data;
+	}
+	
+	static _renderContainer(target,self,container)
+	{
+		let i,c,l;
+		for (i = 0,l=self._children.length;i&lt;l;i++) {
+			c = self._children[i];
+			if(c instanceof DisplayObjectContainer){
+				try{
+					if(ClassUtil.getQualifiedSuperclassName(c).split('.').indexOf('Sprite')>=0 || (c.name &amp;&amp; (''+c.name).indexOf('sprite')==0)) 
+						c.render(target,container);
+					else 
+						CanvasUtil._renderContainer(target,c,container)
+				}catch(err){
+					trace("[ERROR]",err);
+				}
+				
+				continue;
+			}
+			
+			target.context.save();
+			c._render(target,false,container);
+			target.context.restore();
+		}
+	}
+	
+	/**
+	 * @param {Context} context
+	 * @param {Rectangle} rect
+	 * @param {ColorTransform} colorTransform
+	 * @param {Context} display
+	 * @param {Rectangle} rect2
+	 */
+	static colorTransform(context,rect,colorTransform,display,rect2)
+	{
+		const x = rect.x >> 0, y = rect.y >> 0, w = rect.width >> 0, h = rect.height >> 0;
+		const temp = (display &amp;&amp; rect2) ? display.getImageData(rect2.x,rect2.y,rect2.width,rect2.height).data : null;
+		
+		const img = context.getImageData(x,y,w,h);
+		const data = img.data;
+		
+		for (let i = 0, l = data.length; i &lt; l; i += 4) {
+			let r = i, g = i + 1, b = i + 2, a = i + 3;
+			if((temp &amp;&amp; temp[a]&lt;1) || data[a]&lt;1) continue;
+	
+			data[r] = data[r] * colorTransform.redMultiplier   + colorTransform.redOffset;
+			data[g] = data[g] * colorTransform.greenMultiplier + colorTransform.greenOffset;
+			data[b] = data[b] * colorTransform.blueMultiplier  + colorTransform.blueOffset;
+			data[a] = data[a] * colorTransform.alphaMultiplier + colorTransform.alphaOffset;
+		}
+		
+		context.putImageData(img,x,y,0,0,w,h);
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: display/DisplayObjectContainer.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: display/DisplayObjectContainer.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+===================================================================
+DisplayObjectContainer Class
+===================================================================
+**/
+
+import Global from '../core/Global.js'
+import DOMDisplay from './DOMDisplay.js'
+import DisplayBase from './DisplayBase.js'
+import Rectangle from '../geom/Rectangle.js'
+import DisplayObject from './DisplayObject.js'
+import UniqueUtil from '../utils/UniqueUtil.js'
+import CanvasUtil from '../utils/CanvasUtil.js'
+import ObjectPool from '../utils/ObjectPool.js'
+import StringUtil from '../utils/StringUtil.js'
+import CollisionUtil from '../utils/CollisionUtil.js'
+
+/**
+ * @class
+ * @module DisplayObjectContainer
+ * @extends DisplayBase
+ */
+export default class DisplayObjectContainer extends DisplayBase
+{
+	constructor()
+	{
+		super();
+		this.name=UniqueUtil.getName("display_object_container");
+		this.use_canvas=Global.useCanvas;
+		this.mouseChildren=true;
+		this.autoSize = false;
+		this._parentNode=null;
+		this._children=[];
+	}
+	
+	get stage()
+	{
+		return this._stage;
+	}
+	
+	set stage(value) 
+	{
+        if(this._stage==value) return;
+		this._stage=value;
+		
+		if(this._children==undefined || this._children.length&lt;1) return;
+		let i,c,l;
+		for (i = 0,l=this._children.length;i&lt;l;i++) {
+			c = this._children[i];
+			c.stage=value;
+		}
+    }
+	
+	get alpha()
+	{
+		return this._alpha;
+	}
+	
+	set alpha(value) 
+	{
+        if(this._alpha==value) return;
+		this._alpha=value;
+		this.__checkDisplayUpdate();
+		this._update_parent_alpha();
+    }
+	
+	get visible()
+	{
+		return this._visible;
+	}
+	
+	set visible(value) 
+	{
+        if(this._visible==value) return;
+		this._visible=value;
+		this.__checkDisplayUpdate();
+		
+		if(this._children.length&lt;1) return;
+		this._update_child_visible();
+    }
+	
+	get updateMatrix()
+	{
+		return this._updateMatrix;
+	}
+	
+	set updateMatrix(value) 
+	{
+		if(value)this.__checkDisplayUpdate();
+        if(this._updateMatrix==value) return;
+		this._updateMatrix=value;
+		
+		if(value &amp;&amp; this._bounds) this._bounds.width=this._bounds.height=0;
+		
+		if(!value || this._children.length&lt;1) return;
+		let i,c,l;
+		for (i = 0,l=this._children.length;i&lt;l;i++) {
+			c = this._children[i];
+			c.updateMatrix=true;
+		}
+    }
+	
+	get parentNode()
+	{
+		return this._parentNode;
+	}
+	
+	set parentNode(value) 
+	{
+        if(this._parentNode==value) return;
+		this._parentNode=value;
+		
+		if(this._children.length&lt;1) return;
+		let i,c,l;
+		for (i = 0,l=this._children.length;i&lt;l;i++) {
+			c = this._children[i];
+			if(!(c instanceof DisplayObject)) c.parentNode=value;
+		}
+    }
+	
+	get numChildren()
+	{
+		return this._children.length;
+	}
+	
+	_update_parent_alpha()
+	{
+		if(this._children.length&lt;1) return;
+		let i,c,l;
+		for (i = 0,l=this._children.length;i&lt;l;i++) {
+			c = this._children[i];
+			c._parent_alpha=this._alpha*this._parent_alpha;
+			if(c instanceof DisplayObjectContainer) c._update_parent_alpha();
+		}
+	}
+	
+	_update_child_visible()
+	{
+		let i,c,l;
+		for (i = 0,l=this._children.length;i&lt;l;i++) {
+			c = this._children[i];
+			
+			if(c instanceof DisplayObjectContainer)
+				c._update_child_visible();
+			else if(c instanceof DOMDisplay) 
+				c._update_visible();
+		}
+	}
+	
+	/**
+	 * 添加显示子对象
+	 * @param {DisplayBase} displayObject
+	 */
+	addChild(displayObject)
+	{
+		if(displayObject==undefined || !displayObject instanceof DisplayBase) return ;
+		return this.addChildAt(displayObject,this._children.length);
+	}
+	
+	/**
+	 * 添加显示子对象 到对应图层
+	 * @param {DisplayBase} displayObject
+	 * @param {Number} index
+	 */
+	addChildAt(displayObject,index)
+	{
+		if(displayObject==undefined || !displayObject instanceof DisplayBase) return ;
+		
+		displayObject.parent &amp;&amp; displayObject.parent.removeChild(displayObject);
+		this._children.splice(index, 0, displayObject);
+		
+		if(displayObject instanceof DisplayObject) DisplayObjectContainer._num_canvas_target++;
+		else displayObject.parentNode=this._parentNode;
+		
+		displayObject.stage=this.stage;
+		displayObject.parent=this;
+		
+		displayObject.updateMatrix=true;
+		displayObject._parent_alpha=this._alpha*this._parent_alpha;
+		
+		if(this.autoSize) {
+			this._updateSize();
+		}else{
+			this.width=Math.max(this.width,displayObject.getWidth());
+			this.height=Math.max(this.height,displayObject.getHeight());
+		}
+		
+		return displayObject;
+	}
+	
+	_updateSize()
+	{
+		if(this._children==undefined || this._children.length==0) return;
+		let i,c,l, bounds,rect=ObjectPool.create(Rectangle);
+		
+		for (i = 0,l=this._children.length;i&lt;l;i++) {
+			c = this._children[i];
+			bounds= c.getBounds(this);
+			rect=rect.union(bounds);
+		}
+		
+		this._minX=Math.floor(rect.x);
+		this._minY=Math.floor(rect.y);
+		
+		this.width=Math.ceil(rect.width);
+		this.height=Math.ceil(rect.height);
+		ObjectPool.remove(rect);
+	}
+	
+	/**
+	 * 移除子对象
+	 * @param {DisplayBase} displayObject
+	 */
+	removeChild(displayObject)
+	{
+		return this.removeChildAt(this._children.indexOf(displayObject));
+	}
+	
+	/**
+	 * 移除对应图层子对象
+	 * @param {Number} index
+	 */
+	removeChildAt(index)
+	{
+		if (index &lt; 0 || index > (this._children.length - 1)) return null;
+		let displayObject=this._children[index];
+		displayObject.stage=displayObject.parent=null;
+		this._children.splice(index,1);
+		displayObject._parent_alpha=1;
+		
+		if(this._children.length==0) this.width=this.height=0;
+		else if(this.autoSize)  this._updateSize();
+		
+		if(displayObject instanceof DisplayObject) DisplayObjectContainer._num_canvas_target--;
+		else displayObject.parentNode=null;
+		
+		return displayObject;
+	}
+	
+	/**
+	 * 根据对象名称,获取对应子对象
+	 * @param {String} name
+	 * @returns {DisplayBase} displayObject
+	 */
+	getChildByName(name)
+	{
+		if(StringUtil.isEmpty(name)) return;
+		
+		let i;
+		let len=this._children.length;
+		
+		for (i=0; i &lt; len; i++) 
+		{
+			if (this._children[i].name == name) return this._children[i];
+		}
+		return null;
+	}
+	
+	/**
+	 * 根据图层数,获取对应子对象
+	 * @param {Number} index
+	 * @returns {DisplayBase} displayObject
+	 */
+	getChildAt(index)
+	{
+		if (index &lt; 0 || index > (this._children.length - 1)) return null;
+		return this._children[index];
+	}
+	
+	/**
+	 * 清除全部子对象
+	 * @param {Boolean} bool 清除时是否销毁子对象
+	 */
+	removeAllChildren(bool)
+	{
+		if(this._children==undefined || this._children.length&lt;1) return;
+		
+		let i,c,l;
+		for (i = 0,l=this._children.length;i&lt;l;i++) {
+			c = this._children[i];
+			c.stage=c.parent=null;
+			c._parent_alpha=1;
+			
+			if(c instanceof DisplayObject) DisplayObjectContainer._num_canvas_target--;
+			else c.parentNode=null;
+			
+			if(bool &amp;&amp; !Global.gc(c)){
+				try{
+					c.dispose();
+				}
+				catch(e){}
+			}
+			
+		}
+		
+		this._children=[];
+		this.width=this.height=0;
+	}
+	
+	/**
+	 * 是否包含该显示对象
+	 * @param {DisplayBase} displayObject
+	 */
+	contains(displayObject)
+	{
+		return this._children.indexOf(displayObject)!=-1;
+	}
+	
+	render(target)
+	{
+		if(this._children==undefined || this._children.length==0) return;
+		if(this.updateMatrix) this.getMatrix(target,true);
+		
+		let i,child;
+		
+		for (i=0; i &lt; this._children.length; i++) {
+			child=this._children[i];
+			if(!this.visible &amp;&amp; (child instanceof DisplayObject)) continue;
+			child.render(...arguments);
+		}
+		
+		this.updateMatrix=false;
+	}
+	
+	/**
+	 * 调换两个图层的位置
+	 * @param {Number} index1
+	 * @param {Number} index2
+	 */
+	swapChildrenAt(index1, index2)
+	{
+		const len=this._children.length;
+		if(len==0 || index1>=len || index1&lt;0) return;
+		
+		index2=index2&lt;0 ? 0 :(index2>=len ? len-1 : index2);
+	    const temp=this._children[index1];
+	    this._children[index1]=this._children[index2];
+	    this._children[index2]=temp;
+	}
+	
+	/**
+	 * 移动子对象到对应图层
+	 * @param {DisplayBase} displayObject
+	 * @param {Number} index
+	 */
+	setChildIndex(child, index)
+	{
+		const pos=this._children.indexOf(child);
+		if(child==null || pos&lt;0 || pos==index) return;
+		this._children.splice(pos,1);
+		this._children.splice(index, 0, child);
+	}
+	
+	/**
+	 * 点碰撞子对象 
+	 * all true-返回所以碰撞列表  false-返回最上层碰撞对象
+	 * @param {Number} x
+	 * @param {Number} y
+	 * @param {Boolean} usePixelTrace
+	 * @param {Boolean} all
+	 */
+	getObjectUnderPoint (x, y, usePixelTrace,all) 
+	{
+		let g;
+		if (all) g = [];
+		
+		for (let i = this._children.length - 1; i >= 0; i--) {
+			let h = this._children[i];
+			if (h == null || !h.visible) continue;
+			
+			if ((h instanceof DisplayObjectContainer) &amp;&amp; h.mouseChildren &amp;&amp; h.numChildren > 0) {
+				let j = h.getObjectUnderPoint(x, y, usePixelTrace, all);
+				if (j){
+					if (!all) return j;
+					if(j.length > 0) g = g.concat(j);
+				}else if (h.mouseEnabled &amp;&amp; h.hitTestPoint(x, y, usePixelTrace)){
+					if (!all) return h;
+					g.push(h);
+				}
+			} else if (h.mouseEnabled &amp;&amp; h.hitTestPoint(x,y, usePixelTrace)){
+				if (!all) return h;
+				g.push(h);
+			}
+		}
+		
+		return all ? g : null;
+	}
+	
+	/**
+	 * 本容器是否与对应坐标有碰触
+	 * @param {Number} x
+	 * @param {Number} y
+	 * @param {Boolean} usePixelTrace
+	 * @returns {Boolean}
+	 */
+	hitTestPoint (x,y, usePixelTrace) 
+	{
+		if(this._children.length&lt;=0) return false;
+		
+		if(!this.mouseChildren &amp;&amp; this.autoSize){
+			return CollisionUtil.hitTestPoint(this,x,y, this.usePolyCollision)>0 ;
+		}
+		
+		for (let i = this._children.length - 1; i >= 0; i--) {
+			let h = this._children[i];
+			if(this.usePolyCollision &amp;&amp; !h.usePolyCollision) h.usePolyCollision=true;
+			if(h.hitTestPoint(x,y, usePixelTrace)) return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * 本容器是否与对应另一个显示对象有碰触
+	 * @param {DisplayBase} obj
+	 * @param {Boolean} usePixelTrace
+	 * @returns {Boolean}
+	 */
+	hitTestObject (obj, usePixelTrace) 
+	{
+		let i,h,j,g;
+		
+		for (i = this._children.length - 1; i >= 0; i--) {
+			h = this._children[i];
+			if(!(obj instanceof DisplayObjectContainer)) {
+				if(h.hitTestObject(obj,usePixelTrace)) return true;
+				continue;
+			}
+			
+			for (j = obj._children.length - 1; j >= 0; j--) {
+			    g = obj._children[i];
+			    if(h.hitTestObject(g,usePixelTrace)) return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	catchAsImage ()
+	{
+		if(this._children.length&lt;=1) return;
+		
+		this._updateSize();
+		const image=CanvasUtil.containerToImage(this);
+		this.removeAllChildren(true);
+		
+		const display_obj=new (this.use_canvas ? DisplayObject : DOMDisplay)();
+		display_obj.setInstance(image);
+		this.addChild(display_obj);
+	}
+	
+	reset()
+	{
+		this.parentNode=null;
+		this.removeAllChildren(true);
+		
+		this.name=null;
+		this.autoSize = false;
+		this.mouseChildren=true;
+		this.use_canvas=Global.useCanvas;
+		
+		super.reset();
+	}
+	
+	/**
+	 * 销毁
+	 */
+	dispose()
+	{
+		super.dispose();
+		delete this.use_canvas,this._parentNode,this.autoSize,this._children,this.mouseChildren;
+	}
+	
+	toString()
+	{
+		return DisplayObjectContainer.name;
+	}
+
+}
+
+DisplayObjectContainer.className="DisplayObjectContainer";
+DisplayObjectContainer._num_canvas_target=0;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

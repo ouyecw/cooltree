@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: transitions/TweenLite.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: transitions/TweenLite.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/***
+ * =========================================================
+ * TweenLite 
+ * =========================================================
+ */
+import Easing from './Easing.js'
+import Timer from '../core/Timer.js'
+import Stage from '../display/Stage.js'
+import StageEvent from '../events/StageEvent.js'
+
+/**
+ * @class
+ * @module TweenLite
+ */
+export default class TweenLite
+{
+
+	static init()
+	{
+		TweenLite._inited = true;
+		
+		TweenLite.register("easenone",			Easing.easeNone);
+		TweenLite.register("linear",			Easing.easeNone);		
+		
+		TweenLite.register("easeinquad",		Easing.easeInQuad);	
+		TweenLite.register("easeoutquad",		Easing.easeOutQuad);	
+		TweenLite.register("easeinoutquad",		Easing.easeInOutQuad);	
+		TweenLite.register("easeoutinquad",		Easing.easeOutInQuad);
+		
+		TweenLite.register("easeincubic",		Easing.easeInCubic);
+		TweenLite.register("easeoutcubic",		Easing.easeOutCubic);
+		TweenLite.register("easeinoutcubic",	Easing.easeInOutCubic);
+		TweenLite.register("easeoutincubic",	Easing.easeOutInCubic);
+		
+		TweenLite.register("easeinquart",		Easing.easeInQuart);
+		TweenLite.register("easeoutquart",		Easing.easeOutQuart);
+		TweenLite.register("easeinoutquart",	Easing.easeInOutQuart);
+		TweenLite.register("easeoutinquart",	Easing.easeOutInQuart);
+		
+		TweenLite.register("easeinquint",		Easing.easeInQuint);
+		TweenLite.register("easeoutquint",		Easing.easeOutQuint);
+		TweenLite.register("easeinoutquint",	Easing.easeInOutQuint);
+		TweenLite.register("easeoutinquint",	Easing.easeOutInQuint);
+		
+		TweenLite.register("easeinsine",		Easing.easeInSine);
+		TweenLite.register("easeoutsine",		Easing.easeOutSine);
+		TweenLite.register("easeinoutsine",		Easing.easeInOutSine);
+		TweenLite.register("easeoutinsine",		Easing.easeOutInSine);
+		
+		TweenLite.register("easeincirc",		Easing.easeInCirc);
+		TweenLite.register("easeoutcirc",		Easing.easeOutCirc);
+		TweenLite.register("easeinoutcirc",		Easing.easeInOutCirc);
+		TweenLite.register("easeoutincirc",		Easing.easeOutInCirc);
+		
+		TweenLite.register("easeinexpo",		Easing.easeInExpo);		
+		TweenLite.register("easeoutexpo", 		Easing.easeOutExpo);		
+		TweenLite.register("easeinoutexpo", 	Easing.easeInOutExpo);		
+		TweenLite.register("easeoutinexpo", 	Easing.easeOutInExpo);
+		
+		TweenLite.register("easeinelastic", 	Easing.easeInElastic);		
+		TweenLite.register("easeoutelastic", 	Easing.easeOutElastic);	
+		TweenLite.register("easeinoutelastic", 	Easing.easeInOutElastic);	
+		TweenLite.register("easeoutinelastic", 	Easing.easeOutInElastic);
+		
+		TweenLite.register("easeinback", 		Easing.easeInBack);		
+		TweenLite.register("easeoutback", 		Easing.easeOutBack);		
+		TweenLite.register("easeinoutback", 	Easing.easeInOutBack);		
+		TweenLite.register("easeoutinback", 	Easing.easeOutInBack);
+		
+		TweenLite.register("easeinbounce", 		Easing.easeInBounce);		
+		TweenLite.register("easeoutbounce", 	Easing.easeOutBounce);		
+		TweenLite.register("easeinoutbounce", 	Easing.easeInOutBounce);	
+		TweenLite.register("easeoutinbounce", 	Easing.easeOutInBounce);
+		
+		TweenLite.register("easeinstrong", 		Easing.easeInStrong);		
+		TweenLite.register("easeoutstrong", 	Easing.easeOutStrong);		
+		TweenLite.register("easeinoutstrong", 	Easing.easeInOutStrong);	
+	}
+	
+	static register(p_name, p_function)
+	{
+		TweenLite._transitionList[p_name] = p_function;
+	}
+	
+	static count(name,mode,start_value,target_value,min,max,param)
+	{
+		if (!TweenLite._inited) TweenLite.init();
+		const p_name=TweenLite.getEaseName(name,mode);
+		return TweenLite._tween(p_name,min, target_value, target_value-start_value, max, param);
+	}
+	
+	static getEaseName(name,mode)
+	{
+		return (name==TweenLite.LINEAR) ? TweenLite.LINEAR : ("ease"+(name==TweenLite.NONE ? TweenLite.NONE : (mode+name)));
+	}
+	
+	static _tween(ease,start_value,target_value,min,max,param)
+	{
+		if (!TweenLite._inited) TweenLite.init();
+		if(!TweenLite._transitionList.hasOwnProperty(ease)) return target_value;
+		return TweenLite._transitionList[ease](min, start_value, target_value, max, param);
+	}
+	
+	static run(target, duration, vars)
+	{
+		return new Promise(resolve => {
+			if(target==undefined || duration&lt;=0 || vars==undefined) return resolve();
+			vars.onComplete=resolve;
+			TweenLite.to(target, duration, vars);
+		});
+	}
+	
+	/**
+	 * default params : "delay","ease","easeParams","onStart","onStartParams","onUpdate","onUpdateParams","onComplete","onCompleteParams"
+	 * @param {Object} target
+	 * @param {Number} duration
+	 * @param {Object} vars
+	 */
+	static to  (target, duration, vars) 
+	{
+		if(target==undefined || duration&lt;=0 || vars==undefined) return;
+		
+		if(TweenLite._tweens.length==0){
+			if(!TweenLite._locked &amp;&amp; Stage.current){
+				Stage.current.addEventListener(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
+			}else{
+				if(TweenLite._timer==null) TweenLite._timer=new Timer();
+				TweenLite._timer.addEventListener(Timer.TIME,TweenLite._enterFrame);
+				TweenLite._timer.start();
+			}
+		}
+		
+		const data={target : target, duration : duration, vars : vars};
+		data.max=Math.ceil(duration*Timer.fps);
+		data.min=0;
+		
+		if(data.vars.hasOwnProperty("delay") &amp;&amp; data.vars["delay"]){
+			data.delay=Math.ceil(Number(data.vars["delay"])*Timer.fps);
+			delete data.vars["delay"];
+		}else {
+			data.delay=0;
+		}
+		
+		if(data.vars.hasOwnProperty("ease") &amp;&amp; data.vars["ease"]){
+			data.ease=data.vars["ease"];
+			delete data.vars["ease"];
+		}else{
+			data.ease="easeoutquad";
+		}
+		
+		if(data.vars.hasOwnProperty("easeParams") &amp;&amp; data.vars["easeParams"]){
+			data.easeParams=data.vars["easeParams"];
+			delete data.vars["easeParams"];
+		}
+		
+		if(data.vars.hasOwnProperty("onStart") &amp;&amp; data.vars["onStart"]){
+			data.onStart=data.vars["onStart"];
+			delete data.vars["onStart"];
+		}
+		
+		if(data.vars.hasOwnProperty("onStartParams") &amp;&amp; data.vars["onStartParams"]){
+			data.onStartParams=data.vars["onStartParams"];
+			delete data.vars["onStartParams"];
+		}
+		
+		if(data.vars.hasOwnProperty("onUpdate") &amp;&amp; data.vars["onUpdate"]){
+			data.onUpdate=data.vars["onUpdate"];
+			delete data.vars["onUpdate"];
+		}
+		
+		if(data.vars.hasOwnProperty("onUpdateParams") &amp;&amp; data.vars["onUpdateParams"]){
+			data.onUpdateParams=data.vars["onUpdateParams"];
+			delete data.vars["onUpdateParams"];
+		}
+		
+		if(data.vars.hasOwnProperty("onComplete") &amp;&amp; data.vars["onComplete"]){
+			data.onComplete=data.vars["onComplete"];
+			delete data.vars["onComplete"];
+		}
+		
+		if(data.vars.hasOwnProperty("onCompleteParams") &amp;&amp; data.vars["onCompleteParams"]){
+			data.onCompleteParams=data.vars["onCompleteParams"];
+			delete data.vars["onCompleteParams"];
+		}
+		
+		let k;
+		for (k in data.vars) {
+			if(data.first==undefined) data.first={};
+			data.first[k]=(target[k]==undefined) ? 0 : target[k];
+			data.vars[k]-=data.first[k];
+		}
+		
+		TweenLite._tweens.push(data);
+	}
+	
+	static pause  () 
+	{
+		if(TweenLite._timer &amp;&amp; TweenLite._timer.isStart()) {
+			TweenLite._timer.stop();
+			TweenLite._timer.removeEventListener(Timer.TIME,TweenLite._enterFrame);
+		}
+		else if(Stage.current){
+			Stage.current.removeEventListener(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
+		}
+	}
+	
+	static resume  () 
+	{
+		if(TweenLite._timer &amp;&amp; TweenLite._tweens.length>0  &amp;&amp; !TweenLite._timer.isStart()) {
+			TweenLite._timer.addEventListener(Timer.TIME,TweenLite._enterFrame);
+			TweenLite._timer.start();
+		}
+		else if(Stage.current){
+			Stage.current.addEventListener(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
+		}
+	}
+	
+	static remove  (target) 
+	{
+		if(target==undefined || TweenLite._tweens.length==0) return;
+		
+		let i,tween;
+		let len=TweenLite._tweens.length;
+		
+		for (i=0;i&lt;len;i++) {
+			tween=TweenLite._tweens[i];
+		    
+		    if(tween.target==target){
+		    	TweenLite._tweens.splice(i,1);
+		    	len--;
+		    	i--;
+		    }
+		}
+		
+		if(TweenLite._tweens.length==0) TweenLite.pause();
+	}
+	
+	static _enterFrame(e)
+	{
+		if(TweenLite._tweens.length==0) return;
+		TweenLite._default_params
+		
+		let i,tween;
+		const len=TweenLite._tweens.length;
+		
+		for (i=0;i&lt;len;i++) {
+			tween=TweenLite._tweens[i];
+			TweenLite._setAttribute(tween);
+		}
+	}
+	
+	static _setAttribute(tween)
+	{
+		if(tween==undefined) return;
+		
+		let k,twname;
+		const target=tween["target"]; 
+		
+		if(tween.delay&lt;=1 &amp;&amp; tween.min==0 &amp;&amp; tween.hasOwnProperty("onStart") &amp;&amp; tween["onStart"]){
+	//		try{
+				tween["onStart"].apply(null,tween.hasOwnProperty("onStartParams") ? tween["onStartParams"] : null);
+	//		}
+	//		catch(err){
+	//			twname=twname || target.name+"("+ClassUtil.getQualifiedClassName(target)+")";
+	//			trace("[ERROR] TweenLite._setAttribute:onStart "+twname+"{"+err+"}");
+	//		}
+			
+			delete tween["onStartParams"];
+			delete tween["onStart"];
+		}
+		
+		if(tween.delay>0) {
+			tween.delay--;
+			return;
+		}
+		else tween.min++;
+		
+		for (k in tween.vars) {
+			target[k] = (tween.min>=tween.max) ? (tween.vars[k]+tween.first[k]) : TweenLite._tween(tween.ease,tween.first[k],tween.vars[k],tween.min,tween.max,tween.easeParams);
+		}
+		
+		if(tween.min>=tween.max){
+			const index=TweenLite._tweens.indexOf(tween);
+			
+			TweenLite._tweens.splice(index,1);
+			if(TweenLite._tweens.length==0) TweenLite.pause();
+			
+			if(tween.hasOwnProperty("onComplete") &amp;&amp; tween["onComplete"]){
+	//			try{
+					tween["onComplete"].apply(null,tween.hasOwnProperty("onCompleteParams") ? tween["onCompleteParams"] : null);
+	//			}
+	//			catch(err){
+	//				twname=twname || target.name+"("+ClassUtil.getQualifiedClassName(target)+")";
+	//				trace("[ERROR] TweenLite._setAttribute:onComplete "+twname+"{"+err+"}");
+	//			}
+			}
+			return;
+		}
+		
+		if(tween.hasOwnProperty("onUpdate") &amp;&amp; tween["onUpdate"]){
+	//	    try{
+				tween["onUpdate"].apply(null,tween.hasOwnProperty("onUpdateParams") ? tween["onUpdateParams"] : null);
+	//		}
+	//		catch(err){
+	//			twname=twname || target.name+"("+ClassUtil.getQualifiedClassName(target)+")";
+	//			trace("[ERROR] TweenLite._setAttribute:onUpdate "+twname+"{"+err+"}");
+	//		}
+		}
+	}
+
+}
+
+/**
+ * course name
+ */
+TweenLite.NONE="none";
+TweenLite.LINEAR="linear";
+TweenLite.QUAD="quad";
+TweenLite.CUBIC="cubic";
+TweenLite.QUART="quart";
+TweenLite.QUINT="quint";
+TweenLite.SINE="sine";
+TweenLite.CIRC="circ";
+TweenLite.EXPO="expo";
+TweenLite.ELASTIC="elastic";
+TweenLite.BACK="back";
+TweenLite.BOUNCE="bounce";
+TweenLite.STRONG="strong";
+
+/**
+ * mode
+ */
+TweenLite.IN="in";
+TweenLite.OUT="out";
+TweenLite.IN_OUT="inout";
+TweenLite.OUT_IN="outin";
+
+TweenLite._timer;
+TweenLite._tweens = [];
+TweenLite._inited = false;
+TweenLite._locked = false;
+TweenLite._transitionList = {};	
+TweenLite.className="TweenLite";</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

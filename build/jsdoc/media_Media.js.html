@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: media/Media.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: media/Media.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+import Global from '../core/Global.js'
+import Event from '../events/Event.js'
+import DOMUtil from '../utils/DOMUtil.js'
+import MediaManager from './MediaManager.js'
+import UniqueUtil from '../utils/UniqueUtil.js'
+import StringUtil from '../utils/StringUtil.js'
+import DisplayObject from '../display/DisplayObject.js'
+
+/**
+ * @class
+ * @module Media
+ * @extends DisplayObject
+ */
+export default class Media extends DisplayObject
+{
+	constructor()
+	{
+		super();
+		this.__over_handler=this.__update_handler=this.__load_handler=this.__error_handler=null;
+		this.loadFail=this.once=this.auto_play=this.is_init = this.loading =this.loaded = this.playing = false;
+		this.list=this._type=this.element=null;
+		this.auto_next=true; 
+		this.seed_time=0;
+		this.length = 0;
+		this.current=0;
+		this.volume=1;
+		
+		this.delay_id=0;
+		this.delay_max=20;
+		this.delay_count=0;
+		this.delay_time=400;
+	}
+	
+	init  ()
+	{
+		if(this.is_init) return;
+		this.is_init=true;
+		
+		this.name=UniqueUtil.getName(this._type);
+	    this.element = document.createElement(this._type);
+	    this.element.id=this.name;
+
+		this.element.controls = "";
+		this.element.preload  = "auto";
+		
+		this.list=[];
+		Media.Container.add(this);
+		this.canvas = this.element;
+		
+		this.__delay_handler=Global.delegate(this._delay,this);
+		this.__over_handler=Global.delegate(this._play_over,this);
+		this.__load_handler=Global.delegate(this._load_handler,this);
+		this.__update_handler=Global.delegate(this._time_update,this);
+		this.__error_handler=Global.delegate(this._error_handler,this);
+		this.element.addEventListener("error",this.__error_handler, false);
+	}
+	
+	_delay()
+	{
+		if(this.element.readyState>0 || this.delay_count&lt;=0){
+			this._load_complete();
+			return;
+		}
+		
+		this.delay_count--;
+		this.delay_id=setTimeout(this.__delay_handler, this.delay_time);
+	}
+	
+	_load_handler(e)
+	{
+		this.length=(this.element.duration==null || isNaN(this.element.duration)) ? 0 : Math.max(0,this.element.duration);
+		if(e.type.indexOf("canplay")!=0 || this.loaded) return;
+		this._load_complete();
+	}
+	
+	_load_complete()
+	{
+		this.dispatchEvent(new Event(Media.MEDIA_LOAD_COMPLETE));
+		if(this.delay_id) clearTimeout(this.delay_id);
+		this.delay_id=0;
+		
+		this.loaded =true;
+		this.loading=false;
+		
+		if(this.auto_play &amp;&amp; !this.playing) {
+			if(this.once) this.auto_play=this.once=false;
+			this.play();
+		}
+	}
+	
+	_error_handler(e)
+	{
+		this.loading=false;
+		this.loadFail=true;
+		trace("[ERROR] Media",e);
+		this.dispatchEvent(new Event(Media.MEDIA_ERROR));
+		
+		if(this.auto_next &amp;&amp; this.list.length>1){
+			this.current=(this.current>=this.list.length ? 0 : this.current+1);
+			this._start_load();
+		}
+		else this.close();
+	}
+	
+	_play_over(e)
+	{
+		this.dispatchEvent(new Event(Media.MEDIA_PLAY_COMPLETE));
+		
+		if(this.auto_next &amp;&amp; this.list.length>1){
+			this.current=(this.current>=this.list.length ? 0 : this.current+1);
+			this._start_load();
+		}
+		else this.close();
+	}
+	
+	_time_update(e)
+	{
+		this.length=(this.element.duration==null) ? 0 : Math.max(0,this.element.duration);
+		this.seed_time=this.element.currentTime;
+	}
+	
+	setVolume  (v) 
+	{
+		if(this.volume == v) return;
+		this.volume = v;
+		
+		if(this.playing){
+			this.element.volume=this.volume;
+			if(this.volume>0) this.element.muted=false;
+		}
+	}
+	
+	getVolume  ()
+	{
+		return this.volume;
+	}
+	
+	setCurrentTime  (t) 
+	{
+		if(this.element &amp;&amp; t!=null &amp;&amp; t>=0 &amp;&amp; t&lt;this.length) {
+			try{
+				this.element.currentTime = t;
+			}
+			catch(err){};
+		}
+	}
+	
+	getCurrentTime  () 
+	{
+		return this.element ? this.element.currentTime : 0;
+	}
+	
+	load  (args)
+	{
+		if(!this.is_init) this.init();
+		
+		if(typeof args=="number"){
+			if(!this.loading){
+				let old=this.current;
+				this.current=args;
+				if(!this._start_load()) this.current=old;
+			}
+			return;
+		}
+		
+		if(typeof args=="string" &amp;&amp; args.indexOf(",")>0){
+			args=args.split(",");
+		}
+		
+		if(!(args instanceof Array)){
+			if(typeof args=="string"){
+				args={url:args};
+			}
+			args=[args];
+		}else{
+			ArrayUtil.each(args,function(item,index){
+				if(typeof item=="string") args[index]={url:item};
+			});
+		}
+		
+		for (let source,obj,type,bool,prefix,i=0,l=args.length;i&lt;l;i++){
+			obj=args[i];
+			if(StringUtil.isEmpty(obj.url)) continue;
+			type=this._type+'/'+this._fit_name(StringUtil.getPathExt(obj.url))+("codecs" in obj ? ';codecs="'+obj.codecs+'"' :'');
+			bool=this.element.canPlayType(type);
+			
+			prefix=obj.url.slice(0,4).toLowerCase();
+			if(prefix=='rtmp'){
+				bool=true;
+				type="rtmp/flv";
+			}
+			
+			if(bool){
+				source=DOMUtil.createDOM("source",{type:type,src:obj.url});
+				this.element.appendChild(source);
+			}
+			else if(prefix!='blob') continue;
+			
+			this.list.push(obj);
+		}
+		
+		if(!this.loading &amp;&amp; this.list.length>0) this._start_load();
+		else if(args.length>0 &amp;&amp; this.list.length==0){
+			this.dispatchEvent(new Event(Media.MEDIA_ERROR));
+		}
+	}
+	
+	_fit_name(name)
+	{
+		switch(name)
+		{
+			case "mov": return "quicktime";
+			case "3gp": return "3gpp";
+			case "mid": return "midi";
+			case "ogv": return "ogg";
+			case "m4a": return "acc";
+			default : return name;
+		}
+	}
+	
+	_start_load()
+	{
+		if(!this.element || this.current&lt;0 || this.list.length==0 || this.current>=this.list.length){
+			return false;
+		}
+		
+		this.close();
+		this.loading=true;
+		
+		this.element.addEventListener("loadedmetadata",this.__load_handler, false);
+		this.element.addEventListener("canplaythrough",this.__load_handler, false);
+		this.element.addEventListener('loadeddata',this.__load_handler, false);
+		this.element.addEventListener("canplay",this.__load_handler, false);
+		this.element.src=this.list[this.current].url;
+		this.element.load();
+		
+		if(Global.ios){
+			this.delay_count=this.delay_max;
+			this.delay_id=setTimeout(this.__delay_handler, this.delay_time);
+		}
+		
+		return true;
+	}
+	
+	close()
+	{
+		if(!this.element) return;
+		this.element.removeEventListener("loadedmetadata",this.__load_handler);
+		this.element.removeEventListener("canplaythrough",this.__load_handler);
+		this.element.removeEventListener("loadeddata",this.__load_handler);
+		this.element.removeEventListener("canplay",this.__load_handler);
+		
+		if(this.delay_id) clearTimeout(this.delay_id);
+		this.delay_id=0;
+		
+		if(this.playing) this.stop();
+		this.loadFail=this.loaded =this.loading=this.playing = false;
+		this.seed_time=0;
+	}
+	
+	play  (bool)
+	{
+		if(!this.element) return;
+		
+		if(!this.loaded){
+			if(!this.loading &amp;&amp; this.list.length>0){
+				if(!this.auto_play){
+					this.once=this.auto_play=true;
+				}
+				this._start_load();
+			}
+			return;
+		}
+		
+		if(this.playing) this.stop();
+		
+		if(bool) this.seed_time=0;
+		if(this.seed_time>0){
+			try{
+				this.element.currentTime = this.seed_time;
+			}
+			catch(err){}
+		}
+		
+		this.element.addEventListener("timeupdate",this.__update_handler,false);
+		this.element.addEventListener("ended",this.__over_handler,false);
+		if(this.volume>0) this.element.volume=this.volume;
+		else this.element.muted=true;
+		this.playing = true;
+		this.element.play();
+	}
+	
+	stop  ()
+	{
+		if(!this.element) return;
+		this.seed_time=this.element.currentTime;
+		this.element.removeEventListener("timeupdate",this.__update_handler);
+		this.element.removeEventListener("ended",this.__over_handler);
+		this.playing = false;
+		this.element.pause();
+	}
+	
+	dispose  ()
+	{
+		this.close();
+		super.dispose();
+		this.list=this.canvas=null;
+		Media.Container.remove(this);
+		delete this.delay_id,this.delay_max,this.delay_count,this.delay_time,this.loadFail,this.once,this.loaded,this.list,this.loading,this.playing,this.element,this.seed_time,this.length,this.current,this.volume,this.auto_play,this._type,this.auto_next,this.__over_handler,this.__update_handler,this.__load_handler,this.__error_handler;
+	}
+}
+
+Media.MEDIA_ERROR="mediaError";
+Media.MEDIA_LOAD_COMPLETE="mediaLoadComplete";
+Media.MEDIA_PLAY_COMPLETE="mediaPlayComplete";
+Media.Container=new MediaManager();
+Media.className="Media";
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Wed Jul 09 2025 11:50:31 GMT+0800 (中国标准时间)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
