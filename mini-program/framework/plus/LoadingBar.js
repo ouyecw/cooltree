@@ -4,6 +4,7 @@ import TweenLite from '../transitions/TweenLite.js'
 import ObjectUtil from '../utils/ObjectUtil.js'
 import Factory from '../core/Factory.js'
 import Event from '../events/Event.js'
+import MathUtil from '../utils/MathUtil.js'
 
 export default class LoadingBar extends DisplayObjectContainer
 {
@@ -31,7 +32,8 @@ export default class LoadingBar extends DisplayObjectContainer
 				color:"#FFFFFF",
 				stroke:"#ffff00",
 				info:"",
-				width:80
+				width:80,
+				bold:true
 			}
 		}
 		
@@ -50,7 +52,7 @@ export default class LoadingBar extends DisplayObjectContainer
 		if(!this._options.tf) return;
 		
 		this.tf=Factory.c("tf",{
-			bold:true,
+			bold:this._options.tf.bold,
 			fillType:this._options.tf.stroke ? "both" : "fill",
 			text:this._options.tf.info+this.percent+"%",
 			font:this._options.tf.font,
@@ -59,8 +61,37 @@ export default class LoadingBar extends DisplayObjectContainer
 			strokeColor:this._options.tf.stroke,
 			lineWidth:this._options.tf.width
 		});
+
 		this.tf.moveTo((this._options.width-this.tf.width)*0.5,(this._options.height-this.tf.height)*0.5+this._options.ty);
 		this.addChild(this.tf);
+
+		const offset=this._options.line*0.5 || 0;
+		const num=Math.min(this._options.radius,this._options.height*0.5-offset);
+		this._args=[this._options.color,
+					Math.max(offset*2,num),
+					this._options.height-offset*2,
+					num,0];
+		
+		this.bar=Factory.c("bs",this._args);
+		this.addChildAt(this.bar,1);
+		this.bar.moveTo(offset,offset);
+	}
+
+	reset(percent)
+	{
+		if(!this.tf) return;
+		percent=MathUtil.clamp(percent,0,100);
+		this.percent=percent;
+
+		this.tf.text=this._options.tf.info+percent+"%";
+		this.tf.moveTo((this._options.width-this.tf.width)*0.5,(this._options.height-this.tf.height)*0.5+this._options.ty);
+
+		const offset=this._options.line*0.5 || 0;
+		const max=(this._options.width-offset*2);
+		const current=percent*0.01*max;
+
+		this._args[1]=current;
+		this.bar.width=this._args[1];
 	}
 	
 	change(percent)
@@ -71,20 +102,6 @@ export default class LoadingBar extends DisplayObjectContainer
 		const offset=this._options.line*0.5 || 0;
 		const max=(this._options.width-offset*2);
 		const current=percent*0.01*max;
-
-		if(!this._args){
-			const num=Math.min(this._options.radius,this._options.height*0.5-offset);
-			this._args=[this._options.color,
-						Math.max(offset*2,num),
-						this._options.height-offset*2,
-						num,0];
-		}
-		
-		if(!this.bar){
-			this.bar=Factory.c("bs",this._args);
-			this.addChildAt(this.bar,1);
-			this.bar.moveTo(offset,offset);
-		}
 		
 		if(current<=this._args[1]) return;
 		const time=(current-this._args[1])*this._options.speed;
