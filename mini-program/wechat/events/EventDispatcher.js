@@ -43,8 +43,12 @@ export default class EventDispatcher
 	on(eventType, func,target=null,id=null)
 	{
 		if(!(typeof eventType==="string" && typeof func==="function")) return;
+		if(!id && target && typeof target=="string"){
+			id=target;
+			target=null;
+		}
+
 		if(!StringUtil.isEmpty(id) && this.has(eventType,id)) return;
-		
 		if(this.listeners[eventType] == undefined) this.listeners[eventType]=[];
 		if(this.listeners[eventType].indexOf(func)==-1) this.listeners[eventType].push({f:func,t:target});
 		

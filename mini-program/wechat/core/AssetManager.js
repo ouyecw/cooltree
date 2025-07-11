@@ -23,7 +23,7 @@ export default class AssetManager
 	static addFiles(files,isMovie=false)
 	{
 		if(files==null) return;
-		let i,f,x,s,j,a,b;
+		let i,f,x,s,j,a,b,l;
 		
 		for(i in files){
 			f=files[i];
@@ -35,7 +35,8 @@ export default class AssetManager
 			if(ClassUtil.isImage(f)){
 				if(files.hasOwnProperty(j+"@xml") || files.hasOwnProperty(j+"@json") || files.hasOwnProperty(j+"@plist")){
 					b=files.hasOwnProperty(j+"@xml") ? 1 : (files.hasOwnProperty(j+"@plist") ? 2 : 0);
-					x=files[j+(b==1 ? "@xml" : (!b ? "@json" : "@plist"))];
+					l=(b==1 ? "@xml" : (!b ? "@json" : "@plist"));
+					x=files[j+l];
 					
 					if(x==undefined) {
 						AssetManager._cache[i]=f;
@@ -48,10 +49,8 @@ export default class AssetManager
 						continue;
 					}
 					
-					if(b==1){
-						if(AssetManager._cache.hasOwnProperty(j+"@xml")){
-							delete AssetManager._cache[j+"@xml"];
-						}
+					if(b==1 && AssetManager._cache.hasOwnProperty(j+"@xml")){
+						delete AssetManager._cache[j+"@xml"];
 					}
 					else if(!b && AssetManager._cache.hasOwnProperty(j+"@json")){
 						delete AssetManager._cache[j+"@json"];
@@ -59,6 +58,7 @@ export default class AssetManager
 					else if(AssetManager._cache.hasOwnProperty(j+"@plist")){
 						delete AssetManager._cache[j+"@plist"];
 					}
+					else delete files[j+l];
 					
 					if(s[0].width>0 && isMovie) 
 						MovieManager.addSources(s);
