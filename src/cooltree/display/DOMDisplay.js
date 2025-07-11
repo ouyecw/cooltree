@@ -78,6 +78,18 @@ export default class DOMDisplay extends DisplayBase
 		if(this[_element]) 
 			this[_element].style.display = (!this._visible || !this._global_visible) ? "none" : "";
     }
+
+	getWidth ()
+	{
+		const width=this.instance && (this.instance instanceof Source) && this.instance.isRotated ? this.height : this.width;
+		return Math.ceil(Math.abs(width * this.scaleX));
+	}
+			
+	getHeight ()
+	{
+		const height=this.instance && (this.instance instanceof Source) && this.instance.isRotated ? this.width : this.height;
+		return Math.ceil(Math.abs(height * this.scaleY));
+	}
 	
 	get stage()
 	{
@@ -207,6 +219,11 @@ export default class DOMDisplay extends DisplayBase
 	    	else if(this.instance.image!=target.image) {
 	    		this[_element].style.backgroundImage="url(" + target.image.src+ ")";
 	    	}
+
+			if(target.isRotated){
+				this.rotation-=90;
+				this.origin.x+=target.width;
+			}
 	    }
 	    else if(target instanceof Graphics){
 	    	this.setInstance(target.canvas);

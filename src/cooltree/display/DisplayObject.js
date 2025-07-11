@@ -203,8 +203,8 @@ export default class DisplayObject extends DisplayBase
 		this.instance=target;
 		if(!StringUtil.isEmpty(target.name)) this.name=target.name;
 		
-		this.width=this.instance.width;
-		this.height=this.instance.height;
+		this.width=this.instance.isRotated ? this.instance.height : this.instance.width;
+		this.height=this.instance.isRotated ? this.instance.width : this.instance.height;
 		this.origin={x:target.regX,y:target.regY};
 
 		this.updateMatrix=true;
@@ -273,21 +273,26 @@ export default class DisplayObject extends DisplayBase
 		if(this.canvas){
 			(target!=undefined ? target.context : this.stage.context).drawImage(this.canvas,0,0);
 		}
-		else if(this[_graphics]){
-			this.do_actions(target ? target : this.stage.graphics,this.graphics,true);
-		}
-		else if(this.instance){
-			(target!=undefined ? target.context : this.stage.context).drawImage(
-				                 this.instance.image,
-		                         this.instance.x,
-		                         this.instance.y,
-		                         this.instance.width,
-		                         this.instance.height,
-		                         0,0,this.instance.width/this.instance.scale,
-		                         this.instance.height/this.instance.scale);
+		else if(this.instance && this.instance.image){
+			const ctx=(target!=undefined ? target.context : this.stage.context);
+			if(this.instance.isRotated) ctx.rotate(1.5 * Math.PI);
+			
+			ctx.drawImage(
+			 this.instance.image,
+			 this.instance.x,
+			 this.instance.y,
+			 this.instance.width,
+			 this.instance.height,
+			 this.instance.isRotated ? -this.instance.width/this.instance.scale : 0,0,
+			 this.instance.width/this.instance.scale,
+			 this.instance.height/this.instance.scale);
 		    
+			if(this.instance.isRotated) ctx.rotate(0.5 * Math.PI);
 		}
-		else if(this.context){
+		
+		if(this[_graphics]){
+			this.do_actions(target ? target : this.stage.graphics,this.graphics,true);
+		}else if(this.context){
 			this.do_actions(target ? target : this.stage,this.context);
 		}
 		

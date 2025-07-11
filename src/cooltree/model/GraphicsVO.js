@@ -52,7 +52,7 @@ export default class GraphicsVO
 	}
 }
 
-GraphicsVO.LIST=['arc','moveTo','lineTo','beginPath','closePath','bezierCurveTo','curveTo','lineStyle','clear','beginFill','endFill','beginBitmapFill','linearGradientFill','radialGradientFill','drawRect','drawRoundRect','drawPath','drawCircle','drawEllipse','createPolygon','drawSVGPath','drawShape','dispose'];
+GraphicsVO.LIST=['arc','moveTo','lineTo','beginPath','closePath','clearRect','bezierCurveTo','curveTo','lineStyle','clear','beginFill','endFill','beginBitmapFill','linearGradientFill','radialGradientFill','drawRect','drawRoundRect','drawPath','drawCircle','drawEllipse','createPolygon','drawSVGPath','drawShape','drawSpecialRect','dispose'];
 
 GraphicsVO.ATTR=['line_cap','line_join','line_alpha','stroke_style','line_width','miter_limit','fill_alpha','fill_style'];
 

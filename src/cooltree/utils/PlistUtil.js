@@ -1,12 +1,5 @@
-
 export default class PlistUtil 
 {
-    static TEXT_NODE = 3;
-    static CDATA_NODE = 4;
-    static COMMENT_NODE = 8;
-
-    static TEST=false;
-
     static parsePlistXML(node) 
     {
         var i, new_obj, key, val, new_arr, res, counter, type;
@@ -166,4 +159,7 @@ export default class PlistUtil
     }
 }
 
-module.exports = PlistUtil;
+PlistUtil.TEXT_NODE = 3;
+PlistUtil.CDATA_NODE = 4;
+PlistUtil.COMMENT_NODE = 8;
+PlistUtil.TEST=false;

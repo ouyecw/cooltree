@@ -5,6 +5,7 @@ import ObjectPool from './ObjectPool.js'
 import StringUtil from './StringUtil.js'
 import BitmapFont from '../text/BitmapFont.js'
 import URLLoader from '../loader/URLLoader.js'
+import PlistUtil from '../utils/PlistUtil.js'
 import AssetManager from '../core/AssetManager.js'
 
 /**
@@ -13,9 +14,9 @@ import AssetManager from '../core/AssetManager.js'
  */
 export default class AssetUtil
 {
-	static parseSheet(image,data,isXML)
+	static parseSheet(image,data,type)
 	{
-		return isXML ? AssetUtil._xml2sheet(image,data) : AssetUtil._json2sheet(image,data.content);
+		return type==1 ? AssetUtil._xml2sheet(image,data) : (type==2 ? AssetUtil._plist2sheet(image,data) : AssetUtil._json2sheet(image,data.content));
 	}
 	
 	static _xml2sheet(image,xml)
@@ -46,28 +47,54 @@ export default class AssetUtil
 			}
 			
 			source=ObjectPool.create(Source);
-			source.setup(image,temp);
+			source.setup(image,temp,false,i);
 			array.push(source);
 		}
 		
 		return array;
 	}
 	
+	static _plist2sheet(image,data)
+	{
+		if(image==null || data==null) return;
+		const doc=data.documentElement;
+		data=PlistUtil.parsePlistXML(doc);
+
+		if(!data || data.length<1) return;
+		let name,item,key,source,sub,array=[],i=0;
+
+		for(name in data){
+			item=data[name];
+			if(!item || !item.hasOwnProperty("frames") || !item.frames) continue;
+
+			for(key in item.frames){
+				sub=item.frames[key];
+				source=ObjectPool.create(Source);
+				source.setPlist(image,sub,key,i++);
+				array.push(source);
+			}
+		}
+
+		return array;
+	}
+	
 	static _json2sheet(image,json)
 	{
 		if(image==null || json==null) return;
-		let i,str,temp,source,datas,old,array=[];
+		let i,str,temp,source,datas,old,array=[],j=0;
 		
 		for(str in json){
 			if(str=="meta") continue;
+
 			datas=json[str];
+			if(!datas) continue;
 			
 			for(i in datas){
 				temp=datas[i];
 				temp.name=i;
 				
 				source=ObjectPool.create(Source);
-				source.setup(image,temp,true);
+				source.setup(image,temp,true,j++);
 	
 				if(source.width==0 && source.height==0 && !StringUtil.isEmpty(source.label) && old && source.label==old.label){
 					

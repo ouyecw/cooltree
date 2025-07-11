@@ -73,6 +73,10 @@ export default class ContextVO
 				if(!this.strict) return;
 			}
 			
+			if(name=="clear" || name=="dispose"){
+				this.actions=[];
+			}
+			
     		this.actions.push({type:type,method:name,data:arguments});
     	}
 	}

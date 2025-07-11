@@ -8,28 +8,25 @@ import ArrayUtil from '../utils/ArrayUtil.js'
 import Rectangle from '../geom/Rectangle.js'
 import Factory from '../core/Factory.js'
 import Source from '../core/Source.js'
-import Global from '../core/Global.js'
 import Stage from '../display/Stage.js'
 import TweenLite from '../transitions/TweenLite.js'
 import MathUtil from '../utils/MathUtil.js'
 
 export default class ContentList extends DisplayObjectContainer
 {
-    static className="ContentList";
-	
-	controller;
-	container;
-	hold_size;
-	line_img;
-	old_list;
-	bounds;
-	datas;
-	space;
-	bg;
-	
 	constructor(options)
 	{
 		super();
+
+		this.controller;
+		this.container;
+		this.hold_size;
+		this.line_img;
+		this.old_list;
+		this.bounds;
+		this.datas;
+		this.space;
+		this.bg;
         
 		this.ops={
 			width:Stage.current.stageWidth,
@@ -250,9 +247,6 @@ export default class ContentList extends DisplayObjectContainer
 
 export class ContentItem extends DisplayObjectContainer
 {
-	static className="ContentItem";
-	data=null;
-
 	reset()
 	{
 		this.data=null;
@@ -265,3 +259,6 @@ export class ContentItem extends DisplayObjectContainer
 		this.data=data;
 	}
 }
+
+ContentList.className="ContentList";
+ContentItem.className="ContentItem";

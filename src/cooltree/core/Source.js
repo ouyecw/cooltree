@@ -23,6 +23,7 @@ export default class Source
 	{
 		this.x=this.y=this.regX=this.regY=this.index=this.width=this.height=this.frame_width=this.frame_height=0;
 		this.image=this.name=this.animation=this.label=this.url=null;
+		this.isRotated=false;
 		this.isClone=false;
 		this.scale=1;
 		
@@ -36,7 +37,7 @@ export default class Source
 	 * @param {Object} obj 资源属性
 	 * @param {Boolean} isJson
 	 */
-	setup (img,obj,isJson=false)
+	setup (img,obj,isJson=false,index=0)
 	{
 		if(!img) return;
 		
@@ -45,10 +46,6 @@ export default class Source
 		
 		this.animation=labels.length>1 ? labels[0] : "";
 		this.name=labels.length>1 ? labels[1] : labels[0];
-		
-		labels=StringUtil.getNumber(this.name);
-		this.label=labels.length>0 ? labels[0] : "";
-		this.index=labels.length>1 ? MathUtil.int(labels[1]) : 0;
 		
 		this.x=MathUtil.format(isJson ? obj.frame.x : obj.x);
 		this.y=MathUtil.format(isJson ? obj.frame.y : obj.y);
@@ -76,7 +73,57 @@ export default class Source
 		}
 		else this.image=img;
 		
+		this.setLabel(index);
 		this.isClone=false;
+	}
+	
+	setLabel(index=0)
+	{
+		const labels=StringUtil.getNumber(this.name);
+		this.label=labels.length>0 ? labels[0] : "";
+		this.index=labels.length>1 ? MathUtil.int(labels[1]) : index;
+
+		if(!StringUtil.isEmpty(this.label) && (this.label.indexOf("-")==this.label.length-1 || this.label.indexOf("_")==this.label.length-1)){
+			this.label=String(this.label).substring(0,this.label.length-1);
+		}
+
+		this.label=StringUtil.trim(this.label);
+	}
+	
+	setPlist(img,obj,name,index,anim="")
+	{
+		name=StringUtil.replaceAll(name,[".png",".jpg",".gif"],["","",""]);
+		this.animation=anim;
+		this.name=name;
+		
+		const rect=Source.format(obj.frame || obj.textureRect);
+		const reg=Source.format(obj.offset || obj.spriteOffset);
+		const size=Source.format(obj.sourceSize || obj.spriteSize);
+
+		this.x=MathUtil.format(rect[0]);
+		this.y=MathUtil.format(rect[1]);
+
+		this.width=MathUtil.format(rect[2]);
+		this.height=MathUtil.format(rect[3]);
+
+		this.frame_width=MathUtil.format(size[0]);
+		this.frame_height=MathUtil.format(size[1]);
+
+		if(this.width<=0) this.width=this.frame_width;
+		if(this.height<=0) this.height=this.frame_height;
+
+		this.regX=MathUtil.format(reg[0]);
+		this.regY=MathUtil.format(reg[1]);
+
+		this.image=img;
+		this.setLabel(index);
+		this.isClone=false;
+
+		this.isRotated=obj.hasOwnProperty("textureRotated") ? obj.textureRotated : (obj.hasOwnProperty("rotated") ? obj.rotated : false);
+		if(!this.isRotated) return;
+		const w=this.width;
+		this.width=this.height;
+		this.height=w;
 	}
 	
 	/**
@@ -99,6 +146,7 @@ export default class Source
 		copy.height=this.height;
 		copy.frame_width=this.frame_width;
 		copy.frame_height=this.frame_height;
+		copy.isRotated=this.isRotated;
 		copy.url=this.url;
 		copy.isClone=true;
 		return copy;
@@ -111,6 +159,7 @@ export default class Source
 	{
 		this.x=this.y=this.regX=this.regY=this.index=this.width=this.height=this.frame_width=this.frame_height=0;
 		this.image=this.name=this.animation=this.label=this.url=null;
+		this.isRotated=false;
 		this.isClone=false;
 		this.scale=1;
 		
@@ -123,7 +172,7 @@ export default class Source
 	dispose()
 	{
 		this.reset();
-		delete this.x,this.y,this.scale,this.name,this.animation,this.label,this.url,this.regX,this.regY,this.frame_width,this.frame_height,this.image,this.index,this.width,this.height,this.isClone;
+		delete this.isRotated,this.x,this.y,this.scale,this.name,this.animation,this.label,this.url,this.regX,this.regY,this.frame_width,this.frame_height,this.image,this.index,this.width,this.height,this.isClone;
 	}
 	
 	toString()
@@ -143,8 +192,20 @@ export default class Source
 		str+='"x":'+this.x+',';
 		str+='"y":'+this.y+',';
 		str+='"url":'+this.url+',';
-		str+='"scale":'+this.scale;
+		str+='"scale":'+this.scale+',';
+		str+='"isRotated":'+this.isRotated;
 		return str+"}";
+	}
+
+	static format(data)
+	{
+		data=StringUtil.replaceAll(data,["{","}"],["",""]);
+		data=data.split(",");
+		const array=[];
+		for(let num of data){
+			array.push(Number(num));
+		}
+		return array;
 	}
 }
 

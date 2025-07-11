@@ -108,7 +108,13 @@ export default class MovieManager
 		if(source) return source;
 		const labels=StringUtil.getNumber(label);
 		if(!labels || labels.length<1) return null;
-		source=MovieManager.getData(labels[0],animation);
+
+		let sign=labels[0];
+		if(!StringUtil.isEmpty(sign) && (sign.indexOf("-")==sign.length-1 || sign.indexOf("_")==sign.length-1)){
+			sign=String(sign).substring(0,sign.length-1);
+		}
+		
+		source=MovieManager.getData(sign,animation);
 		if(!source) return null;
 		for(let asset of source) {
 			if(asset.name==label) return asset;

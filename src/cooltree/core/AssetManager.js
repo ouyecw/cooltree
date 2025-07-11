@@ -20,7 +20,7 @@ export default class AssetManager
 	static addFiles(files)
 	{
 		if(files==null) return;
-		let i,f,x,s,j,b;
+		let i,f,x,s,j,b,l;
 		
 		for(i in files){
 			f=files[i];
@@ -28,10 +28,11 @@ export default class AssetManager
 			if(f==undefined) continue;
 			
 			if(f instanceof Image){
-				if(files.hasOwnProperty(j+"@xml") || files.hasOwnProperty(j+"@json")){
+				if(files.hasOwnProperty(j+"@xml") || files.hasOwnProperty(j+"@json") || files.hasOwnProperty(j+"@plist")){
 					
-					b=files.hasOwnProperty(j+"@xml");
-					x=files[j+(b ? "@xml" : "@json")];
+					b=files.hasOwnProperty(j+"@xml") ? 1 : (files.hasOwnProperty(j+"@plist") ? 2 : 0);
+					l=(b==1 ? "@xml" : (!b ? "@json" : "@plist"));
+					x=files[j+l];
 					
 					if(x==undefined) {
 						AssetManager._cache[i]=f;
@@ -44,16 +45,16 @@ export default class AssetManager
 						continue;
 					}
 					
-					if(b){
-						if(AssetManager._cache.hasOwnProperty(j+"@xml")){
-							delete AssetManager._cache[j+"@xml"];
-						}
+					if(b==1 && AssetManager._cache.hasOwnProperty(j+"@xml")){
+						delete AssetManager._cache[j+"@xml"];
 					}
-					else{
-						if(AssetManager._cache.hasOwnProperty(j+"@json")){
-							delete AssetManager._cache[j+"@json"];
-						}
+					else if(!b && AssetManager._cache.hasOwnProperty(j+"@json")){
+						delete AssetManager._cache[j+"@json"];
 					}
+					else if(AssetManager._cache.hasOwnProperty(j+"@plist")){
+						delete AssetManager._cache[j+"@plist"];
+					}
+					else delete files[j+l];
 					
 					if(s[0].width>0) MovieManager.addSources(s);
 					else             AssetManager.addSources(s);

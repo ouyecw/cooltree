@@ -272,6 +272,7 @@ export default class Loader extends EventDispatcher
 				
 			case "xml":
 			case "fnt":
+			case "plist":
 			case "svg":
 				this.loadXML(url,name,this);
 				break;

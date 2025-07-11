@@ -50,6 +50,7 @@ app.GraphicsVO=require('./model/GraphicsVO.js').default
 
 app.JSONUtil=require('./utils/JSONUtil.js').default
 
+app.PlistUtil=require('./utils/PlistUtil.js').default
 
 app.Point=require('./geom/Point.js').default
 
@@ -215,5 +216,7 @@ app.TimeUtil=require('./utils/TimeUtil.js').default
 app.MaxRectsBinPack=require('./utils/MaxRectsBinPack.js').default
 
 app.MySocket=require('./net/MySocket.js').default
+
+app.ContentList=require('./plus/ContentList.js').default
 
 module.exports=app;
