@@ -101,7 +101,7 @@ export default class UIContainer extends UIBase
 		}
 		
 		if(this._orientation==0) return;
-		this._register_instance.addEventListener(DisplayBase.RESIZE,Global.delegate(this._reset_hold_control,this),this.name);
+		this._register_instance.on(DisplayBase.RESIZE,Global.delegate(this._reset_hold_control,this),this.name);
 		this._reset_hold_control(null);
 	}
 	
@@ -111,12 +111,12 @@ export default class UIContainer extends UIBase
 		this.mouseEnabled=this._register_instance.mouseEnabled=bool;
 		
 		if(bool) {
-			if(!this._register_instance.hasEventListener(StageEvent.MOUSE_DOWN))
-				this._register_instance.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_drag_handler,this),this.name);
+			if(!this._register_instance.has(StageEvent.MOUSE_DOWN))
+				this._register_instance.on(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_drag_handler,this),this.name);
 	    }
 		else {
-			this._register_instance.removeEventListener(StageEvent.DRAG_MOVE,null,this.name);
-			this._register_instance.removeEventListener(StageEvent.MOUSE_DOWN,null,this.name);
+			this._register_instance.off(StageEvent.DRAG_MOVE,null,this.name);
+			this._register_instance.off(StageEvent.MOUSE_DOWN,null,this.name);
 		}
 	}
 	
@@ -145,15 +145,15 @@ export default class UIContainer extends UIBase
 	    }
 	
 		TweenLite.remove(this._register_instance);
-		this._register_instance.addEventListener(StageEvent.DRAG_MOVE,Global.delegate(this._drag_move_handler,this),this.name);
+		this._register_instance.on(StageEvent.DRAG_MOVE,Global.delegate(this._drag_move_handler,this),this.name);
 		
 		(this.stage ? this.stage : Stage.current).startDrag(this._register_instance,rect,false,free);
-		(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.MOUSE_UP,Global.delegate(this._mouse_up_handler,this),this.name);
+		(this.stage ? this.stage : Stage.current).on(StageEvent.MOUSE_UP,Global.delegate(this._mouse_up_handler,this),this.name);
 	}
 	
 	_drag_move_handler(e)
 	{
-		this.dispatchEvent(new Event(UIContainer.DRAG_MOVE));
+		this.emit(new Event(UIContainer.DRAG_MOVE));
 	}
 	
 	_mouse_up_handler(e)
@@ -167,7 +167,9 @@ export default class UIContainer extends UIBase
 				
 				if(posX!=this._register_instance.x || posY!=this._register_instance.y) {
 					bool=false;
-					TweenLite.to(this._register_instance,this.back_time,{ease:this.back_ease,x:posX,y:posY});
+					TweenLite.to(this._register_instance,this.back_time,{ease:this.back_ease,x:posX,y:posY,
+						onUpdate:()=>this.emit(new Event(UIContainer.DRAG_MOVE))
+					});
 				}
 			}
 			
@@ -181,7 +183,9 @@ export default class UIContainer extends UIBase
 		    	
 		    	if(length>8){
 		    		let data=this._count_speed(posX,posY,speed);
-		    		TweenLite.to(this._register_instance,data.time,{ease:this.back_ease,x:data.x,y:data.y});
+		    		TweenLite.to(this._register_instance,data.time,{ease:this.back_ease,x:data.x,y:data.y,
+						onUpdate:()=>this.emit(new Event(UIContainer.DRAG_MOVE))
+					});
 		    	}
 		    }
 		}
@@ -195,8 +199,8 @@ export default class UIContainer extends UIBase
 		
 		(this.stage ? this.stage : Stage.current).stopDrag();
 		(this.stage ? this.stage : Stage.current).mouseTarget=null;
-		(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.MOUSE_UP,null,this.name);
-		this._register_instance.removeEventListener(StageEvent.DRAG_MOVE,null,this.name);
+		(this.stage ? this.stage : Stage.current).off(StageEvent.MOUSE_UP,null,this.name);
+		this._register_instance.off(StageEvent.DRAG_MOVE,null,this.name);
 	}
 	
 	_count_speed(offsetX,offsetY,speed)
@@ -226,7 +230,7 @@ export default class UIContainer extends UIBase
 	moveTo(x,y)
 	{
 		super.moveTo(x,y);
-		if(this._register_instance) this._register_instance.dispatchEvent(new Event(Event.RESIZE,{w:this._mask_width,h:this._mask_height},{x:this.x,y:this.y}));
+		if(this._register_instance) this._register_instance.emit(new Event(Event.RESIZE,{w:this._mask_width,h:this._mask_height},{x:this.x,y:this.y}));
 	}
 	
 	/**
@@ -243,7 +247,7 @@ export default class UIContainer extends UIBase
 		if(!this._register_instance) return;
 		
 		this._control_orientation();
-		this._register_instance.dispatchEvent(new Event(Event.RESIZE,{w:this._mask_width,h:this._mask_height},{x:this.x,y:this.y}));
+		this._register_instance.emit(new Event(Event.RESIZE,{w:this._mask_width,h:this._mask_height},{x:this.x,y:this.y}));
 	}
 	
 	render  ()
@@ -287,7 +291,7 @@ export default class UIContainer extends UIBase
 	    if(this._register_instance!=undefined) {
 	    	this._reset_hold_control(null);
 	    	this._register_instance.resize=true;
-	    	this._register_instance.dispatchEvent(new Event(Event.RESIZE,{w:this._mask_width,h:this._mask_height},{x:this.x,y:this.y,r:this.rotation}));
+	    	this._register_instance.emit(new Event(Event.RESIZE,{w:this._mask_width,h:this._mask_height},{x:this.x,y:this.y,r:this.rotation}));
 	    }
 	}
 	
@@ -315,13 +319,13 @@ export default class UIContainer extends UIBase
 	reset()
 	{
 		if(this._register_instance){
-			if(this._register_instance.hasEventListener(StageEvent.MOUSE_DOWN)){
+			if(this._register_instance.has(StageEvent.MOUSE_DOWN)){
 				this._mouse_up_handler(null);
-				this._register_instance.removeEventListener(StageEvent.MOUSE_DOWN,null,this.name);
+				this._register_instance.off(StageEvent.MOUSE_DOWN,null,this.name);
 			}
 			
-			if(this._register_instance.hasEventListener(DisplayBase.RESIZE)){
-				this._register_instance.removeEventListener(DisplayBase.RESIZE,null,this.name);
+			if(this._register_instance.has(DisplayBase.RESIZE)){
+				this._register_instance.off(DisplayBase.RESIZE,null,this.name);
 			}
 		}
 		

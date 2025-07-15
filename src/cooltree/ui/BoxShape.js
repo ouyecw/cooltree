@@ -39,7 +39,7 @@ export default class BoxShape extends DisplayObjectContainer
 	{
 		if(value && this._resize!=value){
 			if(this.instance && this.instance instanceof DisplayObject) this.instance.graphics.reset();
-			this.dispatchEvent(new Event(DisplayBase.RESIZE));
+			this.emit(new Event(DisplayBase.RESIZE));
 			this.__checkDisplayUpdate();
 		}
 		

@@ -80,7 +80,17 @@ export default class Spine extends DisplayBase
 	//当前动画的长度（秒）
     get duration()
     {
-        return this.state ? this.state.getCurrent(0).animation.duration : 0;
+        if(!this.state) return 0;
+		
+		let time=0;
+		try{
+			time=this.state.getCurrent(0).animation.duration;
+		}
+		catch(err){
+			console.log("[ERROR]",err);
+		}
+		
+        return time;
     }
 
 	//当前动画骨骼所有皮肤
@@ -357,7 +367,7 @@ export default class Spine extends DisplayBase
                 const animation_duration=this.duration;
                 this.currentTime += delta;
 
-                while (this.currentTime >= animation_duration)
+                while (animation_duration>0 && this.currentTime >= animation_duration)
                     this.currentTime -= animation_duration;
 
                 this.percent=this.currentTime / animation_duration;

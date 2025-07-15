@@ -64,7 +64,7 @@ export default class DisplayBase extends EventDispatcher
 		this._resize=value;
 			
 		if(this._resize){
-			this.dispatchEvent(new Event(DisplayBase.RESIZE));
+			this.emit(new Event(DisplayBase.RESIZE));
 			this.__checkDisplayUpdate();
 		}
 	}

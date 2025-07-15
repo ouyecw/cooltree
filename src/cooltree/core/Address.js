@@ -49,7 +49,7 @@ export default class Address extends EventDispatcher
 		if(str==this._value) return;
 		
 		this._value=str;
-		this.dispatchEvent(new Event(Address.CHANGE,this._value));
+		this.emit(new Event(Address.CHANGE,this._value));
 	}
 	
 	dispose()

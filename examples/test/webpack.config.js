@@ -1,5 +1,4 @@
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
@@ -14,16 +13,11 @@ module.exports = (env,argv) =>{
     filename: 'js/[name].[hash:8].js',
     path: path.resolve(__dirname, 'bin')
   },
-	module: { 
+	module: {
 	  rules: [{ 
 		test: /\.js$/, 
 		exclude: /node_modules/, 
-		use:{
-			loader: 'babel-loader',
-			options: {
-				presets: ['es2015']
-		    }
-		}
+		loader: 'babel-loader',
 	  }] 
 	},
   optimization: {
@@ -32,19 +26,19 @@ module.exports = (env,argv) =>{
 	  name: true,
 	  minChunks: Infinity,
 	},
-	minimizer: [new UglifyJsPlugin({
-		exclude: /\.min\.js$/, // 过滤掉以".min.js"结尾的文件，我们认为这个后缀本身就是已经压缩好的代码，没必要进行二次压缩
-		parallel: true, // 开启并行压缩，充分利用cpu
-		extractComments: true, // 移除注释
-		cache: true,
-	})],
+	// minimizer: [new UglifyJsPlugin({
+	// 	exclude: /\.min\.js$/, // 过滤掉以".min.js"结尾的文件，我们认为这个后缀本身就是已经压缩好的代码，没必要进行二次压缩
+	// 	parallel: true, // 开启并行压缩，充分利用cpu
+	// 	extractComments: true, // 移除注释
+	// 	cache: true,
+	// })],
   },
   devServer: {
-    port: 8118,
+    port: 8111,
     host: 'localhost',
-    proxy: { 
-       '/': 'http://localhost:10000/'
-    }
+    // proxy: { 
+    //    '/': 'http://cooltree.cn/
+    // }
   },
   stats: { 
 	  children: false ,

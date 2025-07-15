@@ -85,7 +85,7 @@ export default class GroupList extends DisplayObjectContainer
 		}
 		else list=new ScrollTouchList();
 		this.addChild(list);
-	    list.addEventListener(ScrollTouchList.SELECT,this._selectHandler);
+	    list.on(ScrollTouchList.SELECT,this._selectHandler);
 	    
 	    if(this.auto_all && d.length>0 && (!d[0].hasOwnProperty("id") || d[0].id!=0)){
 	    	let obj={id:0};
@@ -139,7 +139,7 @@ export default class GroupList extends DisplayObjectContainer
 		for (i = 0;i<l;i++) {
 			c = this._children[i];
 			if(c && c.type>=type) {
-				c.removeEventListener(ScrollTouchList.SELECT);
+				c.off(ScrollTouchList.SELECT);
 				c.clear();
 				c.data=null;
 				c.removeFromParent(false);
@@ -186,7 +186,7 @@ export default class GroupList extends DisplayObjectContainer
 			this.removeList(type+1);
 		}
 		
-		this.dispatchEvent(new Event(GroupList.SELECTED,e.params,type));
+		this.emit(new Event(GroupList.SELECTED,e.params,type));
 	}
 }
 

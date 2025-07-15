@@ -59,10 +59,8 @@ export default class Graphics
 		this.stroke_style=style;
 		this.line_join=joint;
 		this.line_alpha=alpha;
-		this.line_width=thickness;
 		this.miter_limit=miterLimit;
-		
-		this.line_width=this.line_width<=0 ? 0.1 : this.line_width;
+		this.line_width=Math.max(0,thickness);
 		this.stroke_style=this.stroke_style+"";
 		
 		this.context.lineCap=this.line_cap;
@@ -102,7 +100,7 @@ export default class Graphics
 			this.context.fill();
 		}
 		
-		if (this.stroke_style)
+		if (this.stroke_style && this.line_width>0 && this.line_alpha>0)
 		{
 			
 			this.context.strokeStyle=this.stroke_style;

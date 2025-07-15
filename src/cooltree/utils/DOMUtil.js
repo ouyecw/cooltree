@@ -167,11 +167,11 @@ export default class DOMUtil
 	    } 
 	}
 	
-	static dispatchEvent(eventClass,eventType,node)
+	static emit(eventClass,eventType,node)
 	{
 		let evObj = document.createEvent(eventClass);
 	    evObj.initEvent( eventType, true, false);
-	    (node || document).dispatchEvent(evObj);
+	    (node || document).emit(evObj);
 	}
 	
 	static addMeta(content,name="keywords")

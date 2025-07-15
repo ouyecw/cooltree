@@ -30,7 +30,7 @@ export default class URLLoader extends EventDispatcher
 		const target=this;
 		const ext = StringUtil.getPathExt(u);
 		
-		if (ext == "txt") {
+		if (ext == "txt" || ext == "atlas") {
 			type = URLLoader.TYPE_TEXT;
 		} else if (ext == "json") {
 			type = URLLoader.TYPE_JSON;
@@ -41,36 +41,21 @@ export default class URLLoader extends EventDispatcher
 		}else if (ext == "css") {
 			type = URLLoader.TYPE_CSS;
 		}
-		else retrun;
+		else type = URLLoader.TYPE_BUFFER;
 		this.type =type;
 	
-		if (type == URLLoader.TYPE_TEXT || type == URLLoader.TYPE_JSON || type == URLLoader.TYPE_PROP) {
-			let ajax = new Ajax();
-			ajax.get(u).then(function(data){
-				target.content = data;
-				target.dispatchEvent(new Event(Event.COMPLETE));
-				target.removeEventListener(Event.COMPLETE);
-				target.removeEventListener(Event.ERROR);
-			}).catch(function(error){
-				console.log("[ERROR]",error);
-				target.content = null;
-				target.dispatchEvent(new Event(Event.ERROR));
-				target.removeEventListener(Event.COMPLETE);
-				target.removeEventListener(Event.ERROR);
-			});
-		}
-	    else if (type == URLLoader.TYPE_JS) {
+		if (type == URLLoader.TYPE_JS) {
 			target.content = document.createElement("script");
 			target.content.onload =function() {
-				target.dispatchEvent(new Event(Event.COMPLETE));
-				target.removeEventListener(Event.COMPLETE);
-	            target.removeEventListener(Event.ERROR);
+				target.emit(new Event(Event.COMPLETE));
+				target.off(Event.COMPLETE);
+	            target.off(Event.ERROR);
 			};
 			
 			target.content.onerror =function() {
-				target.dispatchEvent(new Event(Event.ERROR));
-				target.removeEventListener(Event.COMPLETE);
-				target.removeEventListener(Event.ERROR);
+				target.emit(new Event(Event.ERROR));
+				target.off(Event.COMPLETE);
+				target.off(Event.ERROR);
 			};
 			
 			target.content.src = u;
@@ -83,20 +68,52 @@ export default class URLLoader extends EventDispatcher
 			target.content.type = "text/css";
 			
 			target.content.onload =function () {
-				target.dispatchEvent(new Event(Event.COMPLETE));
-				target.removeEventListener(Event.COMPLETE);
-				target.removeEventListener(Event.ERROR);
+				target.emit(new Event(Event.COMPLETE));
+				target.off(Event.COMPLETE);
+				target.off(Event.ERROR);
 			}
 			
 			target.content.onerror =function () {
-				target.dispatchEvent(new Event(Event.ERROR));
-				target.removeEventListener(Event.COMPLETE);
-				target.removeEventListener(Event.ERROR);
+				target.emit(new Event(Event.ERROR));
+				target.off(Event.COMPLETE);
+				target.off(Event.ERROR);
 			};
 			
 			target.content.href = u;
 			document.querySelector('head').appendChild(target.content);
 		}
+		else {
+			let ajax = new Ajax(URLLoader.getType(type));
+			ajax.get(u).then(function(data){
+				target.content = data;
+				target.emit(new Event(Event.COMPLETE));
+				target.off(Event.COMPLETE);
+				target.off(Event.ERROR);
+			}).catch(function(error){
+				console.log("[ERROR]",error);
+				target.content = null;
+				target.emit(new Event(Event.ERROR));
+				target.off(Event.COMPLETE);
+				target.off(Event.ERROR);
+			});
+		}
+	}
+
+	static getType(type)
+	{
+		switch(type)
+		{
+			case URLLoader.TYPE_TEXT:
+				return Ajax.TEXT;
+
+			case URLLoader.TYPE_JSON:
+				return Ajax.JSON;
+
+			case URLLoader.TYPE_PROP:
+				return Ajax.PROP;
+		}
+
+		return Ajax.ARRAY_BUFFER;
 	}
 	
 	/**
@@ -132,9 +149,10 @@ export default class URLLoader extends EventDispatcher
 
 }
 
-URLLoader.TYPE_TEXT = "text";
-URLLoader.TYPE_JSON = "json";
-URLLoader.TYPE_PROP = "prop";
+URLLoader.TYPE_BUFFER = "arraybuffer";
+URLLoader.TYPE_TEXT   = "text";
+URLLoader.TYPE_JSON   = "json";
+URLLoader.TYPE_PROP   = "prop";
 
 URLLoader.TYPE_CSS = "css";
 URLLoader.TYPE_JS  = "js";

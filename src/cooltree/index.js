@@ -219,4 +219,6 @@ app.MySocket=require('./net/MySocket.js').default
 
 app.ContentList=require('./plus/ContentList.js').default
 
+app.ContentItem=require('./plus/ContentItem.js').default
+
 module.exports=app;

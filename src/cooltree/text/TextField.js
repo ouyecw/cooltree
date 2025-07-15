@@ -356,10 +356,10 @@ export default class TextField extends DisplayObject
 	set stage(value) 
 	{
         if(this._stage==value) return;
-		if(this._stage) this._stage.removeEventListener(StageEvent.UPDATE,null,this.name);
+		if(this._stage) this._stage.off(StageEvent.UPDATE,null,this.name);
 		
 		this._stage=value;
-		if(this._stage) this._stage.addEventListener(StageEvent.UPDATE,Global.delegate(this.__update_size,this),this.name);
+		if(this._stage) this._stage.on(StageEvent.UPDATE,Global.delegate(this.__update_size,this),this.name);
     }
 	
 	_update()

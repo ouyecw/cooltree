@@ -42,7 +42,7 @@ export default class Timer extends EventDispatcher
 	
 	_onTimeHandler()
 	{
-		this.dispatchEvent(new Event(Timer.TIME));
+		this.emit(new Event(Timer.TIME));
 	}
 	
 	start()

@@ -129,7 +129,8 @@ export default class ObjectUtil
 				    break;
 				    
 				default:
-				   target[i]=(item==null || typeof(item)=="string" || !clone) ? item : ObjectUtil.cloneObj(item);
+				   if(target[i] && type=="object" && item) ObjectUtil.copyAttribute(target[i],item,false);
+				   else target[i]=(item==null || typeof(item)=="string" || !clone) ? item : ObjectUtil.cloneObj(item);
 				   break;
 			}
 		}

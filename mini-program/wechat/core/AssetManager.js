@@ -18,9 +18,8 @@ export default class AssetManager
 	/**
 	 * 添加加载完成的文件数据
 	 * @param {Object} files
-	 * @param {Boolean} isMovie
 	 */
-	static addFiles(files,isMovie=false)
+	static addFiles(files)
 	{
 		if(files==null) return;
 		let i,f,x,s,j,a,b,l;
@@ -60,10 +59,10 @@ export default class AssetManager
 					}
 					else delete files[j+l];
 					
-					if(s[0].width>0 && isMovie) 
+					if(s[0].width>0) 
 						MovieManager.addSources(s);
 					else
-						AssetManager.addSources(s,isMovie);
+						AssetManager.addSources(s);
 				}
 				else AssetManager._cache[i]=f;
 			}

@@ -163,7 +163,7 @@ export default class Stage extends DisplayObjectContainer
 		this.stageHeight=h;
 		
 		if(Global.autoShapeSize){
-			this.dispatchEvent(new Event(StageEvent.UPDATE));
+			this.emit(new Event(StageEvent.UPDATE));
 		}
 	}
 	
@@ -175,13 +175,13 @@ export default class Stage extends DisplayObjectContainer
 		if(bool){
 			if(!Global.animationFrame){
 				this.timer=this.timer ? this.timer : new Timer();
-				this.timer.addEventListener(Timer.TIME,this.__enter_frame, false);
+				this.timer.on(Timer.TIME,this.__enter_frame, false);
 	   			this.timer.start();
 			}
 			else this._enterFrame();
 		}
 		else if(this.timer){
-		    this.timer.removeEventListener(Timer.TIME,this.__enter_frame);
+		    this.timer.off(Timer.TIME,this.__enter_frame);
 	    	this.timer.stop();
 	    }
 			
@@ -231,23 +231,23 @@ export default class Stage extends DisplayObjectContainer
 		}else{
 			Global.root.removeEventListener('message', this.__message_handler);
 			document.removeEventListener("keydown", this.__key_handler);
-		    document.removeEventListener("keyup", this.__key_handler);
+			document.removeEventListener("keyup", this.__key_handler);
 		}
 	}
 	
 	_message_handler(e)
 	{
-		this.dispatchEvent(new Event(StageEvent.MESSAGE,e && e.data ? e.data : e));
+		this.emit(new Event(StageEvent.MESSAGE,e && e.data ? e.data : e));
 	}
 	
 	resize (w,h) 
 	{
-		this.dispatchEvent(new Event(StageEvent.RESIZE,{width:w,height:h}));
+		this.emit(new Event(StageEvent.RESIZE,{width:w,height:h}));
 	}
 	
 	_enterFrame (e) 
 	{
-		this.dispatchEvent(new Event(StageEvent.ENTER_FRAME));
+		this.emit(new Event(StageEvent.ENTER_FRAME));
 		
 		if(this.auto_clear && (DisplayObjectContainer._num_canvas_target>0 || this.last_fresh)) {
 			if(this.auto_fresh) this.clear();
@@ -325,7 +325,7 @@ export default class Stage extends DisplayObjectContainer
 		this.dragTarget.x = pos.x;
 		this.dragTarget.y = pos.y;
 		
-		if(!this._isTap) this.dragTarget.dispatchEvent(new Event(StageEvent.DRAG_MOVE));
+		if(!this._isTap) this.dragTarget.emit(new Event(StageEvent.DRAG_MOVE));
 	    if(pos2) ObjectPool.remove(pos2);
 	    if(pos) ObjectPool.remove(pos);
 	}
@@ -407,9 +407,9 @@ export default class Stage extends DisplayObjectContainer
 		let bool=a.target.breakTouch;
 		let copy=(a.target!=this) ?  Factory.c("se",a) : null;
 	    let bt=this._checkMouseClick(a,b);
-		a.target.dispatchEvent(a);
+		a.target.emit(a);
 		
-		if(copy) this.dispatchEvent(copy);
+		if(copy) this.emit(copy);
 		if(!(Global.breakTouch || bool || bt || this.breakTouch) || a.type==StageEvent.MOUSE_UP) return;
 		
 		e.preventDefault();
@@ -420,7 +420,7 @@ export default class Stage extends DisplayObjectContainer
 	{
 		if(e.target==null || e.type=="mouseleave" || (!DOMUtil.contains(this.div,e.target) && e.type!="mouseup")) {
 			this._activate=false;
-			this.dispatchEvent(Factory.c("se",[StageEvent.MOUSE_OUT,this._activate]));
+			this.emit(Factory.c("se",[StageEvent.MOUSE_OUT,this._activate]));
 			return;
 		}
 		
@@ -433,13 +433,13 @@ export default class Stage extends DisplayObjectContainer
 		if(e.type=="mouseenter"){
 			this._activate=true;
 			a.type=StageEvent.MOUSE_OVER;
-			this.dispatchEvent(Factory.c("se",[StageEvent.MOUSE_OVER,this._activate]));
+			this.emit(Factory.c("se",[StageEvent.MOUSE_OVER,this._activate]));
 		}else if(!this.isFullScreen && this._activate && (mx<0 || my<0 || mx>this.stageWidth || my>this.stageHeight)){
 			this._activate=false;
-			this.dispatchEvent(Factory.c("se",[StageEvent.MOUSE_OUT,this._activate]));
+			this.emit(Factory.c("se",[StageEvent.MOUSE_OUT,this._activate]));
 		}else if(!this._activate && e.type!="mouseup"){
 			this._activate=true;
-			this.dispatchEvent(Factory.c("se",[StageEvent.MOUSE_OVER,this._activate]));
+			this.emit(Factory.c("se",[StageEvent.MOUSE_OVER,this._activate]));
 		}
 		
 		if(b && e.type==StageEvent.MOUSE_MOVE){
@@ -472,9 +472,9 @@ export default class Stage extends DisplayObjectContainer
 		let bool=a.target.breakTouch;
 		let copy=(a.target!=this) ?  Factory.c("se",a) : null;
 		let bt=this._checkMouseClick(a,b);
-		a.target.dispatchEvent(a);
+		a.target.emit(a);
 		
-		if(copy) this.dispatchEvent(copy);
+		if(copy) this.emit(copy);
 		if(!(Global.breakTouch || bool || bt || this.breakTouch) || a.type==StageEvent.MOUSE_UP) return;
 		
 		e.preventDefault();
@@ -490,11 +490,11 @@ export default class Stage extends DisplayObjectContainer
 		
 		if(a.type==StageEvent.MOUSE_UP){
 			if(this._mouseDownTarget!=null && a.target!=this && a.target==this._mouseDownTarget){
-				a.target.dispatchEvent(this.__copyStageEvent(a,this._mouseDownTarget,StageEvent.MOUSE_CLICK));
+				a.target.emit(this.__copyStageEvent(a,this._mouseDownTarget,StageEvent.MOUSE_CLICK));
 			    if(this._isTap) {
 			    	let evt=this.__copyStageEvent(a,this._mouseDownTarget,StageEvent.MOUSE_TAP);
 			    	this.__transmitEvent(evt);
-			    	a.target.dispatchEvent(evt);
+			    	a.target.emit(evt);
 			    }
 			}
 			
@@ -526,10 +526,10 @@ export default class Stage extends DisplayObjectContainer
 			if(a.type==StageEvent.MOUSE_OVER || a.type==StageEvent.MOUSE_OUT){
 				bool=obj.hitTestPoint(this.mouseX,this.mouseY);
 				if((a.type==StageEvent.MOUSE_OVER && bool) || (a.type==StageEvent.MOUSE_OUT && !bool)){
-					obj.dispatchEvent(this.__copyStageEvent(a,obj));
+					obj.emit(this.__copyStageEvent(a,obj));
 				}
 			}
-			else obj.dispatchEvent(this.__copyStageEvent(a,obj));
+			else obj.emit(this.__copyStageEvent(a,obj));
 		}
 		
 		return false;//bt;
@@ -559,7 +559,7 @@ export default class Stage extends DisplayObjectContainer
 			
 			this.__transmitEvent(s);
 			if(c.onMouseEvent)  c.onMouseEvent(s);
-			if(c.dispatchEvent) c.dispatchEvent(s);
+			if(c.emit) c.emit(s);
 			
 			if(this._mouseDownTarget==c) 
 				this._mouseDownTarget=null;
@@ -573,7 +573,7 @@ export default class Stage extends DisplayObjectContainer
 			
 			this.__transmitEvent(s);
 			if(a.onMouseEvent)  a.onMouseEvent(s);
-			if(a.dispatchEvent) a.dispatchEvent(s);
+			if(a.emit) a.emit(s);
 		}
 	}
 	
@@ -622,7 +622,7 @@ export default class Stage extends DisplayObjectContainer
 	
 	_keyHandler(e)
 	{
-		this.dispatchEvent(new Event(e.type,(e||Global.root.event).keyCode,e,this.mouseTarget));
+		this.emit(new Event(e.type,(e||Global.root.event).keyCode,e,this.mouseTarget));
 	}
 	
 	setCursor (target) 

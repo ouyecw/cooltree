@@ -44,7 +44,7 @@ window.onload = function()
     _stage.initCanvas(window.innerWidth,window.innerHeight,canvas);
     
     _loader=new Loader("img/source.json",Main.locale,"preload");
-    _loader.addEventListener(Loader.LOAD_COMPLETE,onComPlete);
+    _loader.on(Loader.LOAD_COMPLETE,onComPlete);
 }
 
 function onEnterFrame(e)
@@ -71,7 +71,7 @@ function onComPlete(e)
 		
 		if(!_show_fps) return;
 		_fps_tf=Factory.c("tf",{text:"FPS",size:16,color:"#FFFFFF",width:90,height:20});
-		_stage.addEventListener(StageEvent.ENTER_FRAME,onEnterFrame);
+		_stage.on(StageEvent.ENTER_FRAME,onEnterFrame);
 		_stage.addChild(_fps_tf);
 		
 		setInterval(function(){
@@ -90,5 +90,5 @@ window.onresize=function()
 		_preloader.moveTo((Global.canvas.width-_preloader.width)*0.5,(Global.canvas.height-_preloader.height)*0.5);
 	}
 	
-    Stage.current.dispatchEvent(new Event(StageEvent.RESIZE,null));
+    Stage.current.emit(new Event(StageEvent.RESIZE,null));
 }

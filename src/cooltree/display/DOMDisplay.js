@@ -249,7 +249,7 @@ export default class DOMDisplay extends DisplayBase
 	    
 	    this.updateMatrix=true;
 	    this.__checkDisplayUpdate();
-	    this.dispatchEvent(new Event(DisplayBase.RESET_INSTANCE));
+	    this.emit(new Event(DisplayBase.RESET_INSTANCE));
 	    return this.instance;
 	}
 	

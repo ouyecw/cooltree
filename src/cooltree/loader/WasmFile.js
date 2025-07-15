@@ -23,7 +23,7 @@ export default class WasmFile extends EventDispatcher
 	async load(url)
 	{
 		if(!Global.supportWebAssembly){
-			this.dispatchEvent(new Event(Event.ERROR));
+			this.emit(new Event(Event.ERROR));
 			return;
 		}
 		
@@ -33,10 +33,10 @@ export default class WasmFile extends EventDispatcher
 			response = await fetch(url);
 			buffer = await response.arrayBuffer();
 			this.module = await WebAssembly.compile(buffer);
-			this.dispatchEvent(new Event(Event.COMPLETE));
+			this.emit(new Event(Event.COMPLETE));
 		}
 		catch(err){
-			this.dispatchEvent(new Event(Event.ERROR));
+			this.emit(new Event(Event.ERROR));
 		}
 	}
 	

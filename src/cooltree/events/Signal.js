@@ -96,7 +96,7 @@ export default class Signal
 	 * @param  {...any} params 参数
 	 * @return {boolean} 是否成功
 	 */
-	send(name, ...args)
+	emit(name, ...args)
 	{
 		if(StringUtil.isEmpty(name)) return false;
 		let list=this._handlers[name];

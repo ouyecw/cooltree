@@ -376,15 +376,15 @@ export default class InputText extends DOMDisplay
 	    
 	    const target=this;
 	    inputElement.oninput = function () {
-	        target.dispatchEvent(new Event(InputText.CHANGE,inputElement.value));
+	        target.emit(new Event(InputText.CHANGE,inputElement.value));
 	    };
 	    
 	    inputElement.onfocus = function () {
-	    	target.dispatchEvent(new Event(InputText.FOCUS_IN));
+	    	target.emit(new Event(InputText.FOCUS_IN));
 	    }
 	    
 	    inputElement.onblur = function () {
-	    	target.dispatchEvent(new Event(InputText.FOCUS_OUT));
+	    	target.emit(new Event(InputText.FOCUS_OUT));
 	    }
 	    
 	    return inputElement;

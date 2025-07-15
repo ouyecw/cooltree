@@ -88,7 +88,7 @@ export default class List extends DisplayObjectContainer
        	  
        	  if(Global.isPC && this.useWheel) {
        	  	this.container.mouseEnabled=true;
-       	  	this.container.addEventListener(StageEvent.MOUSE_WHEEL,Global.delegate(this._mouse_wheel,this));
+       	  	this.container.on(StageEvent.MOUSE_WHEEL,Global.delegate(this._mouse_wheel,this));
        	  }
        }
        
@@ -147,7 +147,7 @@ export default class List extends DisplayObjectContainer
 		this.container.addChild(item);
 		LayoutUtil.tile(this.container._children,1,false);
 		this.container.height=(this.container.numChildren*this.item_height);
-		item.addEventListener(StageEvent.MOUSE_TAP,this._handler);
+		item.on(StageEvent.MOUSE_TAP,this._handler);
 	}
 	
 	_click_item(e)
@@ -174,7 +174,7 @@ export default class List extends DisplayObjectContainer
 		}
 		
 		this.selected=btn;
-		this.dispatchEvent(new Event(List.CHANGE,btn.data,btn.tf.text));
+		this.emit(new Event(List.CHANGE,btn.data,btn.tf.text));
 	}
 	
 	size(w,h)

@@ -76,7 +76,7 @@ export default class Media extends DisplayObject
 	
 	_load_complete()
 	{
-		this.dispatchEvent(new Event(Media.MEDIA_LOAD_COMPLETE));
+		this.emit(new Event(Media.MEDIA_LOAD_COMPLETE));
 		if(this.delay_id) clearTimeout(this.delay_id);
 		this.delay_id=0;
 		
@@ -94,7 +94,7 @@ export default class Media extends DisplayObject
 		this.loading=false;
 		this.loadFail=true;
 		trace("[ERROR] Media",e);
-		this.dispatchEvent(new Event(Media.MEDIA_ERROR));
+		this.emit(new Event(Media.MEDIA_ERROR));
 		
 		if(this.auto_next && this.list.length>1){
 			this.current=(this.current>=this.list.length ? 0 : this.current+1);
@@ -105,7 +105,7 @@ export default class Media extends DisplayObject
 	
 	_play_over(e)
 	{
-		this.dispatchEvent(new Event(Media.MEDIA_PLAY_COMPLETE));
+		this.emit(new Event(Media.MEDIA_PLAY_COMPLETE));
 		
 		if(this.auto_next && this.list.length>1){
 			this.current=(this.current>=this.list.length ? 0 : this.current+1);
@@ -202,7 +202,7 @@ export default class Media extends DisplayObject
 		
 		if(!this.loading && this.list.length>0) this._start_load();
 		else if(args.length>0 && this.list.length==0){
-			this.dispatchEvent(new Event(Media.MEDIA_ERROR));
+			this.emit(new Event(Media.MEDIA_ERROR));
 		}
 	}
 	
@@ -287,8 +287,16 @@ export default class Media extends DisplayObject
 		this.element.addEventListener("ended",this.__over_handler,false);
 		if(this.volume>0) this.element.volume=this.volume;
 		else this.element.muted=true;
+		
+		try{
+			this.element.play();
+		}
+		catch(err){
+			console.log("[ERROR]",err);
+			return;
+		}
+		
 		this.playing = true;
-		this.element.play();
 	}
 	
 	stop  ()

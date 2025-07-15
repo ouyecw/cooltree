@@ -168,7 +168,7 @@ export default class ScrollTouchList extends Sprite
 		
 		for(i=0;i<l;i++){
 			item=this._list[i];
-			item.removeEventListener(StageEvent.MOUSE_TAP);
+			item.off(StageEvent.MOUSE_TAP);
 			item.removeFromParent(false);
 			ObjectPool.remove(item);
 		}
@@ -219,7 +219,7 @@ export default class ScrollTouchList extends Sprite
 	    	if(index>0) this.goto(index,true);
 	    	else {
 	    		this._update_items_state();
-	    		this.dispatchEvent(new Event(ScrollTouchList.SELECT,this._datas[0]));
+	    		this.emit(new Event(ScrollTouchList.SELECT,this._datas[0]));
 	    	}
 	    }
 	    
@@ -227,8 +227,8 @@ export default class ScrollTouchList extends Sprite
 	    this._is_init=true;
 	    
 	    this._complete=Global.delegate(this.onTweenComplete,this);
-	    this.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this.onMouseDown,this));
-	    this.addEventListener(StageEvent.MOUSE_WHEEL,Global.delegate(this.onMouseWheel,this));
+	    this.on(StageEvent.MOUSE_DOWN,Global.delegate(this.onMouseDown,this));
+	    this.on(StageEvent.MOUSE_WHEEL,Global.delegate(this.onMouseWheel,this));
 	}
 	
 	onMouseDown(e)
@@ -236,8 +236,8 @@ export default class ScrollTouchList extends Sprite
 		this._has_drag=false;
 		TweenLite.remove(this._container);
 		this._start_point=new Point(e.mouseX,e.mouseY);
-		this.stage.addEventListener(StageEvent.MOUSE_MOVE,Global.delegate(this.onMouseMove,this),this.name);
-		this.stage.addEventListener(StageEvent.MOUSE_UP,Global.delegate(this.onMouseUp,this),this.name);
+		this.stage.on(StageEvent.MOUSE_MOVE,Global.delegate(this.onMouseMove,this),this.name);
+		this.stage.on(StageEvent.MOUSE_UP,Global.delegate(this.onMouseUp,this),this.name);
 	}
 	
 	onMouseMove(e)
@@ -276,8 +276,8 @@ export default class ScrollTouchList extends Sprite
 	
 	onMouseUp(e)
 	{
-		this.stage.removeEventListener(StageEvent.MOUSE_MOVE,null,this.name);
-		this.stage.removeEventListener(StageEvent.MOUSE_UP,null,this.name);
+		this.stage.off(StageEvent.MOUSE_MOVE,null,this.name);
+		this.stage.off(StageEvent.MOUSE_UP,null,this.name);
 		
 		this._has_drag=false;
 		this.stage.stopDrag();
@@ -348,7 +348,7 @@ export default class ScrollTouchList extends Sprite
 	{
 		this._update_items_state();
 		this._move_current_item();
-	//	this.dispatchEvent(new Event(ScrollTouchList.SELECT,this._datas[this._current]));
+	//	this.emit(new Event(ScrollTouchList.SELECT,this._datas[this._current]));
 	}
 	
 	onMouseWheel(e)
@@ -435,7 +435,7 @@ export default class ScrollTouchList extends Sprite
 			item.set(data,this._portrait ? this._list_width : this._item_size,this._portrait ? this._item_size : this._list_height);
 			
 			item.index=i;
-			item.addEventListener(StageEvent.MOUSE_TAP,Global.delegate(this.onMouseTap,this));
+			item.on(StageEvent.MOUSE_TAP,Global.delegate(this.onMouseTap,this));
 		}
 		
 		LayoutUtil.tile(this._list,1,!this._portrait,new Rectangle(0,0,this._portrait ? this._list_width : this._item_size,this._portrait ? this._item_size : this._list_height),new Point(this._portrait ? 0 : this.space,this._portrait ? this.space : 0));
@@ -511,7 +511,7 @@ export default class ScrollTouchList extends Sprite
 		let label=(this._portrait ? "y" : "x");
 		let offest=(this._temp_item[label]+this._container[label]-this._middle);
 		this._container[label]-=offest;
-		this.dispatchEvent(new Event(ScrollTouchList.SELECT,this._datas[this._current]));
+		this.emit(new Event(ScrollTouchList.SELECT,this._datas[this._current]));
 	}
 	
 	dispose()

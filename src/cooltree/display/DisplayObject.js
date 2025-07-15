@@ -209,7 +209,7 @@ export default class DisplayObject extends DisplayBase
 
 		this.updateMatrix=true;
 		this.__checkDisplayUpdate();
-		this.dispatchEvent(new Event(DisplayBase.RESET_INSTANCE));
+		this.emit(new Event(DisplayBase.RESET_INSTANCE));
 		return this.instance;
 	}
 	
@@ -276,16 +276,21 @@ export default class DisplayObject extends DisplayBase
 		else if(this.instance && this.instance.image){
 			const ctx=(target!=undefined ? target.context : this.stage.context);
 			if(this.instance.isRotated) ctx.rotate(1.5 * Math.PI);
-			
-			ctx.drawImage(
-			 this.instance.image,
-			 this.instance.x,
-			 this.instance.y,
-			 this.instance.width,
-			 this.instance.height,
-			 this.instance.isRotated ? -this.instance.width/this.instance.scale : 0,0,
-			 this.instance.width/this.instance.scale,
-			 this.instance.height/this.instance.scale);
+
+			try{
+				ctx.drawImage(
+					this.instance.image,
+					this.instance.x,
+					this.instance.y,
+					this.instance.width,
+					this.instance.height,
+					this.instance.isRotated ? -this.instance.width/this.instance.scale : 0,0,
+					this.instance.width/this.instance.scale,
+					this.instance.height/this.instance.scale);
+			}
+			catch(err){
+				console.log("[ERROR]",err);
+			}
 		    
 			if(this.instance.isRotated) ctx.rotate(0.5 * Math.PI);
 		}

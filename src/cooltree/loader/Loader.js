@@ -66,15 +66,15 @@ export default class Loader extends EventDispatcher
 				e.target.onerror=null;
 				e.target.onload=null;
 			}else if(e.target instanceof URLLoader){
-				e.target.removeEventListener(Event.ERROR,this.__error_handler);
-				e.target.removeEventListener(Event.COMPLETE,this.__load_handler);
+				e.target.off(Event.ERROR,this.__error_handler);
+				e.target.off(Event.COMPLETE,this.__load_handler);
 			}else{
-				e.target.removeEventListener(Media.MEDIA_ERROR,this.__error_handler);
-				e.target.removeEventListener(Media.MEDIA_LOAD_COMPLETE,this.__load_handler);
+				e.target.off(Media.MEDIA_ERROR,this.__error_handler);
+				e.target.off(Media.MEDIA_LOAD_COMPLETE,this.__load_handler);
 			}
 		}
 		
-		this.dispatchEvent(new Event(Loader.STEP_ERROR,this._current_name,this._current_label));
+		this.emit(new Event(Loader.STEP_ERROR,this._current_name,this._current_label));
 		trace("[ERROR] Loading path by",this._current_name);
 		
 		if(this._list.length>0){
@@ -83,7 +83,7 @@ export default class Loader extends EventDispatcher
 			return;
 		}
 		
-		this.dispatchEvent(new Event(Loader.LOAD_COMPLETE,this._files,this._current_label));
+		this.emit(new Event(Loader.LOAD_COMPLETE,this._files,this._current_label));
 	}
 	
 	loadHandler(e)
@@ -96,11 +96,11 @@ export default class Loader extends EventDispatcher
 				e.target.onload=null;
 				e.target.onerror=null;
 			}else if(e.target instanceof URLLoader){
-				e.target.removeEventListener(Event.ERROR,this.__error_handler);
-				e.target.removeEventListener(Event.COMPLETE,this.__load_handler);	
+				e.target.off(Event.ERROR,this.__error_handler);
+				e.target.off(Event.COMPLETE,this.__load_handler);	
 			}else if(e.target){
-				e.target.removeEventListener(Media.MEDIA_ERROR,this.__error_handler);
-				e.target.removeEventListener(Media.MEDIA_LOAD_COMPLETE,this.__load_handler);
+				e.target.off(Media.MEDIA_ERROR,this.__error_handler);
+				e.target.off(Media.MEDIA_LOAD_COMPLETE,this.__load_handler);
 			}else if(e instanceof FontFace){
 				document.fonts.add(e);
 			}
@@ -109,8 +109,8 @@ export default class Loader extends EventDispatcher
 		let temp,fb;
 		
 		if(this._list.length>0){
-			if(this.hasEventListener(Loader.LOAD_PROCESS)) 
-			     this.dispatchEvent(new Event(Loader.LOAD_PROCESS,Math.ceil(100*this._loaded/this._total)));
+			if(this.has(Loader.LOAD_PROCESS)) 
+			     this.emit(new Event(Loader.LOAD_PROCESS,Math.ceil(100*this._loaded/this._total)));
 			
 			temp=this._files[this._current_name];
 			
@@ -120,16 +120,16 @@ export default class Loader extends EventDispatcher
 				this.load();
 			}
 			
-			if(temp) this.dispatchEvent(new Event(Loader.STEP_COMPLETE,temp,this._current_label));
-			else     this.dispatchEvent(new Event(Loader.STEP_ERROR,this._current_name,this._current_label));
+			if(temp) this.emit(new Event(Loader.STEP_COMPLETE,temp,this._current_label));
+			else     this.emit(new Event(Loader.STEP_ERROR,this._current_name,this._current_label));
 		}else{
 			if(this._feedback==null) {
 				let name=this._current_name,label=this._current_label;
 				temp=this._files;
 				this.reset(true);
 				
-				this.dispatchEvent(new Event(Loader.STEP_COMPLETE,temp[name],label));
-				this.dispatchEvent(new Event(Loader.LOAD_COMPLETE,temp,label));
+				this.emit(new Event(Loader.STEP_COMPLETE,temp[name],label));
+				this.emit(new Event(Loader.LOAD_COMPLETE,temp,label));
 				
 			}else{
 				fb=this._feedback;
@@ -213,7 +213,7 @@ export default class Loader extends EventDispatcher
 		if(this._list==null) return false;
 		
 		if(this._list.length==0){
-			this.dispatchEvent(new Event(Loader.LOAD_COMPLETE,this._files,this._current_label));
+			this.emit(new Event(Loader.LOAD_COMPLETE,this._files,this._current_label));
 			return false;
 		}
 		
@@ -266,8 +266,8 @@ export default class Loader extends EventDispatcher
 				}
 				
 				this._files[name]=sound;
-				sound.addEventListener(Media.MEDIA_ERROR,this.__error_handler);
-			    sound.addEventListener(Media.MEDIA_LOAD_COMPLETE,this.__load_handler);
+				sound.on(Media.MEDIA_ERROR,this.__error_handler);
+			    sound.on(Media.MEDIA_LOAD_COMPLETE,this.__load_handler);
 				break;
 				
 			case "xml":
@@ -292,24 +292,12 @@ export default class Loader extends EventDispatcher
 			    	this.errorHandler();
 			    }
 			    break;
-				
-			case "json":
-			case "txt":
-			case "js":
-			case "css":
-			case "prop":
-				url_loader=new URLLoader();
-				this._files[name]=url_loader;
-				url_loader.addEventListener(Event.ERROR,this.__error_handler);
-				url_loader.addEventListener(Event.COMPLETE,this.__load_handler);
-				url_loader.load(url);
-				break;
-				
+
 			case "wasm":
 				wasm=new WasmFile();
 				this._files[name]=wasm;
-				wasm.addEventListener(Event.ERROR,this.__error_handler);
-				wasm.addEventListener(Event.COMPLETE,this.__load_handler);
+				wasm.on(Event.ERROR,this.__error_handler);
+				wasm.on(Event.COMPLETE,this.__load_handler);
 				wasm.load(url);
 				break;
 				
@@ -319,8 +307,8 @@ export default class Loader extends EventDispatcher
 			case "mov":
 			    video=new Video();
 				this._files[name]=video;
-				video.addEventListener(Media.MEDIA_ERROR,this.__error_handler);
-			    video.addEventListener(Media.MEDIA_LOAD_COMPLETE,this.__load_handler);
+				video.on(Media.MEDIA_ERROR,this.__error_handler);
+			    video.on(Media.MEDIA_LOAD_COMPLETE,this.__load_handler);
 				video.load(url);
 				break;
 			
@@ -351,7 +339,12 @@ export default class Loader extends EventDispatcher
 			    break;
 			    
 			default:
-			    return false;
+			    url_loader=new URLLoader();
+				this._files[name]=url_loader;
+				url_loader.on(Event.ERROR,this.__error_handler);
+				url_loader.on(Event.COMPLETE,this.__load_handler);
+				url_loader.load(url);
+				break;
 		}
 		
 		return true;

@@ -169,7 +169,7 @@ export default class Button extends DisplayObjectContainer
 					  (this.state==Button.state.OVER ? this.over_color || this.out_color : this.out_color));
 					  
 	    	if(!StringUtil.isEmpty(color)) this.tf.color=color;
-	    	this.tf.dispatchEvent(new Event(Button.STATE_CHANGE,this.state));
+	    	this.tf.emit(new Event(Button.STATE_CHANGE,this.state));
 	    }
 	
 		if(this.frames.hasOwnProperty(this.state) && this.frames[b]) {

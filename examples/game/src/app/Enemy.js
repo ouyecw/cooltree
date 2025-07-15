@@ -21,8 +21,8 @@ export default class Enemy extends DisplayObjectContainer
 		this._old_height=Global.canvas.height;
 		
 		this._sound=AssetManager.getSource("sound_Sound 4@mp3");
-		Stage.current.addEventListener(StageEvent.RESIZE,Global.delegate(this.resizeHandler,this),this.name);
-		Stage.current.addEventListener(StageEvent.ENTER_FRAME,Global.delegate(this.onEnterFrame,this),this.name);
+		Stage.current.on(StageEvent.RESIZE,Global.delegate(this.resizeHandler,this),this.name);
+		Stage.current.on(StageEvent.ENTER_FRAME,Global.delegate(this.onEnterFrame,this),this.name);
 	}
 
 	create()
@@ -45,7 +45,7 @@ export default class Enemy extends DisplayObjectContainer
 			this._boob_list.push(boob);
 			this.addChild(boob);
 			boob.moveTo(enemy.x-90,enemy.y-60);
-			boob.addEventListener(Event.PLAY_OVER,Global.delegate(this.onPlayOver,this));
+			boob.on(Event.PLAY_OVER,Global.delegate(this.onPlayOver,this));
 			boob.gotoAndStop(2);
 			
 			this._sound.play(1);
@@ -54,7 +54,7 @@ export default class Enemy extends DisplayObjectContainer
 			for (var i = 0; i < 6; i++) 
 			{
 				var partical=Factory.c("do");
-				partical.setInstance(MovieManager.getData("shipDebris_")[MathUtil.randomInt(6)]);
+				partical.setInstance(MovieManager.getData("shipDebris")[MathUtil.randomInt(6)]);
 			    partical.life = 100;
 			    partical.rotationSpeed = Math.random() * 0.4;
 			    partical.speedX=Math.random() * 30 - 15;
@@ -94,7 +94,7 @@ export default class Enemy extends DisplayObjectContainer
 	onPlayOver(e)
 	{
 		var boob=(e instanceof Event) ? e.target : e;
-		boob.removeEventListener(Event.PLAY_OVER);
+		boob.off(Event.PLAY_OVER);
 		this._boob_list.splice(this._boob_list.indexOf(boob),1);
 		boob.removeFromParent(true);
 	}
@@ -259,7 +259,7 @@ export default class Enemy extends DisplayObjectContainer
 		var team,prec;
 		
 		team=MathUtil.randomInt(10);
-		enemy=MovieManager.getInstance("alienAnim_");
+		enemy=MovieManager.getInstance("alienAnim");
 		this._enemy_list.push(enemy);
 		this.addChild(enemy);
 		
@@ -350,8 +350,8 @@ export default class Enemy extends DisplayObjectContainer
 	
 	dispose()
 	{
-		Stage.current.removeEventListener(StageEvent.ENTER_FRAME,null,this.name);
-		Stage.current.removeEventListener(StageEvent.RESIZE,null,this.name);
+		Stage.current.off(StageEvent.ENTER_FRAME,null,this.name);
+		Stage.current.off(StageEvent.RESIZE,null,this.name);
 		super.dispose();
 	}
 }

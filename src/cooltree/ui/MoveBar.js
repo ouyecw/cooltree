@@ -73,7 +73,7 @@ export default class MoveBar extends DisplayObjectContainer
     	this._value=value;
     	
     	this.barSync();
-//  	this.dispatchEvent(new Event(MoveBar.CHANGE,this._value));
+//  	this.emit(new Event(MoveBar.CHANGE,this._value));
     }
 
 	/**
@@ -125,26 +125,26 @@ export default class MoveBar extends DisplayObjectContainer
 		this.bar.breakTouch=bool;
 		
 		if(bool){
-			this.bar.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_down_bar, this));
-			if(this.bottom.alpha>0 && this.bottom.visible) this.bottom.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_move_handler, this));
+			this.bar.on(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_down_bar, this));
+			if(this.bottom.alpha>0 && this.bottom.visible) this.bottom.on(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_move_handler, this));
 			return;
 		}
 		
-		this.bar.removeEventListener(StageEvent.MOUSE_DOWN);
-		this.bottom.removeEventListener(StageEvent.MOUSE_DOWN);
+		this.bar.off(StageEvent.MOUSE_DOWN);
+		this.bottom.off(StageEvent.MOUSE_DOWN);
 	}
 	
 	_mouse_down_bar(e)
 	{
 		this._mousePos=this.bar.globalToLocal(e.mouseX,e.mouseY);
-		(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.MOUSE_MOVE,Global.delegate(this._mouse_move_handler, this),this.name);
-		(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.MOUSE_UP,Global.delegate(this._mouse_up_bar, this),this.name);
+		(this.stage ? this.stage : Stage.current).on(StageEvent.MOUSE_MOVE,Global.delegate(this._mouse_move_handler, this),this.name);
+		(this.stage ? this.stage : Stage.current).on(StageEvent.MOUSE_UP,Global.delegate(this._mouse_up_bar, this),this.name);
 	}
 	
 	_mouse_up_bar(e)
 	{
-		(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.MOUSE_MOVE,null,this.name);
-		(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.MOUSE_UP,null,this.name);
+		(this.stage ? this.stage : Stage.current).off(StageEvent.MOUSE_MOVE,null,this.name);
+		(this.stage ? this.stage : Stage.current).off(StageEvent.MOUSE_UP,null,this.name);
 		
 		this._mousePos=null;
 		this.dataSync();
@@ -198,7 +198,7 @@ export default class MoveBar extends DisplayObjectContainer
 			this._value=(this._max-value)<=this._min ? this._min : (this._max-value);
 		}
 	
-		this.dispatchEvent(new Event(MoveBar.CHANGE,this._value,(this._mousePos==null)));
+		this.emit(new Event(MoveBar.CHANGE,this._value,(this._mousePos==null)));
 	}
 	
 	barSync()

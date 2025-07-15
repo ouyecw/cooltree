@@ -38,12 +38,12 @@ export default class Windows extends DisplayObjectContainer
 			if(!this.contains(this._bg)) 
 				this.addChildAt(this._bg,0);
 				
-			if(!this._bg.hasEventListener(StageEvent.MOUSE_DOWN))
-				this._bg.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_down_handler,this));
+			if(!this._bg.has(StageEvent.MOUSE_DOWN))
+				this._bg.on(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_down_handler,this));
 		}else{
 			if(this.contains(this._bg)) 
 				this.removeChild(this._bg);
-			this._bg.removeEventListener(StageEvent.MOUSE_DOWN);
+			this._bg.off(StageEvent.MOUSE_DOWN);
 		}
 		
 		if(this._close_btn){
@@ -54,7 +54,7 @@ export default class Windows extends DisplayObjectContainer
 		this.addChild(this._close_btn);
 		this._win_title.y=Math.floor(Math.max(0,(bar_height-this._win_title.size)*0.4));
 		this._close_btn.moveTo(w-close_btn.getWidth()-2,(bar_height-close_btn.getHeight())*0.5);
-		this._close_btn.addEventListener(StageEvent.MOUSE_CLICK,Global.delegate(this._close_handler,this));
+		this._close_btn.on(StageEvent.MOUSE_CLICK,Global.delegate(this._close_handler,this));
 	}
 	
 	_init()
@@ -98,7 +98,7 @@ export default class Windows extends DisplayObjectContainer
 	    this._win_title.selectable=false;
 	    this._win_title.mouseEnabled=false;
 	    
-	    this._win_bar.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_down_handler,this));
+	    this._win_bar.on(StageEvent.MOUSE_DOWN,Global.delegate(this._mouse_down_handler,this));
 	}
 	
 	add(target,height)
@@ -137,19 +137,19 @@ export default class Windows extends DisplayObjectContainer
 	_mouse_down_handler(e)
 	{
 		(this.stage ? this.stage : Stage.current).startDrag(this,this.area_rect);
-		(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.MOUSE_UP,Global.delegate(this._mouse_up_handler,this),this.name);
+		(this.stage ? this.stage : Stage.current).on(StageEvent.MOUSE_UP,Global.delegate(this._mouse_up_handler,this),this.name);
 	}
 	
 	_mouse_up_handler(e)
 	{
-		(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.MOUSE_UP,null,this.name);
+		(this.stage ? this.stage : Stage.current).off(StageEvent.MOUSE_UP,null,this.name);
 		(this.stage ? this.stage : Stage.current).stopDrag();
 	}
 	
 	_close_handler(e)
 	{
 		this.removeFromParent(false);
-		this.dispatchEvent(new Event(Windows.CLOSE));
+		this.emit(new Event(Windows.CLOSE));
 	}
 }
 

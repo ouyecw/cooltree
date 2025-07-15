@@ -86,8 +86,9 @@ export default class AssetUtil
 
 	static _json2sheet(image,json)
 	{
-		if(image==null || json==null || !json.hasOwnProperty("frames") || !json.frames) return;
+		if(image==null || json==null) return;
 		let i,str,temp,source,datas,old,array=[],j=0;
+		const bool=(!json.hasOwnProperty("frames") && !json.frames);
 		
 		for(str in json){
 			if(str=="meta") continue;
@@ -96,8 +97,9 @@ export default class AssetUtil
 			for(i in datas){
 				temp=datas[i];
 				if(!temp || typeof temp!="object") continue;
+				if(bool && (!temp.hasOwnProperty("frame") && !temp.frame)) return;
+
 				temp.name=i;
-				
 				source=ObjectPool.create(Source);
 				source.setup(image,temp,true,j++);
 	

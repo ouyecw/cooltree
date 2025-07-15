@@ -64,24 +64,24 @@ export default class VideoPlayer extends DisplayObjectContainer
 		this._url=path;
 		
 		let video=new Video();
-		video.addEventListener(Media.MEDIA_LOAD_COMPLETE,Global.delegate(this._complete_handler,this));
-		video.addEventListener(Media.MEDIA_ERROR,Global.delegate(this._error_handler,this));
+		video.on(Media.MEDIA_LOAD_COMPLETE,Global.delegate(this._complete_handler,this));
+		video.on(Media.MEDIA_ERROR,Global.delegate(this._error_handler,this));
 		video.load(this._url);
 	}
 	
 	_error_handler(e)
 	{
-		e.target.removeEventListener(Media.MEDIA_LOAD_COMPLETE);
-		e.target.removeEventListener(Media.MEDIA_ERROR);
+		e.target.off(Media.MEDIA_LOAD_COMPLETE);
+		e.target.off(Media.MEDIA_ERROR);
 		
 		this._is_loading=false;
-		this.dispatchEvent(new Event(VideoPlayer.ERROR));
+		this.emit(new Event(VideoPlayer.ERROR));
 	}
 	
 	_complete_handler(e)
 	{
-		e.target.removeEventListener(Media.MEDIA_LOAD_COMPLETE);
-		e.target.removeEventListener(Media.MEDIA_ERROR);
+		e.target.off(Media.MEDIA_LOAD_COMPLETE);
+		e.target.off(Media.MEDIA_ERROR);
 		this._is_loading=false;
 		
 		if(e.target && !e.target.loadFail) {
@@ -90,7 +90,7 @@ export default class VideoPlayer extends DisplayObjectContainer
 		}
 		
 		if(this._is_reload){
-			this.dispatchEvent(new Event(VideoPlayer.ERROR));
+			this.emit(new Event(VideoPlayer.ERROR));
 			return;
 		}
 		
@@ -99,7 +99,7 @@ export default class VideoPlayer extends DisplayObjectContainer
 		this._is_loading=true;
 		
 		let video=new Video();
-		video.addEventListener(Media.MEDIA_LOAD_COMPLETE,Global.delegate(this._complete_handler,this));
+		video.on(Media.MEDIA_LOAD_COMPLETE,Global.delegate(this._complete_handler,this));
 		video.load(this._url);
 	}
 	
@@ -111,7 +111,7 @@ export default class VideoPlayer extends DisplayObjectContainer
 		let vw=video.getWidth();
 		
 		if(this.isStrict && (vh<=0 || vw<=0 || (Global.isPC && (isNaN(video.length) || video.length<=0)))){
-			this.dispatchEvent(new Event(VideoPlayer.ERROR));
+			this.emit(new Event(VideoPlayer.ERROR));
 			return;
 		}
 		
@@ -134,7 +134,7 @@ export default class VideoPlayer extends DisplayObjectContainer
 			this.addChild(this.bg);
 			
 			this.bg.mouseEnabled=true;
-	    	this.bg.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this.onMouseClick,this));    
+	    	this.bg.on(StageEvent.MOUSE_DOWN,Global.delegate(this.onMouseClick,this));    
 		}else{
 			this.bg.setSize(this._video_width,this._video_height);
 		}
@@ -153,11 +153,11 @@ export default class VideoPlayer extends DisplayObjectContainer
 		this.update_view(false);
 		this._video.setVolume(this._volume);
 		
-		if(this.play_btn && !this.play_btn.hasEventListener(StageEvent.MOUSE_CLICK)) {
-			this.play_btn.addEventListener(StageEvent.MOUSE_CLICK,Global.delegate(this.onMouseClick,this));
+		if(this.play_btn && !this.play_btn.has(StageEvent.MOUSE_CLICK)) {
+			this.play_btn.on(StageEvent.MOUSE_CLICK,Global.delegate(this.onMouseClick,this));
 		}
 		
-		this.dispatchEvent(new Event(VideoPlayer.READY));
+		this.emit(new Event(VideoPlayer.READY));
 	}
 	
 	updateSize(w,h)
@@ -205,7 +205,7 @@ export default class VideoPlayer extends DisplayObjectContainer
 		if(this.isStop) {
 			this._video.element.addEventListener("pause",this._changeState);
 	    	this._video.element.addEventListener("playing",this._changeState);
-			this._video.addEventListener(Media.MEDIA_PLAY_COMPLETE,Global.delegate(this.onPlayOver,this));
+			this._video.on(Media.MEDIA_PLAY_COMPLETE,Global.delegate(this.onPlayOver,this));
 		}
 		
 		this._video.play(this.seedTime);
@@ -232,7 +232,7 @@ export default class VideoPlayer extends DisplayObjectContainer
 		
 		this._video.element.removeEventListener("playing",this._changeState);
 		this._video.element.removeEventListener("pause",this._changeState);
-		this._video.removeEventListener(Media.MEDIA_PLAY_COMPLETE);
+		this._video.off(Media.MEDIA_PLAY_COMPLETE);
 	}
 	
 	__change_state(e)
@@ -242,16 +242,16 @@ export default class VideoPlayer extends DisplayObjectContainer
 			this._video.playing=true;
 			this.update_view(true);
 			if(this.isStop) {
-				this._video.addEventListener(Media.MEDIA_PLAY_COMPLETE,Global.delegate(this.onPlayOver,this));
+				this._video.on(Media.MEDIA_PLAY_COMPLETE,Global.delegate(this.onPlayOver,this));
 			}
 			this.isStop=false;
-			this.dispatchEvent(new Event(VideoPlayer.PLAY));
+			this.emit(new Event(VideoPlayer.PLAY));
 		}else if(e.type=="pause"){
 			if(!this._video.playing) return;
 			this._video.playing=false;
 			this.seedTime=this._video.getCurrentTime();
 			this.update_view(false);
-			this.dispatchEvent(new Event(VideoPlayer.PAUSE));
+			this.emit(new Event(VideoPlayer.PAUSE));
 		}
 	}
 	
@@ -262,8 +262,8 @@ export default class VideoPlayer extends DisplayObjectContainer
 		if(bool){
 			if(this.play_btn) this.play_btn.removeFromParent(false);
 			
-			if(Global.useCanvas && !(this.stage ? this.stage : Stage.current).hasEventListener(StageEvent.ENTER_FRAME,this.name)){
-				(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.ENTER_FRAME,Global.delegate(this.onEnterFrame,this),this.name);
+			if(Global.useCanvas && !(this.stage ? this.stage : Stage.current).has(StageEvent.ENTER_FRAME,this.name)){
+				(this.stage ? this.stage : Stage.current).on(StageEvent.ENTER_FRAME,Global.delegate(this.onEnterFrame,this),this.name);
 			}
 			return;
 		}
@@ -273,8 +273,8 @@ export default class VideoPlayer extends DisplayObjectContainer
 			this.addChild(this.play_btn);
 		}
 		
-		if((this.stage ? this.stage : Stage.current).hasEventListener(StageEvent.ENTER_FRAME,this.name)){
-			(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.ENTER_FRAME,null,this.name);
+		if((this.stage ? this.stage : Stage.current).has(StageEvent.ENTER_FRAME,this.name)){
+			(this.stage ? this.stage : Stage.current).off(StageEvent.ENTER_FRAME,null,this.name);
 		}
 	}
 	
@@ -286,14 +286,14 @@ export default class VideoPlayer extends DisplayObjectContainer
 	onPlayOver(e)
 	{
 		this.stop();
-		this.dispatchEvent(new Event(VideoPlayer.COMPLETE));
+		this.emit(new Event(VideoPlayer.COMPLETE));
 	}
 	
 	dispose()
 	{
 		if(this._video && !this.isStop) this.stop();
-		else if((this.stage ? this.stage : Stage.current).hasEventListener(StageEvent.ENTER_FRAME,this.name)){
-			(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.ENTER_FRAME,null,this.name);
+		else if((this.stage ? this.stage : Stage.current).has(StageEvent.ENTER_FRAME,this.name)){
+			(this.stage ? this.stage : Stage.current).off(StageEvent.ENTER_FRAME,null,this.name);
 		}
 		
 		super.dispose();

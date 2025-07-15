@@ -71,7 +71,7 @@ export default class Shape extends DisplayObjectContainer
 	{
 		if(value && this._resize!=value){
 			if(this.use_canvas && this.instance) this.instance.graphics.reset();
-			this.dispatchEvent(new Event(DisplayBase.RESIZE));
+			this.emit(new Event(DisplayBase.RESIZE));
 			this.__checkDisplayUpdate();
 		}
 		

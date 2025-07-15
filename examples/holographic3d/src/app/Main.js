@@ -102,7 +102,7 @@ function load(data)
 	const loader=new Loader();
 	
 	//添加事件侦听器
-	loader.addEventListener(Loader.LOAD_COMPLETE,loadComplete);
+	loader.on(Loader.LOAD_COMPLETE,loadComplete,this);
 	
 	//加载文件路径
 	loader.load(data);
@@ -111,7 +111,7 @@ function load(data)
 function loadComplete(e)
 {
 	//清除事件侦听器
-	e.target.removeEventListener(Loader.LOAD_COMPLETE);
+	e.target.off(Loader.LOAD_COMPLETE);
 	
 	//清空舞台 （Stage.current为获取当前舞台的静态属性）
 	if(loadingClip){

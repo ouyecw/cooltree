@@ -149,7 +149,7 @@ export default class CanvasUtil
 				return null;
 			}
 		}
-		else data=CanvasUtil.toImage(target.canvas,!StringUtil.isEmpty(fill_color) ? "image/jpg" : null);
+		else data=CanvasUtil.toImage(target.canvas);
 		
 		ObjectPool.remove(target);
 		return data;

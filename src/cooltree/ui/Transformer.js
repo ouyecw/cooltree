@@ -183,15 +183,15 @@ export default class Transformer extends DisplayObjectContainer
 			this.addChild(this._btn);
 		}
 		
-		this._btn.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this._trans_mouse_down,this),this.name);
-	    this._canvas.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this._drag_mouse_down,this),this.name);
+		this._btn.on(StageEvent.MOUSE_DOWN,Global.delegate(this._trans_mouse_down,this),this.name);
+	    this._canvas.on(StageEvent.MOUSE_DOWN,Global.delegate(this._drag_mouse_down,this),this.name);
 	
 		this._canvas.matrix=this._target.matrix;
 		this._btn.moveTo(this.globalToLocal(this._canvas.localToGlobal(this._point.x,this._point.y)));
 		
 		if(Global.isPC){
-			if(this.wheel_control) this._canvas.addEventListener(StageEvent.MOUSE_WHEEL, Global.delegate(this._mouse_wheel_handle,this),this.name);
-			if(this.key_control)   (this.stage ? this.stage : Stage.current).addEventListener(StageEvent.KEY_DOWN,Global.delegate(this._key_down,this),this.name);
+			if(this.wheel_control) this._canvas.on(StageEvent.MOUSE_WHEEL, Global.delegate(this._mouse_wheel_handle,this),this.name);
+			if(this.key_control)   (this.stage ? this.stage : Stage.current).on(StageEvent.KEY_DOWN,Global.delegate(this._key_down,this),this.name);
 		}
 	}
 	
@@ -211,15 +211,15 @@ export default class Transformer extends DisplayObjectContainer
 		this._canvas.thickness=(this.lineWidth*2/(this._canvas.scaleX+this._canvas.scaleY));
 		
 		this._btn.moveTo(this.globalToLocal(this._canvas.localToGlobal(this._point.x,this._point.y)));
-		this.dispatchEvent(new Event(Transformer.SCALE));
+		this.emit(new Event(Transformer.SCALE));
 		ObjectPool.remove(poi);
 	}
 	
 	_key_up(e)
 	{
 		if(this._has_key_down) {
-			(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.KEY_UP,null,this.name);
-			this.dispatchEvent(new Event(Transformer.MOVE));
+			(this.stage ? this.stage : Stage.current).off(StageEvent.KEY_UP,null,this.name);
+			this.emit(new Event(Transformer.MOVE));
 		}
 		
 		this._has_key_down=false;
@@ -252,14 +252,14 @@ export default class Transformer extends DisplayObjectContainer
 			break;
 			
 			case 46:
-			this.dispatchEvent(new Event(Transformer.DELETE));
+			this.emit(new Event(Transformer.DELETE));
 			return;
 		}
 		
 		if(bool) {
 			this._has_key_down=true;
 			this._drag_mouse_move(null);
-			(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.KEY_UP,Global.delegate(this._key_up,this),this.name);
+			(this.stage ? this.stage : Stage.current).on(StageEvent.KEY_UP,Global.delegate(this._key_up,this),this.name);
 			
 			if(e.label) {
 				e.label.preventDefault();
@@ -294,8 +294,8 @@ export default class Transformer extends DisplayObjectContainer
 			(this.stage ? this.stage : Stage.current).startDrag(this._canvas);
 		}
 		
-		(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.MOUSE_UP, Global.delegate(this._drag_mouse_up,this),this.name);
-		(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.MOUSE_MOVE, Global.delegate(this._drag_mouse_move,this),this.name);
+		(this.stage ? this.stage : Stage.current).on(StageEvent.MOUSE_UP, Global.delegate(this._drag_mouse_up,this),this.name);
+		(this.stage ? this.stage : Stage.current).on(StageEvent.MOUSE_MOVE, Global.delegate(this._drag_mouse_move,this),this.name);
 	}
 	
 	_drag_mouse_move(e)
@@ -339,7 +339,7 @@ export default class Transformer extends DisplayObjectContainer
 		this._canvas.moveTo(poi);
 		DisplayUtil.copyTransform(this._canvas,this._target,this.relative_data);
 		this._btn.moveTo(this.globalToLocal(this._canvas.localToGlobal(this._point.x,this._point.y)));
-		this.dispatchEvent(new Event(Transformer.SCALING));
+		this.emit(new Event(Transformer.SCALING));
 		
 		ObjectPool.remove(nce);
 		ObjectPool.remove(poi);
@@ -364,8 +364,8 @@ export default class Transformer extends DisplayObjectContainer
 		this._target_offsetX = Math.max( 0, this._move_point.x-this._target_center.x);
 		this._target_offsetY = Math.max( 0, this._move_point.y-this._target_center.y);
 		
-		(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.MOUSE_UP, Global.delegate(this._drag_mouse_up,this),this.name);
-		(this.stage ? this.stage : Stage.current).addEventListener(StageEvent.MOUSE_MOVE, Global.delegate(this._trans_mouse_move,this),this.name);
+		(this.stage ? this.stage : Stage.current).on(StageEvent.MOUSE_UP, Global.delegate(this._drag_mouse_up,this),this.name);
+		(this.stage ? this.stage : Stage.current).on(StageEvent.MOUSE_MOVE, Global.delegate(this._trans_mouse_move,this),this.name);
 	}
 	
 	_trans_mouse_move(e)
@@ -409,19 +409,19 @@ export default class Transformer extends DisplayObjectContainer
 		this._state=2;
 		
 		ObjectPool.remove(pos);
-		this.dispatchEvent(new Event(Transformer.SCALING));
+		this.emit(new Event(Transformer.SCALING));
 	}
 	
 	_drag_mouse_up(e)
 	{
 		(this.stage ? this.stage : Stage.current).stopDrag();
-		(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.MOUSE_UP, null,this.name);
-		(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.MOUSE_MOVE, null,this.name);
+		(this.stage ? this.stage : Stage.current).off(StageEvent.MOUSE_UP, null,this.name);
+		(this.stage ? this.stage : Stage.current).off(StageEvent.MOUSE_MOVE, null,this.name);
 		this._finger_center,this._point1=this._point2=this._target_center=this._move_point=this._target_scaleX = this._target_scaleY = this._target_distance=this._target_rotation=this._target_angle=null;
 	    
-	    if(this._state==1 && DoubleClick.check()) this.dispatchEvent(new Event(Transformer.DOUBLE_CLICK));
-	    else if(this._state==1 && Math.sqrt((this._cache_point.x-this._canvas.x)*(this._cache_point.x-this._canvas.x)+(this._cache_point.y-this._canvas.y)*(this._cache_point.y-this._canvas.y))<3) this.dispatchEvent(new Event(Transformer.CLICK));
-	    else if(this._state>0) this.dispatchEvent(new Event(this._state==1 ? Transformer.MOVE : Transformer.SCALE));
+	    if(this._state==1 && DoubleClick.check()) this.emit(new Event(Transformer.DOUBLE_CLICK));
+	    else if(this._state==1 && Math.sqrt((this._cache_point.x-this._canvas.x)*(this._cache_point.x-this._canvas.x)+(this._cache_point.y-this._canvas.y)*(this._cache_point.y-this._canvas.y))<3) this.emit(new Event(Transformer.CLICK));
+	    else if(this._state>0) this.emit(new Event(this._state==1 ? Transformer.MOVE : Transformer.SCALE));
 	
 	    this._state=0;
 	}
@@ -430,22 +430,22 @@ export default class Transformer extends DisplayObjectContainer
 	{
 		if(this._canvas) {
 			if( this.contains(this._canvas))this._canvas.removeFromParent(false);
-		 	this._canvas.removeEventListener(StageEvent.MOUSE_DOWN,null,this.name);
+		 	this._canvas.off(StageEvent.MOUSE_DOWN,null,this.name);
 		 	
 		 	if(Global.isPC && this.wheel_control) 
-		 		this._canvas.removeEventListener(StageEvent.MOUSE_WHEEL, null,this.name);
+		 		this._canvas.off(StageEvent.MOUSE_WHEEL, null,this.name);
 		 	
 		 	this._canvas.reset();
 		}
 		  
 		if(this._btn){
-			this._btn.removeEventListener(StageEvent.MOUSE_DOWN,null,this.name);
+			this._btn.off(StageEvent.MOUSE_DOWN,null,this.name);
 			if(this.contains(this._btn)) this._btn.removeFromParent(false);
 		}
 		
-		if(Global.isPC && this.key_control && (this.stage ? this.stage : Stage.current).hasEventListener(StageEvent.KEY_DOWN,this.name)){
-			(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.KEY_DOWN,null,this.name);
-			(this.stage ? this.stage : Stage.current).removeEventListener(StageEvent.KEY_UP,null,this.name);
+		if(Global.isPC && this.key_control && (this.stage ? this.stage : Stage.current).has(StageEvent.KEY_DOWN,this.name)){
+			(this.stage ? this.stage : Stage.current).off(StageEvent.KEY_DOWN,null,this.name);
+			(this.stage ? this.stage : Stage.current).off(StageEvent.KEY_UP,null,this.name);
 		}
 		
 		this._drag_mouse_up(null);

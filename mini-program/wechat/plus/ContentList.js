@@ -120,7 +120,7 @@ export default class ContentList extends DisplayObjectContainer
 				item.setup(data);
 				item.moveTo(data._rect.x,data._rect.y);
 
-				if(this.line_img && this.ops.line){
+				if(this.line_img && this.ops.line && data._index<this.datas.length-1){
 					line=Factory.c("do");
 					line.setInstance(this.line_img);
 					line.moveTo(this.ops.isY ? (sw-line.width)*0.5 : data._rect.width,
@@ -218,6 +218,7 @@ export default class ContentList extends DisplayObjectContainer
 				data._space=this.space;
 			}
 
+			if(data._index!=i) data._index=i;
 			pos=data._rect[b ? "y" : "x"] +data._rect[b ? "height" : "width"]+this.space;
 			if(this.bounds.intersects(data._rect)) list.push(i);
 		}

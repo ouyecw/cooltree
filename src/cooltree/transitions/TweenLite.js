@@ -122,10 +122,10 @@ export default class TweenLite
 		
 		if(TweenLite._tweens.length==0){
 			if(!TweenLite._locked && Stage.current){
-				Stage.current.addEventListener(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
+				Stage.current.on(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
 			}else{
 				if(TweenLite._timer==null) TweenLite._timer=new Timer();
-				TweenLite._timer.addEventListener(Timer.TIME,TweenLite._enterFrame);
+				TweenLite._timer.on(Timer.TIME,TweenLite._enterFrame);
 				TweenLite._timer.start();
 			}
 		}
@@ -197,21 +197,21 @@ export default class TweenLite
 	{
 		if(TweenLite._timer && TweenLite._timer.isStart()) {
 			TweenLite._timer.stop();
-			TweenLite._timer.removeEventListener(Timer.TIME,TweenLite._enterFrame);
+			TweenLite._timer.off(Timer.TIME,TweenLite._enterFrame);
 		}
 		else if(Stage.current){
-			Stage.current.removeEventListener(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
+			Stage.current.off(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
 		}
 	}
 	
 	static resume  () 
 	{
 		if(TweenLite._timer && TweenLite._tweens.length>0  && !TweenLite._timer.isStart()) {
-			TweenLite._timer.addEventListener(Timer.TIME,TweenLite._enterFrame);
+			TweenLite._timer.on(Timer.TIME,TweenLite._enterFrame);
 			TweenLite._timer.start();
 		}
 		else if(Stage.current){
-			Stage.current.addEventListener(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
+			Stage.current.on(StageEvent.ENTER_FRAME,TweenLite._enterFrame);
 		}
 	}
 	

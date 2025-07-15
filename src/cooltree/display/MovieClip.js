@@ -286,10 +286,10 @@ export default class MovieClip extends DisplayObject
 							this._replay_time--;
 							if(this._replay_time==0) {
 								this._paused=true;
-								this.dispatchEvent(new Event(Event.PLAY_OVER));
+								this.emit(new Event(Event.PLAY_OVER));
 							}
 						}
-						else this.dispatchEvent(new Event(Event.PLAY_OVER));
+						else this.emit(new Event(Event.PLAY_OVER));
 					}
 					
 					this.nextFrame();

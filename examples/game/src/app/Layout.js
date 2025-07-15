@@ -8,7 +8,7 @@ export default class Layout extends DisplayObjectContainer
 		super();
 		
 		this._score=this._menu=this._life_bar=this._warn_win=null;
-		Stage.current.addEventListener(Game.FADE_IN,Global.delegate(this.init,this),this.name);
+		Stage.current.on(Game.FADE_IN,Global.delegate(this.init,this),this.name);
 	}
 	
 	init(e)
@@ -36,8 +36,8 @@ export default class Layout extends DisplayObjectContainer
 		this.addChild(this._warn_win);
 		this._warn_win.y=-250;
 		
-		Stage.current.removeEventListener(Game.FADE_IN,null,this.name);
-		Stage.current.addEventListener(StageEvent.RESIZE,Global.delegate(this.resizeHandler,this),this.name);
+		Stage.current.off(Game.FADE_IN,null,this.name);
+		Stage.current.on(StageEvent.RESIZE,Global.delegate(this.resizeHandler,this),this.name);
 	    this.resizeHandler();
 	    
 	    TweenLite.to(this._warn_win,0.5,{ease:TweenLite.getEaseName(TweenLite.BACK,TweenLite.OUT),y:(Global.canvas.height-240)*0.55,delay:1.5,onComplete:Global.delegate(this._tween_complete,this)})
@@ -50,7 +50,7 @@ export default class Layout extends DisplayObjectContainer
 			return;
 		}
 		
-		Stage.current.dispatchEvent(new Event(Game.GAME_READY));
+		Stage.current.emit(new Event(Game.GAME_READY));
 	}
 	
 	resetLayout()

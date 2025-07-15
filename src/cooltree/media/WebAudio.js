@@ -60,7 +60,7 @@ export default class WebAudio extends EventDispatcher
 	_over_handler(e)
 	{
 		this.close();
-	    this.dispatchEvent(new Event(Media.MEDIA_PLAY_COMPLETE));
+	    this.emit(new Event(Media.MEDIA_PLAY_COMPLETE));
 	}
 	
 	load  (url) 
@@ -77,7 +77,7 @@ export default class WebAudio extends EventDispatcher
 					this.loadFail=true;
 					this.loading=false;
 					trace("[ERROR] WebAudio:AudioContext decodeAudioData error : " + error.toString());
-					this.dispatchEvent(new Event(Media.MEDIA_ERROR));
+					this.emit(new Event(Media.MEDIA_ERROR));
 				},this));
 			}
 			return false;
@@ -103,12 +103,12 @@ export default class WebAudio extends EventDispatcher
 				this.loadFail=true;
 				this.loading=false;
 				trace("[ERROR] WebAudio: load audio fail.");
-				this.dispatchEvent(new Event(Media.MEDIA_ERROR));
+				this.emit(new Event(Media.MEDIA_ERROR));
 			}.bind(this));
 		} else {
 			this.loadFail=true;
 			trace( "Not support " + d + " : " + url);
-			this.dispatchEvent(new Event(Media.MEDIA_ERROR));
+			this.emit(new Event(Media.MEDIA_ERROR));
 			return false;
 		}
 		
@@ -126,8 +126,8 @@ export default class WebAudio extends EventDispatcher
 		this.loaded =true;
 		this.loading=this.loadFail=false;
 		this.length = this.buffer.duration;
-		this.dispatchEvent(new Event(Media.MEDIA_LOAD_COMPLETE));
-		this.removeEventListener(Media.MEDIA_LOAD_COMPLETE);
+		this.emit(new Event(Media.MEDIA_LOAD_COMPLETE));
+		this.off(Media.MEDIA_LOAD_COMPLETE);
 		if(this.auto_play) this.play();
 	}
 	
@@ -178,7 +178,11 @@ export default class WebAudio extends EventDispatcher
 		this.bufferSource.addEventListener("ended",this.__over_handler,false);
 		
 		if (this.bufferSource.start) {
-			this.bufferSource.start(0, this.currentTime%this.length);
+			try{
+				this.bufferSource.start(0, this.currentTime%this.length);
+			}catch(err) {
+				console.log("[ERROR]",err);
+			}
 		} else {
 			this.bufferSource.noteGrainOn(0, this.currentTime%this.length);
 		}

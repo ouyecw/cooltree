@@ -44,10 +44,10 @@ export default class Scence extends DisplayObjectContainer
 		this._create_map(this._skys,this._sky,"cloudsFORE_top",{x:0,y:800});
 		
 		this._music=AssetManager.getSource("sound_Sound 9@mp3");
-		this._music.addEventListener(Media.MEDIA_PLAY_COMPLETE,Global.delegate(this._play_over,this));
+		this._music.on(Media.MEDIA_PLAY_COMPLETE,Global.delegate(this._play_over,this));
 		
-		Stage.current.addEventListener(StageEvent.RESIZE,Global.delegate(this.resizeHandler,this),this.name);
-		Stage.current.addEventListener(StageEvent.ENTER_FRAME,Global.delegate(this.onEnterFrame,this),this.name);
+		Stage.current.on(StageEvent.RESIZE,Global.delegate(this.resizeHandler,this),this.name);
+		Stage.current.on(StageEvent.ENTER_FRAME,Global.delegate(this.onEnterFrame,this),this.name);
 	    this.resizeHandler();
 	    
 	    TweenLite.to(this._tf,0.5,{alpha:1,delay:1.5,onComplete:Global.delegate(this._tween_complete,this),onCompleteParams:[true]})
@@ -67,7 +67,7 @@ export default class Scence extends DisplayObjectContainer
 		this._tf=this._bg=null;
 		this._music.play();
 		
-		Stage.current.dispatchEvent(new Event(Game.FADE_IN));
+		Stage.current.emit(new Event(Game.FADE_IN));
 	}
 	
 	_play_over(e)
@@ -125,8 +125,8 @@ export default class Scence extends DisplayObjectContainer
 	dispose()
 	{
 		if(this._music) this._music.dispose();
-		Stage.current.removeEventListener(StageEvent.ENTER_FRAME,null,this.name);
-		Stage.current.removeEventListener(StageEvent.RESIZE,null,this.name);
+		Stage.current.off(StageEvent.ENTER_FRAME,null,this.name);
+		Stage.current.off(StageEvent.RESIZE,null,this.name);
 		super.dispose();
 	}
 }

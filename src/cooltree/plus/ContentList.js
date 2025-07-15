@@ -1,16 +1,16 @@
 import DisplayObjectContainer from '../display/DisplayObjectContainer.js'
 import UIOrientation from '../model/UIOrientation.js'
-import CanvasUtil from '../utils/CanvasUtil.js'
+import QuickUI from '../utils/QuickUI.js'
 import ObjectUtil from '../utils/ObjectUtil.js'
 import ObjectPool from '../utils/ObjectPool.js'
 import UIContainer from '../ui/UIContainer.js'
 import ArrayUtil from '../utils/ArrayUtil.js'
 import Rectangle from '../geom/Rectangle.js'
 import Factory from '../core/Factory.js'
-import Source from '../core/Source.js'
 import Stage from '../display/Stage.js'
 import TweenLite from '../transitions/TweenLite.js'
 import MathUtil from '../utils/MathUtil.js'
+import ContentItem from './ContentItem.js'
 
 export default class ContentList extends DisplayObjectContainer
 {
@@ -69,14 +69,7 @@ export default class ContentList extends DisplayObjectContainer
 		if(!this.ops.line) return;
 		const w=this.ops.isY && this.ops.line.width<1 ? this.ops.line.width*Stage.current.stageWidth : this.ops.line.width;
 		const h=!this.ops.isY && this.ops.line.height<1 ? this.ops.line.height*Stage.current.stageWidth : this.ops.line.height;
-		
-		const obj=Factory.c("bs",this.ops.line.color,w,h);
-		const img=CanvasUtil.containerToImage(obj,"image/png",w,h);
-		this.line_img=ObjectPool.create(Source);
-		this.line_img.image=img;
-		this.line_img.width=w;
-		this.line_img.height=h;
-		ObjectPool.remove(obj);
+		this.line_img=[w,h,this.ops.line.color];
 	}
 
 	dragHandler(e=null)
@@ -105,8 +98,8 @@ export default class ContentList extends DisplayObjectContainer
 		}
 
 		if(add_list && add_list.length>0){
-			const sw=Stage.current.stageWidth;
-			const sh=Stage.current.stageHeight;
+			const sw=this.ops.isY && this.ops.line.width<1 ? Stage.current.stageWidth : this.ops.width;
+			const sh=!this.ops.isY && this.ops.line.height<1 ? Stage.current.stageHeight : this.ops.height;
 
 			for(index of add_list){
 				item=ObjectPool.create(this.ops.className);
@@ -115,11 +108,10 @@ export default class ContentList extends DisplayObjectContainer
 				item.setup(data);
 				item.moveTo(data._rect.x,data._rect.y);
 
-				if(this.line_img && this.ops.line){
-					line=Factory.c("do");
-					line.setInstance(this.line_img);
-					line.moveTo(this.ops.isY ? (sw-line.width)*0.5 : data._rect.width,
-								this.ops.isY ? data._rect.height : (sh-line.height)*0.5);
+				if(this.line_img && this.ops.line && data._index<this.datas.length-1){
+					line=QuickUI.rectDisplay(...this.line_img);
+					line.moveTo(this.ops.isY ? (sw-line.width)*0.5 : data._rect.width+(data._space-line.width)*0.5,
+								this.ops.isY ? data._rect.height+(data._space-line.height)*0.5 : (sh-line.height)*0.5);
 					item.addChild(line);
 				}
 
@@ -213,6 +205,7 @@ export default class ContentList extends DisplayObjectContainer
 				data._space=this.space;
 			}
 
+			if(data._index!=i) data._index=i;
 			pos=data._rect[b ? "y" : "x"] +data._rect[b ? "height" : "width"]+this.space;
 			if(this.bounds.intersects(data._rect)) list.push(i);
 		}
@@ -234,6 +227,7 @@ export default class ContentList extends DisplayObjectContainer
 			ObjectPool.remove(item);
 		}
 
+		this.line_img=null;
 		this.bg=null;
 	}
 
@@ -245,20 +239,4 @@ export default class ContentList extends DisplayObjectContainer
 	}
 }
 
-export class ContentItem extends DisplayObjectContainer
-{
-	reset()
-	{
-		this.data=null;
-		super.reset();
-	}
-
-	setup(data)
-	{
-		if(!data) return;
-		this.data=data;
-	}
-}
-
 ContentList.className="ContentList";
-ContentItem.className="ContentItem";

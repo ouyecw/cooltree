@@ -40,7 +40,7 @@ export default class Box
 		this.container.addChild(this.up);
 		this.onTap();
 		
-		Stage.current.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this.onTap,this));
+		Stage.current.on(StageEvent.MOUSE_DOWN,Global.delegate(this.onTap,this));
 	}
 	
 	enterFrame(e)
@@ -51,10 +51,9 @@ export default class Box
 	onTap(e=null)
 	{
 		if(this.video) {
-			trace(this.video)
-			if(!this.video.playing) this.video.play();
-			if(!Stage.current.hasEventListener(StageEvent.ENTER_FRAME)) 
-				Stage.current.addEventListener(StageEvent.ENTER_FRAME,Global.delegate(this.enterFrame,this));
+			this.video.play();
+			if(!Stage.current.has(StageEvent.ENTER_FRAME)) 
+				Stage.current.on(StageEvent.ENTER_FRAME,Global.delegate(this.enterFrame,this));
 		}
 		
 		this.upright=!this.upright;
@@ -105,7 +104,7 @@ export default class Box
 			this.video.auto_play=true;
 			this.imgW=this.video.getWidth();
 			this.imgH=this.video.getHeight();
-			this.video.addEventListener(Media.MEDIA_PLAY_COMPLETE,Global.delegate(this.playOver,this));
+			this.video.on(Media.MEDIA_PLAY_COMPLETE,Global.delegate(this.playOver,this));
 			return this.video;
 		}
 		

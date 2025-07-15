@@ -1,6 +1,7 @@
 
-import {Button,Effect,Source,Global,Stage,LoadingClip,Loader,AssetManager,Factory,StageEvent,ObjectUtil,MovieManager,MathUtil} from 'cooltree'
-
+import {Button,Effect,Source,Global,Stage,LoadingClip,Loader,AssetManager,Factory,StageEvent,ObjectUtil,MovieManager,MathUtil,ContentList,ContentItem} from 'cooltree'
+import Spine from './Spine.js'
+import EItem from './EItem.js'
 // import * as CT from 'cooltree'
 
 window.onload = function()
@@ -8,7 +9,7 @@ window.onload = function()
 	/**
 	 * 显示模式 true为canvas显示 false为DOM显示（默认为true）
 	 */
-	Global.useCanvas=false;
+	Global.useCanvas=true;
 	
 	/**
 	 * 初始化场景
@@ -23,8 +24,7 @@ window.onload = function()
 	/**
 	 * 初始化场景的宽度和高度
 	 */
-	stage.initCanvas(500,600);
-	
+	stage.initCanvas(window.innerWidth,window.innerHeight);
 	
 	/**
 	 * 初始化工作已经完成
@@ -43,16 +43,16 @@ window.onload = function()
 	const loader=new Loader();
 	
 	//添加事件侦听器
-	loader.addEventListener(Loader.LOAD_COMPLETE,loadComplete);
+	loader.on(Loader.LOAD_COMPLETE,loadComplete);
 	
 	//加载文件路径
-	loader.load(["assets/img/tu.png","assets/img/anim.png","assets/img/anim.json"]);
+	loader.load(["assets/img/spineboy.atlas","assets/img/spineboy.png","assets/img/spineboy-pro.skel","assets/img/tu.png","assets/img/mix.png","assets/img/mix.plist","assets/img/lijue2.png","assets/img/lijue2.json"]);
 }
 
 function loadComplete(e)
 {
 	//清除事件侦听器
-	e.target.removeEventListener(Loader.LOAD_COMPLETE);
+	e.target.off(Loader.LOAD_COMPLETE);
 	
 	//清空舞台 （Stage.current为获取当前舞台的静态属性）
 	Stage.current.removeAllChildren(true);
@@ -60,71 +60,71 @@ function loadComplete(e)
 	//将加载完成的文件数据导入资源管理器
 	AssetManager.addFiles(e.params);
 	
-	/**
-	 * 显示一张图片
-	 */
+	console.log(AssetManager._cache);
 	
 	//新建一个显示对象
-	const img=Factory.c("do");
+	// const img=Factory.c("do");
 	
-	//设置显示内容（资源管理器中取出）,通过Loader.getName获取路径的资源id
-	img.setInstance(AssetManager.getSource(Loader.getName("img/tu.png")));
+	// const asset=AssetManager.getSource("fb_2");
+	// //设置显示内容（资源管理器中取出）,通过Loader.getName获取路径的资源id
+	// img.setInstance(asset);
+	// console.log(img.width,img.height)
+	// //添加到舞台
+	// Stage.current.addChild(img);
 	
+	const list=new ContentList({
+		height:90,
+		width:550,
+		isY:false,
+		space:10,
+		line:{
+			width:2,
+			height:88
+		},
+		className:EItem
+	});
+	
+	let i=10,data=[];
+	while(i>0){
+		data.push({
+			img:"img_tu@png",
+			size:96
+		})
+		i--;
+	}
+	
+	list.addData(data,960)
+	Stage.current.addChild(list);
+	list.moveTo(80,30);
+	
+	//新建一个显示对象
+	const lijue=MovieManager.getInstance("lijue");
+	
+	lijue.moveTo(200,180);
 	//添加到舞台
-	Stage.current.addChild(img);
+	Stage.current.addChild(lijue);
 	
-	/**
-	 * 显示一个按钮
-	 */
-	//新建按钮
-	const btn=new Button();
+	const role=new Spine();
+	role.setInstance(
+		AssetManager.getSource("img_spineboy-pro@skel"),
+		AssetManager.getSource("img_spineboy@atlas"),
+		[AssetManager.getSource("img_spineboy@png")],true);
 	
-	//画一个矩形 参数颜色 宽度 高度 圆角半径
-	const box=Factory.c("bs",["#ff88ff",120,40,3]);
+	Stage.current.addChild(role);
+	role.moveTo(80,300);
+	role.scale=0.3;
+	role.play(2);
 	
-	//设置按钮显示
-	btn.instance=box;
-	
-	//设置中心点
-	box.origin={x:box.width*0.5,y:box.height*0.5};
-
-	//按钮设置特效
-	btn.setup([Factory.c("ef",[Effect.COLOR,"#ff88ff",0.5]),Factory.c("ef",[Effect.SCALE,1,0.5])],
-			  [Factory.c("ef",[Effect.COLOR,"#ff8800",1]),Factory.c("ef",[Effect.SCALE,1.2,1])],
-			  [Factory.c("ef",[Effect.COLOR,"#ff5555",1])]);
-	
-	//添加到舞台
-	Stage.current.addChild(btn);
-	
-	//移动按钮位置
-	btn.moveTo(Stage.current.stageWidth*0.5,Stage.current.stageHeight-65);
-	
-	//设置按钮文本
-	btn.setLabel({text:"NEW",size:26,color:"#FFFFFF",x:-30,y:-10},"#000000");
-	
-	//添加事件侦听器
-	btn.addEventListener(StageEvent.MOUSE_CLICK,click_handler);
+	const mc=MovieManager.getInstance("composition");
+	Stage.current.addChild(mc);
+	mc.moveTo(320,120);
+	mc.scale=0.4;
+	mc.rate=2;
 }
 
-function click_handler(e)
+window.onresize=function()
 {
-	//获取所有Zombie_ladder动画的动作标签
-	const anims=ObjectUtil.getLabels(MovieManager._dic["Zombie_ladder"]);
-	const len=anims.length;
-	
-	const action=anims[MathUtil.randomInt(len)];
-	trace(">>",action);
-	
-	//新建动画实例
-	const mc=MovieManager.getInstance(action,"Zombie_ladder");
-	
-	//添加到舞台
-	Stage.current.addChildAt(mc,1);
-	
-	//移动动画位置
-	mc.moveTo(MathUtil.randomInt(Stage.current.stageWidth-80),MathUtil.randomInt(Stage.current.stageHeight-80));
-	
-	//动画随机缩放
-	mc.scale=MathUtil.clamp(Math.random(),0.4,1);
+	const h=Math.max(window.innerHeight,100);
+	const w=Math.max(window.innerWidth,100);
+	Global.reszie(w,h);
 }
-

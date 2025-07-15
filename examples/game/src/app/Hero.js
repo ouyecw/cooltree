@@ -14,8 +14,8 @@ export default class Hero extends DisplayObjectContainer
 		this.__move_handler=Global.delegate(this._move_handler,this);
 		this.__play_over=Global.delegate(this._play_over,this);
 		
-		this._right_plane=MovieManager.getData("fighter_bankRight_");
-		this._left_plane=MovieManager.getData("fighter_bankLeft_");
+		this._right_plane=MovieManager.getData("fighter_bankRight");
+		this._left_plane=MovieManager.getData("fighter_bankLeft");
 		this._normal_plane=MovieManager.getData("fighter_static");
 		this._instance=Factory.c("mc");
 		this.addChild(this._instance);
@@ -49,8 +49,8 @@ export default class Hero extends DisplayObjectContainer
 		this._play_complete=false;
 		this._instance.play();
 		
-		this._instance.removeEventListener(Event.PLAY_OVER,this.__play_over);
-		if(i>0) this._instance.addEventListener(Event.PLAY_OVER,this.__play_over);
+		this._instance.off(Event.PLAY_OVER,this.__play_over);
+		if(i>0) this._instance.on(Event.PLAY_OVER,this.__play_over);
 	}
 	
 	_play_over(e)
@@ -59,7 +59,7 @@ export default class Hero extends DisplayObjectContainer
 		
 		if(this._instance.reverse){
 			this.setState(0);
-			this._instance.removeEventListener(Event.PLAY_OVER,this.__play_over);
+			this._instance.off(Event.PLAY_OVER,this.__play_over);
 			return;
 		}
 		

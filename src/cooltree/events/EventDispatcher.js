@@ -28,7 +28,7 @@ export default class EventDispatcher
 		this.listeners={};
 	}
 	
-	hasEventListener(eventType,id)
+	has(eventType,id)
 	{
 		if(!StringUtil.isEmpty(id) && this.caches){
 			return (this.caches[eventType+"#"+id]!=undefined);
@@ -37,13 +37,18 @@ export default class EventDispatcher
 		return (this.listeners && this.listeners[eventType] != undefined);
 	}
 	
-	addEventListener(eventType, func,id)
+	on(eventType, func,target=null,id=null)
 	{
 		if(!(typeof eventType==="string" && typeof func==="function")) return;
-		if(!StringUtil.isEmpty(id) && this.hasEventListener(eventType,id)) return;
+		if(!id && target && typeof target=="string"){
+			id=target;
+			target=null;
+		}
+
+		if(!StringUtil.isEmpty(id) && this.has(eventType,id)) return;
 		
 		if(this.listeners[eventType] == undefined) this.listeners[eventType]=[];
-		if(this.listeners[eventType].indexOf(func)==-1) this.listeners[eventType].push(func);
+		if(this.listeners[eventType].indexOf(func)==-1) this.listeners[eventType].push({f:func,t:target});
 		
 		if(id){
 			this.caches=this.caches || {};
@@ -51,7 +56,7 @@ export default class EventDispatcher
 		}
 	}
 	
-	removeEventListener(eventType, func,id=null)
+	off(eventType, func,id=null)
 	{
 		if(this.listeners==undefined || this.listeners[eventType] == undefined) return;
 		
@@ -71,7 +76,7 @@ export default class EventDispatcher
 		for(let i=0; i<len ;i++)
 		{
 			let sub_func=this.listeners[eventType][i];
-			if(sub_func==func){
+			if(sub_func && sub_func.f==func){
 				this.listeners[eventType].splice(i, 1);
 				len--;
 				i--;
@@ -92,7 +97,7 @@ export default class EventDispatcher
 		}
 	}
 	
-	dispatchEvent(eventObj)
+	emit(eventObj)
 	{
 		const list=this.listeners;
 		if(eventObj== undefined || !eventObj.hasOwnProperty("type") || !eventObj.type ||list==undefined || list[eventObj.type] == undefined) {
@@ -108,7 +113,7 @@ export default class EventDispatcher
 		let listener;
 		const map=list[eventObj.type].slice();
 		if(eventObj.target==null) eventObj.target=this;
-		for(listener of map) listener.call(this,eventObj);
+		for(listener of map) listener.f.call(listener.t,eventObj);
 		if(eventObj && !Global.gc(eventObj)) eventObj.dispose();
 		return true;
 	}

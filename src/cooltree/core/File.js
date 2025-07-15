@@ -103,11 +103,11 @@ export default class File extends EventDispatcher
 		}
 		
 		if(failed.length>0){
-			target.dispatchEvent(new Event(File.LIMIT,failed));
+			target.emit(new Event(File.LIMIT,failed));
 		}
 		
 		if(!this.auto_parse || files.length==0){
-			if(files.length) target.dispatchEvent(new Event(File.COMPLETE,files));
+			if(files.length) target.emit(new Event(File.COMPLETE,files));
 			return;
 		}
 		
@@ -124,7 +124,7 @@ export default class File extends EventDispatcher
 					t.onload = function(e) {
 					   URL.revokeObjectURL(t.src);
 					   list.push(t);
-					   if(list.length==files.length) target.dispatchEvent(new Event(File.COMPLETE,list));
+					   if(list.length==files.length) target.emit(new Event(File.COMPLETE,list));
 					}
 					continue;
 				}
@@ -139,7 +139,7 @@ export default class File extends EventDispatcher
 						t.src=evt.target.result;
 						list.push(t);
 					}
-					if(list.length==files.length) target.dispatchEvent(new Event(File.COMPLETE,list));
+					if(list.length==files.length) target.emit(new Event(File.COMPLETE,list));
 				}
 				target._reader.readAsDataURL(f);
 			}
@@ -148,14 +148,14 @@ export default class File extends EventDispatcher
 				target._reader.onload = function(evt) {
 					t=DOMUtil.createDOM("p",{id:evt.target.name,innerHTML:"<pre>"+evt.target.result.replace(/</g, "&lt;").replace(/>/g, "&gt;")+"</pre>"});
 					list.push(t);
-					if(list.length==files.length) target.dispatchEvent(new Event(File.COMPLETE,list));
+					if(list.length==files.length) target.emit(new Event(File.COMPLETE,list));
 				}
 				target._reader.readAsText(f);
 			}else {
 				target._reader = new FileReader();
 				target._reader.onload = function(evt) {
 					list.push(evt.target.result);
-					if(list.length==files.length) target.dispatchEvent(new Event(File.COMPLETE,list));
+					if(list.length==files.length) target.emit(new Event(File.COMPLETE,list));
 				}
 				target._reader.readAsBinaryString(f);
 			}

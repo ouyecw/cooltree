@@ -14,7 +14,7 @@ export default class Firing extends DisplayObjectContainer
 		this._shells=[];
 		this._bullets=[];
 		this._sound=AssetManager.getSource("sound_Sound 11@mp3");
-		Stage.current.addEventListener(StageEvent.ENTER_FRAME,Global.delegate(this.onEnterFrame,this),this.name);
+		Stage.current.on(StageEvent.ENTER_FRAME,Global.delegate(this.onEnterFrame,this),this.name);
 	}
 	
 	start()
@@ -106,7 +106,7 @@ export default class Firing extends DisplayObjectContainer
 	
 	dispose()
 	{
-		Stage.current.removeEventListener(StageEvent.ENTER_FRAME,null,this.name);
+		Stage.current.off(StageEvent.ENTER_FRAME,null,this.name);
 		super.dispose();
 	}
 }

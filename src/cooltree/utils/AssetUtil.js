@@ -82,17 +82,19 @@ export default class AssetUtil
 	{
 		if(image==null || json==null) return;
 		let i,str,temp,source,datas,old,array=[],j=0;
+		const bool=(!json.hasOwnProperty("frames") && !json.frames);
 		
 		for(str in json){
 			if(str=="meta") continue;
-
 			datas=json[str];
 			if(!datas) continue;
-			
+
 			for(i in datas){
 				temp=datas[i];
+				if(!temp || typeof temp!="object") continue;
+				if(bool && (!temp.hasOwnProperty("frame") && !temp.frame)) return;
+
 				temp.name=i;
-				
 				source=ObjectPool.create(Source);
 				source.setup(image,temp,true,j++);
 	

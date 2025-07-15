@@ -42,21 +42,21 @@ export default class Game extends DisplayObjectContainer
 		this._rocket.setInstance(AssetManager.getSource("thrust"));
 		
 		this._sound=AssetManager.getSource("sound_Sound 3@mp3");
-		Stage.current.addEventListener(Game.GAME_READY,Global.delegate(this.start,this),this.name);
+		Stage.current.on(Game.GAME_READY,Global.delegate(this.start,this),this.name);
 	}
 	
 	start(e)
 	{
-		Stage.current.removeEventListener(Game.GAME_READY,null,this.name);
-		Stage.current.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this.mouse_down,this),this.name);
+		Stage.current.off(Game.GAME_READY,null,this.name);
+		Stage.current.on(StageEvent.MOUSE_DOWN,Global.delegate(this.mouse_down,this),this.name);
 	}
 	
 	mouse_down(e)
 	{
 		if(this._hero._dead) return;
 		
-		Stage.current.removeEventListener(StageEvent.MOUSE_DOWN,null,this.name);
-		Stage.current.addEventListener(StageEvent.MOUSE_UP,Global.delegate(this.mouse_up,this),this.name);
+		Stage.current.off(StageEvent.MOUSE_DOWN,null,this.name);
+		Stage.current.on(StageEvent.MOUSE_UP,Global.delegate(this.mouse_up,this),this.name);
 		this._layout.remove_win();
 		Game.control=2;
 		
@@ -68,7 +68,7 @@ export default class Game extends DisplayObjectContainer
 			this._enemys.create();
 			Game.life=3;
 			AssetManager.getSource("sound_Sound 5@mp3").play();
-			Stage.current.addEventListener(StageEvent.MOUSE_MOVE,Global.delegate(this.mouse_move,this),this.name);
+			Stage.current.on(StageEvent.MOUSE_MOVE,Global.delegate(this.mouse_move,this),this.name);
 		}
 		
 		if(this._firing) this._firing.start();
@@ -77,9 +77,9 @@ export default class Game extends DisplayObjectContainer
 	mouse_up(e)
 	{
 		Game.control=1;
-		Stage.current.removeEventListener(StageEvent.MOUSE_UP,null,this.name);
-		Stage.current.addEventListener(Game.GAME_READY,Global.delegate(this.start,this),this.name);
-	    Stage.current.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this.mouse_down,this),this.name);
+		Stage.current.off(StageEvent.MOUSE_UP,null,this.name);
+		Stage.current.on(Game.GAME_READY,Global.delegate(this.start,this),this.name);
+	    Stage.current.on(StageEvent.MOUSE_DOWN,Global.delegate(this.mouse_down,this),this.name);
 	    
 	    if(this._firing) this._firing.stop();
 	}
@@ -96,8 +96,8 @@ export default class Game extends DisplayObjectContainer
 		Game.life--;
 		this._hero._dead=true;
 		
-		Stage.current.removeEventListener(StageEvent.MOUSE_MOVE,null,this.name);
-		Stage.current.removeEventListener(StageEvent.MOUSE_DOWN,null,this.name);
+		Stage.current.off(StageEvent.MOUSE_MOVE,null,this.name);
+		Stage.current.off(StageEvent.MOUSE_DOWN,null,this.name);
 		
 		if(Game.life<1){
 			this.removeChild(this._rocket);
@@ -138,7 +138,7 @@ export default class Game extends DisplayObjectContainer
 		if(Game.life>0){
 			this._enemys.create();
 			this._rocket.visible=this._hero.visible=true;
-			Stage.current.addEventListener(StageEvent.MOUSE_MOVE,Global.delegate(this.mouse_move,this),this.name);
+			Stage.current.on(StageEvent.MOUSE_MOVE,Global.delegate(this.mouse_move,this),this.name);
 		    this._hero.moveTo(MathUtil.clamp(Stage.current.mouseX-40,0,Global.canvas.width-80),MathUtil.clamp(Stage.current.mouseY-50,0,Global.canvas.height-100));
 		}
 		
@@ -146,7 +146,7 @@ export default class Game extends DisplayObjectContainer
 		this._hero._dead=false;
 		Game.instance.protect(false);
 		this._hero.moveTo(Stage.current.stageWidth*0.5,Stage.current.stageHeight-150);
-		Stage.current.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this.mouse_down,this),this.name);
+		Stage.current.on(StageEvent.MOUSE_DOWN,Global.delegate(this.mouse_down,this),this.name);
 		
 		if(Game.life>0) {
 			if(Game.control==2 && this._firing) this._firing.start(); 

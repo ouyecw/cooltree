@@ -49,7 +49,7 @@ export default class SwitchButton extends DisplayObjectContainer
     	
     	if(!this.bottom) return;
     	this.sync_data(true);
-    	this.dispatchEvent(new Event(SwitchButton.CHANGE,this.bool));
+    	this.emit(new Event(SwitchButton.CHANGE,this.bool));
     }
 	
 	setup(config)
@@ -61,7 +61,7 @@ export default class SwitchButton extends DisplayObjectContainer
 			this.addChild(this.bottom);
 			
 			this.bottom.mouseEnabled=true;
-			this.bottom.addEventListener(StageEvent.MOUSE_TAP,Global.delegate(this.change_handler,this));
+			this.bottom.on(StageEvent.MOUSE_TAP,Global.delegate(this.change_handler,this));
 		}else{
 			this.bottom.setSize(this.length+this.space*2,(this.redius+this.space)*2);
 			this.bottom.redius=this.redius+this.space;
@@ -84,7 +84,7 @@ export default class SwitchButton extends DisplayObjectContainer
 			this.addChild(this.bar);
 			
 			this.bar.buttonMode=this.bar.mouseEnabled=true;
-			this.bar.addEventListener(StageEvent.MOUSE_DOWN,Global.delegate(this.mouse_handler,this));
+			this.bar.on(StageEvent.MOUSE_DOWN,Global.delegate(this.mouse_handler,this));
 		}else{
 			this.bar.setSize(this.redius*2,this.redius*2);
 			this.bar.redius=this.redius;
@@ -124,8 +124,8 @@ export default class SwitchButton extends DisplayObjectContainer
 		this.is_drag=false;
 		this.lock=true;
 		
-		this.stage.addEventListener(StageEvent.MOUSE_UP,Global.delegate(this.mouse_up,this),this.name);
-		this.stage.addEventListener(StageEvent.MOUSE_MOVE,Global.delegate(this.mouse_move,this),this.name);
+		this.stage.on(StageEvent.MOUSE_UP,Global.delegate(this.mouse_up,this),this.name);
+		this.stage.on(StageEvent.MOUSE_MOVE,Global.delegate(this.mouse_move,this),this.name);
 	}
 	
 	mouse_move(e)
@@ -152,8 +152,8 @@ export default class SwitchButton extends DisplayObjectContainer
 	
 	mouse_up(e)
 	{
-		this.stage.removeEventListener(StageEvent.MOUSE_UP,null,this.name);
-		this.stage.removeEventListener(StageEvent.MOUSE_MOVE,null,this.name);
+		this.stage.off(StageEvent.MOUSE_UP,null,this.name);
+		this.stage.off(StageEvent.MOUSE_MOVE,null,this.name);
 		
 		this.lock=false;
 		if(!this.is_drag){

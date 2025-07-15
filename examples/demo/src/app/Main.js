@@ -43,7 +43,7 @@ window.onload = function()
 	const loader=new Loader();
 	
 	//添加事件侦听器
-	loader.addEventListener(Loader.LOAD_COMPLETE,loadComplete);
+	loader.on(Loader.LOAD_COMPLETE,loadComplete,this);
 	
 	//加载文件路径
 	loader.load(["assets/img/tu.png","assets/img/anim.png","assets/img/anim.json"]);
@@ -52,7 +52,7 @@ window.onload = function()
 function loadComplete(e)
 {
 	//清除事件侦听器
-	e.target.removeEventListener(Loader.LOAD_COMPLETE);
+	e.target.off(Loader.LOAD_COMPLETE);
 	
 	//清空舞台 （Stage.current为获取当前舞台的静态属性）
 	Stage.current.removeAllChildren(true);
@@ -103,7 +103,9 @@ function loadComplete(e)
 	btn.setLabel({text:"NEW",size:26,color:"#FFFFFF",x:-30,y:-10},"#000000");
 	
 	//添加事件侦听器
-	btn.addEventListener(StageEvent.MOUSE_CLICK,click_handler);
+	btn.on(StageEvent.MOUSE_CLICK,click_handler,this);
+	
+	console.log(MovieManager._dic)
 }
 
 function click_handler(e)
