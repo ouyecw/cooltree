@@ -151,6 +151,8 @@ app.BoxShape=require('./ui/BoxShape.js').default
 
 app.TextField=require('./text/TextField.js').default
 
+app.RichText=require('./text/RichText.js').default
+
 app.SVGText=require('./text/SVGText.js').default
 
 app.BitmapText=require('./text/BitmapText.js').default

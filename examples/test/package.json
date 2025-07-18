@@ -25,6 +25,6 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "cooltree": "^1.1.6"
+    "cooltree": "^1.1.8"
   }
 }

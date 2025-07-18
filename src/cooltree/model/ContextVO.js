@@ -69,8 +69,9 @@ export default class ContextVO
 	{
 		return function(){
 			if(type===0) {
+				const temp=this.value[name];
 				this.value[name]=arguments[0];
-				if(!this.strict) return;
+				if(!this.strict || temp==arguments[0]) return;
 			}
 			
 			if(name=="clear" || name=="dispose"){

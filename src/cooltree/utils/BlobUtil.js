@@ -31,12 +31,8 @@ export default class BlobUtil {
 	
 	static toArrayBuffer(buf)
 	{
-	  let ab = new ArrayBuffer(buf.length);
-	  let view = new Uint8Array(ab);
-	  for (let i = 0; i < buf.length; ++i) {
-	    view[i] = buf[i];
-	  }
-	  return ab;
+		const typedArray = new Uint8Array(buf);
+		return typedArray.slice().buffer;
 	}
 	
 	/**

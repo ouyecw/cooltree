@@ -68,19 +68,16 @@ export default class ContextVO
 	static create_func(type,name)
 	{
 		return function(){
-			if(type===0) {
+			if(type==0) {
+				const temp=this.value[name];
 				this.value[name]=arguments[0];
-				if(!this.strict) return;
+				if(!this.strict || temp==arguments[0]) return;
 			}
 
 			if(name=="clear"){
 				this.actions=[];
 				return;
 			}
-
-			// if(this.actions.length>90){
-			// 	console.warn("[ContextVO] actions is overflowing.",this.actions.length);
-			// }
 
     		this.actions.push({type:type,method:name,data:arguments});
     	}

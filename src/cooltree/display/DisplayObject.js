@@ -297,7 +297,9 @@ export default class DisplayObject extends DisplayBase
 		
 		if(this[_graphics]){
 			this.do_actions(target ? target : this.stage.graphics,this.graphics,true);
-		}else if(this.context){
+		}
+		
+		if(this.context){
 			this.do_actions(target ? target : this.stage,this.context);
 		}
 		

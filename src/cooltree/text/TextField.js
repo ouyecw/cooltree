@@ -51,7 +51,7 @@ export default class TextField extends DisplayObject
 		this._fontMetrics = null;
 		
 		this.autoSize=true;
-		this.scrollHeight=0;
+		this.scrollValue=0;
 		this.mouseEnabled=false;
 		this._writingMode=false;
 		
@@ -207,9 +207,7 @@ export default class TextField extends DisplayObject
     	if(value==null) return;
     	if(!(typeof value =="string" && StringUtil.isEmpty(value))) value=value instanceof GColor ? ColorUtil.getGradientColor(value) : ColorUtil.formatColor(value);
         if(this._color==value) return;
-	
 		this._color=value;
-		this.fillType=value ? (this._color2 ? "both" : "fill") : (this._color2 ? "stroke" : this.fillType);
 		this.has_update=true;
     }
 	
@@ -228,9 +226,7 @@ export default class TextField extends DisplayObject
     	if(!(typeof value =="string" && StringUtil.isEmpty(value)))  value=value instanceof GColor ? ColorUtil.getGradientColor(value) : ColorUtil.formatColor(value);
 		
         if(this._color2==value) return;
-	
 		this._color2=value;
-		this.fillType=value ? (this._color ? "both" : "stroke") : (this._color ? "fill" : this.fillType);
 		this.has_update=true;
     }
 	
@@ -379,8 +375,8 @@ export default class TextField extends DisplayObject
 		
 		const texts=this._text.split(/\r\n|\r|\n|<br(?:[ \/])*>/);
 		let isNormal,word,i,j,line,l=texts.length, width,oy=this._fontMetrics.height * this._lineHeight*0.5,dy =oy,my=(this.autoSize && this._lineWidth ? this._lineWidth : this.height), sy=this._fontMetrics.height*0.5, wordHeight = this._fontMetrics.height;
-	    let mw=0,mx=this.autoSize ? 0 : this.width-this.size*0.5;
-	    let wlen,align_left=(this._textAlign=="start" || this._textAlign=="left"),lines=(align_left && !this.autoSize ? null : []);
+	    let mw=0,max=0,mx=this.autoSize ? 0 : this.width-this.size*0.5;
+	    let wlen,cache,align_left=(this._textAlign=="start" || this._textAlign=="left"),lines=(align_left && !this.autoSize ? null : []);
 		
 		for (i=0;i<l;i++){
 			line=texts[i];
@@ -388,30 +384,60 @@ export default class TextField extends DisplayObject
 			
 			if(!this.autoSize && mx<=this._leading) break;
 			
-			let cache=(align_left && !this.autoSize ? null : []);
-			for(j = 0, wlen = line.length; j < wlen; j++)
+			cache=[];
+			if(this.wordBreak)
 			{
-				word = line.charAt(j);
-				if(!word || word.length == 0) continue;
-				isNormal=!word.match(/[\u4e00-\u9fa5]/);//line.charCodeAt(j)<257;
-				width=this.getTextWidth(word);
-				mw=Math.max(mw,width);
-				
-				if(sy+dy>=my-this._leading){
-					if(cache && cache.length) {
-						lines.push({d:cache,r:{x:mx-mw,y:cache[0].y,w:mw,h:(cache[cache.length-1].y-cache[0].y+wordHeight+this._leading)}});
-					    cache=[];
+				for(j = 0, wlen = line.length; j < wlen; j++)
+				{
+					word = line.charAt(j);
+					if(!word || word.length == 0) continue;
+					isNormal=!word.match(/[\u4e00-\u9fa5]/);//line.charCodeAt(j)<257;
+					width=this.getTextWidth(word);
+					mw=Math.max(mw,width);
+					
+					if(sy+dy>=my-this._leading){
+						if(cache && cache.length) {
+							lines.push({d:cache,r:{x:mx-mw,y:cache[0].y,w:mw,h:(cache[cache.length-1].y-cache[0].y+wordHeight+this._leading)}});
+							cache=[];
+						}
+						
+						dy=oy;
+						mx-=this._fontMetrics.height*this._lineHeight;
+						if(!this.autoSize && mx<=this._leading) break;
 					}
 					
-					dy=oy;
-					mx-=this._fontMetrics.height*this._lineHeight;
-					if(!this.autoSize && mx<=this._leading) break;
+					cache.push({w:word,x:mx-width,y:sy+dy,b:isNormal});
+					dy=dy+(isNormal ? width : wordHeight)+this._leading;
 				}
-				
-				if(cache) cache.push({w:word,x:mx-width,y:sy+dy,b:isNormal});
-				else this._draw(word, sy+dy,mx-width,isNormal);
-				
-				dy=dy+(isNormal ? width : wordHeight)+this._leading;
+			}else{
+				const words = line.split(/([^\x00-\xff]|\b)/);
+				for(let j = 0, wlen = words.length; j < wlen; j++)
+				{
+					const word = words[j];
+					if(!word || word.length == 0) continue;
+
+					if(sy+dy>=my-this._leading){
+						if(cache && cache.length) {
+							lines.push({d:cache,r:{x:mx-mw,y:cache[0].y,w:mw,h:(cache[cache.length-1].y-cache[0].y+wordHeight+this._leading)}});
+							cache=[];
+						}
+						
+						dy=oy;
+						mx-=this._fontMetrics.height*this._lineHeight;
+						if(!this.autoSize && mx<=this._leading) break;
+					}
+
+					for(let k=0,len=word.length;k<len;k++){
+						const letter=word[k];
+						if(!letter || letter.length == 0) continue;
+						isNormal=!letter.match(/[\u4e00-\u9fa5]/);//line.charCodeAt(j)<257;
+						width=this.getTextWidth(letter);
+						mw=Math.max(mw,width);
+
+						cache.push({w:letter,x:mx-width,y:sy+dy,b:isNormal});
+						dy=dy+(isNormal ? width : wordHeight)+this._leading;
+					}
+				}
 			}
 			
 			if(cache && cache.length) {
@@ -423,21 +449,31 @@ export default class TextField extends DisplayObject
 			mx-=mw*this._lineHeight;
 		}
 		
-		if(!lines) return;
-		mx=Math.abs(lines[lines.length-1].d[0].x)+this._leading;
+		if(!lines || !lines.length) return;
+		mx=Math.abs(lines[lines.length-1].d[0].x)+this._leading+this.size*0.5;
 		oy=this._fontMetrics.height+this._leading;
 		
 		for (i=0,l=lines.length;i<l;i++){
 			line=lines[i];
-			this.context.clearRect(line.r.x, line.r.y, line.r.w, line.r.h);
 			sy=oy+(this._textAlign=="center" ? (my-line.r.h)*0.5 : (align_left ? 0 : my-line.r.h));
 			dy=line.d[0].y;
 			
 			for(j = 0, wlen = line.d.length; j < wlen; j++)
 			{
 				word=line.d[j];
+				max=Math.max(mx+word.x,max);
 				this._draw(word.w, word.y-dy+sy,mx+word.x,word.b);
 			}
+		}
+
+		max+=this.size;
+		this.scrollValue = max;
+		
+		if(this.autoSize) {
+			if(this._lineWidth)
+				this.height = Math.min(this._lineWidth,this.getTextWidth(this.getText()));
+				
+			this.width=max;
 		}
 	}
 	
@@ -527,7 +563,7 @@ export default class TextField extends DisplayObject
 			dy += lineHeight;
 		}
 	
-		this.scrollHeight = dy;
+		this.scrollValue = dy;
 		if(this.autoSize) this.height = dy;
 	}
 	
@@ -574,7 +610,7 @@ export default class TextField extends DisplayObject
 	dispose()
 	{
 		super.dispose();
-		delete this.wordBreak,this.scrollHeight,this._lineHeight,this.autoSize,this._underline,this._writingMode,this._text,this._font,this._color,this._color2,this._size,this._textAlign,this._textBaseline,this._fill_type,this._has_update,this._leading,this._italic,this._bold,this._lineWidth,this._fontMetrics,this.mouseEnabled;
+		delete this.wordBreak,this.scrollValue,this._lineHeight,this.autoSize,this._underline,this._writingMode,this._text,this._font,this._color,this._color2,this._size,this._textAlign,this._textBaseline,this._fill_type,this._has_update,this._leading,this._italic,this._bold,this._lineWidth,this._fontMetrics,this.mouseEnabled;
 	}
 	
 	toString()

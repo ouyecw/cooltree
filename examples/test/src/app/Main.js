@@ -1,5 +1,5 @@
 
-import {Button,Effect,Source,Global,Stage,LoadingClip,Loader,AssetManager,Factory,StageEvent,ObjectUtil,MovieManager,MathUtil,ContentList,ContentItem} from 'cooltree'
+import {Button,Effect,RichText,Source,Global,Stage,LoadingClip,Loader,AssetManager,Factory,StageEvent,ObjectUtil,MovieManager,MathUtil,ContentList,ContentItem} from 'cooltree'
 import Spine from './Spine.js'
 import EItem from './EItem.js'
 // import * as CT from 'cooltree'
@@ -120,6 +120,20 @@ function loadComplete(e)
 	mc.moveTo(320,120);
 	mc.scale=0.4;
 	mc.rate=2;
+	
+	const str=`The first article predicted that the market value of <color='#1f04e8' italic=true>Century Huatong</> could potentially hit 100 billion yuan, and by July 10th, Century Huatong had truly achieved this goal in less than three months. This also indicates that the external bullish outlook on DianDian's performance is consistent.
+	For those who started Huatong this year, <strokeColor='#990385' fillType='stroke'>whether they are peers in the game circle, investment institutions, or ordinary shareholders, they can say that they have had a good meal in this feast. Especially in the <color='#00aa00' italic=true>first half of this year</>, when Trump government faced the impact of tariff parity, and the uncertainty of the overall environment increased</>, it is really valuable to have such excellent game stocks as Century Huatong`;
+	
+	const tf=new RichText({
+		text:str,
+		size:18,
+		lineWidth:400,
+		writingMode:false,
+		wordBreak:false,
+		x:250,y:250
+	});
+
+	Stage.current.addChild(tf);
 }
 
 window.onresize=function()
