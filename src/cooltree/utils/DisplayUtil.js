@@ -46,7 +46,36 @@ export default class DisplayUtil
 	    return false;
 	}
 	
-	
+	/**
+	 * 字体大小不变的情况下，根据文本框高度控制文本内容
+	 * @param {TextField} tf  文本框
+	 * @param {Number} value  文本框高度
+	 * @param {String} suffix 文本后缀
+	 * @returns 
+	 */
+	static holdHeight(tf,value,suffix="..")
+	{
+		if(tf==null || StringUtil.isEmpty(tf.text)) return;
+		tf._update();
+
+		if(value<=0 || tf.getHeight()<=value) return;
+		const num=suffix.length+1;
+		let count=0;
+
+		while(tf.getHeight()>value && count<80)
+		{
+			tf.text=tf.text.slice(0,tf.text.length-num)+suffix;
+			tf._update();
+			count++;
+		}
+	}
+
+	/**
+	 * 文本框文本内容不变的情况下，缩小文本字体适应文本框大小
+	 * @param {TextField|InputText} tf   文本框
+	 * @param {Number} minSize 最小字体
+	 * @returns 
+	 */
 	static autoSizeFromText (tf,minSize)
 	{
 		if(tf==null || StringUtil.isEmpty(tf.text)) return;
