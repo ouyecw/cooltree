@@ -54,14 +54,14 @@ export default class DisplayUtil
 
 		tf.render();
 		th=tf.height;
-		sh=tf.scrollHeight;
+		sh=tf.scrollValue;
 		if(sh<=th) return;
 		
 		while(tf.size>minSize && sh>th){
 	    	tf.size=tf.size-1;
 	    	
 	    	tf.render();
-	    	sh=tf.scrollHeight;
+	    	sh=tf.scrollValue;
 	    }
 	}
 }
