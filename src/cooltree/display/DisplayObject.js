@@ -101,7 +101,7 @@ export default class DisplayObject extends DisplayBase
 	
 	set mask(value) 
 	{
-		if(!value || !(value instanceof ShapeVO) || !this.instance){
+		if(!value || !(value instanceof ShapeVO)){
 			this._mask=null;
 			return;
 		}

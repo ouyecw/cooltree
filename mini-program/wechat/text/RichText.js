@@ -209,7 +209,11 @@ export default class RichText extends TextField
 		
 		const styles=[];
 		const array=this._text.split(/(<[^>]+>)/).filter(Boolean);
-		if(this.autoSize && this._lineWidth) this.width = this._lineWidth;
+
+		if(this.autoSize) {
+			this.width = Math.ceil(this.getTextWidth(this.getText())+this._size);
+			this._lineWidth = this._lineWidth || this.width;
+		}
 		
 		const maxWidth=(this.autoSize && this._lineWidth ? this._lineWidth : this.width);
 		const align_left=(this._textAlign=="start" || this._textAlign=="left");

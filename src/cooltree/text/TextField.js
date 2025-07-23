@@ -484,7 +484,11 @@ export default class TextField extends DisplayObject
 		
 		const texts=this._text.split(/\r\n|\r|\n|<br(?:[ \/])*>/);
 		let letter,i,cx,line,width,l=texts.length,lineHeight = this._fontMetrics.height * this._lineHeight, dy = this._fontMetrics.height * this._lineHeight*0.5;
-		if(this.autoSize) this.width = this._lineWidth ;
+		
+		if(this.autoSize) {
+			this.width = Math.ceil(this.getTextWidth()+this._size*0.5);
+			this._lineWidth = this._lineWidth || this.width;
+		}
 		
 		const maxWidth=(this.autoSize && this._lineWidth ? this._lineWidth : this.width);
 		const align_left=(this._textAlign=="start" || this._textAlign=="left");

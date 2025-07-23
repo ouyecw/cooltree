@@ -13,6 +13,7 @@ import UniqueUtil from '../utils/UniqueUtil.js'
 import ContextVO from '../model/ContextVO.js'
 import ClassUtil from '../utils/ClassUtil.js'
 import ShapeUtil from '../utils/ShapeUtil.js'
+import Rectangle from '../geom/Rectangle.js'
 import DisplayBase from './DisplayBase.js'
 import Loader from '../loader/Loader.js'
 import Event from '../events/Event.js'
@@ -66,7 +67,7 @@ export default class DisplayObject extends DisplayBase
 	
 	set mask(value) 
 	{
-		if(!value || !this.instance){
+		if(!value || (typeof value!="string" && !(value instanceof Rectangle))){
 			this._mask=null;
 			return;
 		}

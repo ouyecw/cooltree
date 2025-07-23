@@ -240,6 +240,7 @@ export default class ContentList extends DisplayObjectContainer
 			ObjectPool.remove(item);
 		}
 
+		if(this.bg) ObjectPool.remove(this.bg);
 		this.bg=null;
 	}
 
