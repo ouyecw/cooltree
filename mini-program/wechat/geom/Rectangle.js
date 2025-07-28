@@ -163,7 +163,7 @@ export default class Rectangle
 		return this.x<=p.x && this.y<=p.y && p.right<=this.right && p.bottom<=this.bottom;
 		
 		else if(y!=undefined)
-		return this.x<=p && this.y<=y && p<=this.right && y<=this.bottom;
+		return this.x<=p && this.y<=y && p<=this.x+this.width && y<=this.y+this.height;
 		
 		return false;
 	}

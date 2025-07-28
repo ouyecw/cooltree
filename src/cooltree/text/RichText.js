@@ -209,16 +209,16 @@ export default class RichText extends TextField
 		
 		const styles=[];
 		const array=this._text.split(/(<[^>]+>)/).filter(Boolean);
-		
+
 		if(this.autoSize) {
-			this.width = Math.ceil(this.getTextWidth(this.getText())+this._size*0.5);
+			this.width = Math.ceil(this.getTextWidth(this.getText()));
 			this._lineWidth = this._lineWidth || this.width;
 		}
 		
 		const maxWidth=(this.autoSize && this._lineWidth ? this._lineWidth : this.width);
 		const align_left=(this._textAlign=="start" || this._textAlign=="left");
 		
-		let str,current,pos,style;
+		let str,current,pos,style,max_width=0;
 		for(str of array){
 			if(StringUtil.isEmpty(str)) continue;
 			
@@ -241,19 +241,23 @@ export default class RichText extends TextField
 				current=styles.pop();
 			
 			pos=this._horizontal_render(str,maxWidth,align_left,pos,current);
+			max_width=Math.max(max_width,pos.max);
 		}
 		
 		this.scrollValue = pos.y;
-		if(this.autoSize) this.height = pos.y;
+		if(this.autoSize) {
+			if(max_width>0 && align_left) this.width = max_width;
+			this.height = pos.y;
+		}
 	}
-	
+
 	_horizontal_render(str,maxWidth,align_left,pos=null,style=null)
 	{
 		const texts=str.split(/\r\n|\r|\n/);
 		this._fontMetrics.height=(style && style.hasOwnProperty("size") && !isNaN(Number(style.size))) ? Number(style.size) : this.size;
 		
 		const lineHeight = this._fontMetrics.height * this._lineHeight;
-		let i,line,width,letter,l=texts.length,cx=pos ? pos.x : 0,dy=pos ? pos.y : this._fontMetrics.height * this._lineHeight*0.5;
+		let i,line,max_width=0,l=texts.length,cx=pos ? pos.x : 0,dy=pos ? pos.y : this._fontMetrics.height * this._lineHeight*0.5;
 		
 		for (i=0;i<l;i++){
 			line=texts[i];
@@ -285,6 +289,7 @@ export default class RichText extends TextField
 					if(align_left) this._drawText(letter, dy,cx,false,style);
 					else cache.push({l:letter,x:cx,y:dy});
 					cx+=letterWidth;
+					max_width=Math.max(max_width,cx);
 				}
 			}
 			else
@@ -316,6 +321,7 @@ export default class RichText extends TextField
 						else cache.push({l:letter,x:cx,y:dy});
 						cx+=this.getTextWidth(letter)+this._leading;
 					}
+					max_width=Math.max(max_width,cx);
 				}
 			}
 			
@@ -329,7 +335,7 @@ export default class RichText extends TextField
 			dy += lineHeight;
 		}
 		
-		return {x:cx,y:dy-lineHeight};
+		return {x:cx,y:dy-lineHeight,max:max_width};
 	}
 	
 	_drawText(str,posY=0,posX=0,vertical=false,style=null)

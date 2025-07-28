@@ -67,7 +67,10 @@ export default class Global
 	static _dispatcher=null;
 
 	//场景
-	static _stage=null;
+    static _stage=null;
+    
+    //场景
+	static map =null;
 
 	static get stage()
 	{

@@ -166,10 +166,22 @@ export default class ContentList extends DisplayObjectContainer
 		TweenLite.to(this.container,time,obj);
 	}
 
-	addData(data,size)
+	/**
+	 * 列表添加数据
+	 * @param {Array} data     数组数据
+	 * @param {Number} size    总高度/宽度值（这组数据）
+	 * @param {Boolean} append true向前扩展 false向后扩展
+	 * @returns 
+	 */
+	addData(data,size,append=false)
 	{
 		if(!data || !data.length) return;
-		this.datas=this.datas.concat(data);
+
+		if(append && this.datas && this.datas.length>0){
+			this._clear_old_data();
+		}
+
+		this.datas=append ? data.concat(this.datas) : this.datas.concat(data);
 		this.hold_size+=data.length*this.space+size;
 
 		if(!this.bg) {
@@ -189,6 +201,24 @@ export default class ContentList extends DisplayObjectContainer
 			this.container.addChildAt(this.bg,0);
 		
 		this.dragHandler();
+	}
+
+	_clear_old_data()
+	{
+		this.old_list=[];
+
+		for(let data of this.datas) {
+			if(data && data._rect) delete data._rect;
+		}
+
+		let item;
+		while(this.container.numChildren>0){
+			item=this.container.removeChildAt(0);
+			ObjectPool.remove(item);
+		}
+
+		this.container.moveTo(0,0);
+		this.bg=null;
 	}
 
 	_check_data()
@@ -227,7 +257,6 @@ export default class ContentList extends DisplayObjectContainer
 			ObjectPool.remove(item);
 		}
 
-		if(this.bg) ObjectPool.remove(this.bg);
 		this.line_img=null;
 		this.bg=null;
 	}

@@ -528,7 +528,53 @@ export default class StringUtil
 		const lastIndex = filename.lastIndexOf(".");
 		if (lastIndex !== -1) filename = filename.substring(0, lastIndex);
 		return filename;
-	}
+    }
+    //截取字符串剩余的以last代替（中文算两个字符，英文一个字符）
+    static truncateString(str, maxLength = 8, last = '···') {
+        if (!str || str.length === 0) return '';
+        
+        let currentWidth = 0;
+        let result = '';
+        let i = 0;
+        
+        // 遍历字符串，计算每个字符的宽度
+        while (i < str.length && currentWidth < maxLength) {
+          const char = str[i];
+          const charWidth = this.isFullWidth(char) ? 2 : 1;
+          
+          // 如果添加当前字符会超出最大宽度，则停止
+          if (currentWidth + charWidth > maxLength) {
+            break;
+          }
+          
+          result += char;
+          currentWidth += charWidth;
+          i++;
+        }
+        
+        // 如果原字符串已被完全处理，直接返回
+        if (i === str.length) {
+          return result;
+        }
+        
+        // 否则添加省略符号
+        return result + last;
+      }
+      
+      // 判断字符是否为全角字符（中文、日文、韩文等）
+      static isFullWidth(char) {
+        const charCode = char.codePointAt(0);
+        
+        // 基本汉字、全角符号等 Unicode 范围
+        return (
+          (charCode >= 0x4E00 && charCode <= 0x9FFF) || // CJK 统一表意文字
+          (charCode >= 0xFF00 && charCode <= 0xFFEF) || // 全角符号
+          (charCode >= 0x3000 && charCode <= 0x303F) || // CJK 标点符号
+          (charCode >= 0x3040 && charCode <= 0x309F) || // 日文平假名
+          (charCode >= 0x30A0 && charCode <= 0x30FF) || // 日文片假名
+          (charCode >= 0xAC00 && charCode <= 0xD7AF)    // 韩文 Hangul 音节
+        );
+      }
 }
 
 module.exports = StringUtil;

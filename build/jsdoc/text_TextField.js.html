@@ -79,7 +79,7 @@ export default class TextField extends DisplayObject
 		this._fontMetrics = null;
 		
 		this.autoSize=true;
-		this.scrollHeight=0;
+		this.scrollValue=0;
 		this.mouseEnabled=false;
 		this._writingMode=false;
 		
@@ -235,9 +235,7 @@ export default class TextField extends DisplayObject
     	if(value==null) return;
     	if(!(typeof value =="string" &amp;&amp; StringUtil.isEmpty(value))) value=value instanceof GColor ? ColorUtil.getGradientColor(value) : ColorUtil.formatColor(value);
         if(this._color==value) return;
-	
 		this._color=value;
-		this.fillType=value ? (this._color2 ? "both" : "fill") : (this._color2 ? "stroke" : this.fillType);
 		this.has_update=true;
     }
 	
@@ -256,9 +254,7 @@ export default class TextField extends DisplayObject
     	if(!(typeof value =="string" &amp;&amp; StringUtil.isEmpty(value)))  value=value instanceof GColor ? ColorUtil.getGradientColor(value) : ColorUtil.formatColor(value);
 		
         if(this._color2==value) return;
-	
 		this._color2=value;
-		this.fillType=value ? (this._color ? "both" : "stroke") : (this._color ? "fill" : this.fillType);
 		this.has_update=true;
     }
 	
@@ -407,8 +403,8 @@ export default class TextField extends DisplayObject
 		
 		const texts=this._text.split(/\r\n|\r|\n|&lt;br(?:[ \/])*>/);
 		let isNormal,word,i,j,line,l=texts.length, width,oy=this._fontMetrics.height * this._lineHeight*0.5,dy =oy,my=(this.autoSize &amp;&amp; this._lineWidth ? this._lineWidth : this.height), sy=this._fontMetrics.height*0.5, wordHeight = this._fontMetrics.height;
-	    let mw=0,mx=this.autoSize ? 0 : this.width-this.size*0.5;
-	    let wlen,align_left=(this._textAlign=="start" || this._textAlign=="left"),lines=(align_left &amp;&amp; !this.autoSize ? null : []);
+	    let mw=0,max=0,mx=this.autoSize ? 0 : this.width-this.size*0.5;
+	    let wlen,cache,align_left=(this._textAlign=="start" || this._textAlign=="left"),lines=(align_left &amp;&amp; !this.autoSize ? null : []);
 		
 		for (i=0;i&lt;l;i++){
 			line=texts[i];
@@ -416,30 +412,60 @@ export default class TextField extends DisplayObject
 			
 			if(!this.autoSize &amp;&amp; mx&lt;=this._leading) break;
 			
-			let cache=(align_left &amp;&amp; !this.autoSize ? null : []);
-			for(j = 0, wlen = line.length; j &lt; wlen; j++)
+			cache=[];
+			if(this.wordBreak)
 			{
-				word = line.charAt(j);
-				if(!word || word.length == 0) continue;
-				isNormal=!word.match(/[\u4e00-\u9fa5]/);//line.charCodeAt(j)&lt;257;
-				width=this.getTextWidth(word);
-				mw=Math.max(mw,width);
-				
-				if(sy+dy>=my-this._leading){
-					if(cache &amp;&amp; cache.length) {
-						lines.push({d:cache,r:{x:mx-mw,y:cache[0].y,w:mw,h:(cache[cache.length-1].y-cache[0].y+wordHeight+this._leading)}});
-					    cache=[];
+				for(j = 0, wlen = line.length; j &lt; wlen; j++)
+				{
+					word = line.charAt(j);
+					if(!word || word.length == 0) continue;
+					isNormal=!word.match(/[\u4e00-\u9fa5]/);//line.charCodeAt(j)&lt;257;
+					width=this.getTextWidth(word);
+					mw=Math.max(mw,width);
+					
+					if(sy+dy>=my-this._leading){
+						if(cache &amp;&amp; cache.length) {
+							lines.push({d:cache,r:{x:mx-mw,y:cache[0].y,w:mw,h:(cache[cache.length-1].y-cache[0].y+wordHeight+this._leading)}});
+							cache=[];
+						}
+						
+						dy=oy;
+						mx-=this._fontMetrics.height*this._lineHeight;
+						if(!this.autoSize &amp;&amp; mx&lt;=this._leading) break;
 					}
 					
-					dy=oy;
-					mx-=this._fontMetrics.height*this._lineHeight;
-					if(!this.autoSize &amp;&amp; mx&lt;=this._leading) break;
+					cache.push({w:word,x:mx-width,y:sy+dy,b:isNormal});
+					dy=dy+(isNormal ? width : wordHeight)+this._leading;
 				}
-				
-				if(cache) cache.push({w:word,x:mx-width,y:sy+dy,b:isNormal});
-				else this._draw(word, sy+dy,mx-width,isNormal);
-				
-				dy=dy+(isNormal ? width : wordHeight)+this._leading;
+			}else{
+				const words = line.split(/([^\x00-\xff]|\b)/);
+				for(let j = 0, wlen = words.length; j &lt; wlen; j++)
+				{
+					const word = words[j];
+					if(!word || word.length == 0) continue;
+
+					if(sy+dy>=my-this._leading){
+						if(cache &amp;&amp; cache.length) {
+							lines.push({d:cache,r:{x:mx-mw,y:cache[0].y,w:mw,h:(cache[cache.length-1].y-cache[0].y+wordHeight+this._leading)}});
+							cache=[];
+						}
+						
+						dy=oy;
+						mx-=this._fontMetrics.height*this._lineHeight;
+						if(!this.autoSize &amp;&amp; mx&lt;=this._leading) break;
+					}
+
+					for(let k=0,len=word.length;k&lt;len;k++){
+						const letter=word[k];
+						if(!letter || letter.length == 0) continue;
+						isNormal=!letter.match(/[\u4e00-\u9fa5]/);//line.charCodeAt(j)&lt;257;
+						width=this.getTextWidth(letter);
+						mw=Math.max(mw,width);
+
+						cache.push({w:letter,x:mx-width,y:sy+dy,b:isNormal});
+						dy=dy+(isNormal ? width : wordHeight)+this._leading;
+					}
+				}
 			}
 			
 			if(cache &amp;&amp; cache.length) {
@@ -451,21 +477,31 @@ export default class TextField extends DisplayObject
 			mx-=mw*this._lineHeight;
 		}
 		
-		if(!lines) return;
-		mx=Math.abs(lines[lines.length-1].d[0].x)+this._leading;
+		if(!lines || !lines.length) return;
+		mx=Math.abs(lines[lines.length-1].d[0].x)+this._leading+this.size*0.5;
 		oy=this._fontMetrics.height+this._leading;
 		
 		for (i=0,l=lines.length;i&lt;l;i++){
 			line=lines[i];
-			this.context.clearRect(line.r.x, line.r.y, line.r.w, line.r.h);
 			sy=oy+(this._textAlign=="center" ? (my-line.r.h)*0.5 : (align_left ? 0 : my-line.r.h));
 			dy=line.d[0].y;
 			
 			for(j = 0, wlen = line.d.length; j &lt; wlen; j++)
 			{
 				word=line.d[j];
+				max=Math.max(mx+word.x,max);
 				this._draw(word.w, word.y-dy+sy,mx+word.x,word.b);
 			}
+		}
+
+		max+=this.size;
+		this.scrollValue = max;
+		
+		if(this.autoSize) {
+			if(this._lineWidth)
+				this.height = Math.min(this._lineWidth,this.getTextWidth(this.getText()));
+				
+			this.width=max;
 		}
 	}
 	
@@ -476,7 +512,11 @@ export default class TextField extends DisplayObject
 		
 		const texts=this._text.split(/\r\n|\r|\n|&lt;br(?:[ \/])*>/);
 		let letter,i,cx,line,width,l=texts.length,lineHeight = this._fontMetrics.height * this._lineHeight, dy = this._fontMetrics.height * this._lineHeight*0.5;
-		if(this.autoSize) this.width = this._lineWidth ;
+		
+		if(this.autoSize) {
+			this.width = Math.ceil(this.getTextWidth()+this._size*0.5);
+			this._lineWidth = this._lineWidth || this.width;
+		}
 		
 		const maxWidth=(this.autoSize &amp;&amp; this._lineWidth ? this._lineWidth : this.width);
 		const align_left=(this._textAlign=="start" || this._textAlign=="left");
@@ -555,7 +595,7 @@ export default class TextField extends DisplayObject
 			dy += lineHeight;
 		}
 	
-		this.scrollHeight = dy;
+		this.scrollValue = dy;
 		if(this.autoSize) this.height = dy;
 	}
 	
@@ -602,7 +642,7 @@ export default class TextField extends DisplayObject
 	dispose()
 	{
 		super.dispose();
-		delete this.wordBreak,this.scrollHeight,this._lineHeight,this.autoSize,this._underline,this._writingMode,this._text,this._font,this._color,this._color2,this._size,this._textAlign,this._textBaseline,this._fill_type,this._has_update,this._leading,this._italic,this._bold,this._lineWidth,this._fontMetrics,this.mouseEnabled;
+		delete this.wordBreak,this.scrollValue,this._lineHeight,this.autoSize,this._underline,this._writingMode,this._text,this._font,this._color,this._color2,this._size,this._textAlign,this._textBaseline,this._fill_type,this._has_update,this._leading,this._italic,this._bold,this._lineWidth,this._fontMetrics,this.mouseEnabled;
 	}
 	
 	toString()
@@ -628,13 +668,13 @@ TextField.specialCode=[183,215,8212,8216,8217,8220,8221,8230,12289,12290,12298,1
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Address.html">Address</a></li><li><a href="module-Ajax.html">Ajax</a></li><li><a href="module-ArrayUtil.html">ArrayUtil</a></li><li><a href="module-AssetManager.html">AssetManager</a></li><li><a href="module-AssetUtil.html">AssetUtil</a></li><li><a href="module-BDMap.html">BDMap</a></li><li><a href="module-BitmapFont.html">BitmapFont</a></li><li><a href="module-BitmapText.html">BitmapText</a></li><li><a href="module-BlendMode.html">BlendMode</a></li><li><a href="module-BlobUtil.html">BlobUtil</a></li><li><a href="module-BoxShape.html">BoxShape</a></li><li><a href="module-Button.html">Button</a></li><li><a href="module-Calendar.html">Calendar</a></li><li><a href="module-Camera.html">Camera</a></li><li><a href="module-CanvasUtil.html">CanvasUtil</a></li><li><a href="module-ClassUtil.html">ClassUtil</a></li><li><a href="module-CollisionUtil.html">CollisionUtil</a></li><li><a href="module-ColorTransform.html">ColorTransform</a></li><li><a href="module-ColorUtil.html">ColorUtil</a></li><li><a href="module-ComboList.html">ComboList</a></li><li><a href="module-ContextVO.html">ContextVO</a></li><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-DefsNode.html">DefsNode</a></li><li><a href="module-DisplayBase.html">DisplayBase</a></li><li><a href="module-DisplayObject.html">DisplayObject</a></li><li><a href="module-DisplayObjectContainer.html">DisplayObjectContainer</a></li><li><a href="module-DisplayUtil.html">DisplayUtil</a></li><li><a href="module-DOMDisplay.html">DOMDisplay</a></li><li><a href="module-DOMMovie.html">DOMMovie</a></li><li><a href="module-DOMUtil.html">DOMUtil</a></li><li><a href="module-DoubleClick.html">DoubleClick</a></li><li><a href="module-DrawUtil.html">DrawUtil</a></li><li><a href="module-DropShadowFilter.html">DropShadowFilter</a></li><li><a href="module-Easing.html">Easing</a></li><li><a href="module-Effect.html">Effect</a></li><li><a href="module-Event.html">Event</a></li><li><a href="module-EventDispatcher.html">EventDispatcher</a></li><li><a href="module-Factory.html">Factory</a></li><li><a href="module-File.html">File</a></li><li><a href="module-FontManager.html">FontManager</a></li><li><a href="module-GColor.html">GColor</a></li><li><a href="module-Global.html">Global</a></li><li><a href="module-Graphics.html">Graphics</a></li><li><a href="module-GraphicsVO.html">GraphicsVO</a></li><li><a href="module-GroupList.html">GroupList</a></li><li><a href="module-ImageEditor.html">ImageEditor</a></li><li><a href="module-ImageUtil.html">ImageUtil</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Iso.html">Iso</a></li><li><a href="module-IsoAngle.html">IsoAngle</a></li><li><a href="module-JSONUtil.html">JSONUtil</a></li><li><a href="module-LayoutUtil.html">LayoutUtil</a></li><li><a href="module-List.html">List</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-LoadingClip.html">LoadingClip</a></li><li><a href="module-MapUtil.html">MapUtil</a></li><li><a href="module-MathUtil.html">MathUtil</a></li><li><a href="module-Matrix.html">Matrix</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-Media.html">Media</a></li><li><a href="module-MediaManager.html">MediaManager</a></li><li><a href="module-MoveBar.html">MoveBar</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-MovieManager.html">MovieManager</a></li><li><a href="module-MySocket.html">MySocket</a></li><li><a href="module-ObjectPool.html">ObjectPool</a></li><li><a href="module-ObjectUtil.html">ObjectUtil</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-Popup.html">Popup</a></li><li><a href="module-PropUtil.html">PropUtil</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-QuickUI.html">QuickUI</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-RenderObject.html">RenderObject</a></li><li><a href="module-RouteUtil.html">RouteUtil</a></li><li><a href="module-ScrollTouchList.html">ScrollTouchList</a></li><li><a href="module-Shape.html">Shape</a></li><li><a href="module-ShapeUtil.html">ShapeUtil</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Signal.html">Signal</a></li><li><a href="module-SlideBar.html">SlideBar</a></li><li><a href="module-Sound.html">Sound</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-Sprite.html">Sprite</a></li><li><a href="module-Stage.html">Stage</a></li><li><a href="module-StageEvent.html">StageEvent</a></li><li><a href="module-Storage.html">Storage</a></li><li><a href="module-StringUtil.html">StringUtil</a></li><li><a href="module-SVGLabel.html">SVGLabel</a></li><li><a href="module-SVGText.html">SVGText</a></li><li><a href="module-SVGUtil.html">SVGUtil</a></li><li><a href="module-SwitchButton.html">SwitchButton</a></li><li><a href="module-SystemType.html">SystemType</a></li><li><a href="module-TextField.html">TextField</a></li><li><a href="module-Timer.html">Timer</a></li><li><a href="module-TimeUtil.html">TimeUtil</a></li><li><a href="module-TouchItem.html">TouchItem</a></li><li><a href="module-TouchScale.html">TouchScale</a></li><li><a href="module-Transformer.html">Transformer</a></li><li><a href="module-TweenLite.html">TweenLite</a></li><li><a href="module-UIBase.html">UIBase</a></li><li><a href="module-UIContainer.html">UIContainer</a></li><li><a href="module-UIOrientation.html">UIOrientation</a></li><li><a href="module-UniqueUtil.html">UniqueUtil</a></li><li><a href="module-URLLoader.html">URLLoader</a></li><li><a href="module-Vector.html">Vector</a></li><li><a href="module-Video.html">Video</a></li><li><a href="module-VideoPlayer.html">VideoPlayer</a></li><li><a href="module-WasmFile.html">WasmFile</a></li><li><a href="module-WebAudio.html">WebAudio</a></li><li><a href="module-Windows.html">Windows</a></li><li><a href="module-WordUtil.html">WordUtil</a></li></ul><h3>Classes</h3><ul><li><a href="module-DBManage.html">DBManage</a></li><li><a href="module-File.html">File</a></li><li><a href="module-InputText.html">InputText</a></li><li><a href="module-Loader.html">Loader</a></li><li><a href="module-MaxRectsBinPack.html">MaxRectsBinPack</a></li><li><a href="module-MovieClip.html">MovieClip</a></li><li><a href="module-Point.html">Point</a></li><li><a href="module-QRCode.html">QRCode</a></li><li><a href="module-Rectangle.html">Rectangle</a></li><li><a href="module-ShapeVO.html">ShapeVO</a></li><li><a href="module-Source.html">Source</a></li><li><a href="module-TextField.html">TextField</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_draggable">_draggable</a></li><li><a href="global.html#addData">addData</a></li><li><a href="global.html#toScroll">toScroll</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Tue Jul 15 2025 11:18:06 GMT+0800 (中国标准时间)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Mon Jul 28 2025 15:01:38 GMT+0800 (中国标准时间)
 </footer>
 
 <script> prettyPrint(); </script>
