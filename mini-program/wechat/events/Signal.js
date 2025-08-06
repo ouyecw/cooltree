@@ -1,3 +1,4 @@
+import ClassUtil from '../utils/ClassUtil.js';
 import StringUtil from '../utils/StringUtil.js'
 
 /**
@@ -10,6 +11,24 @@ export default class Signal
 	{
 		this._handlers={};
 	}
+
+	get info()
+    {
+        let key,handlerList,target;
+        const info=[];
+
+        for(key in this._handlers){
+            handlerList=this._handlers[key];
+            for (var i = 0; i < handlerList.length; i++) {
+                
+                target=handlerList[i].t;
+                target=target && typeof target=="object" ? ClassUtil.getQualifiedClassName(target) : target;
+                info.push(key+" : "+target+" > "+(handlerList[i].f ? handlerList[i].f.name : ""));
+            }
+        }
+
+        return info.join("\n");
+    }
 	
 	/**
 	 * 一次性监听
@@ -56,7 +75,10 @@ export default class Signal
 	{
 		if(StringUtil.isEmpty(name)) return false;
 		const list=this._handlers[name];
-		if(!list) return false;
+		if(!list) {
+			delete this._handlers[name];
+			return false;
+		}
 		
 		if(!handler){
 			delete this._handlers[name];
@@ -80,6 +102,9 @@ export default class Signal
 			}
 		}
 		
+		if(list.length==0) 
+			delete this._handlers[name];
+
 		return true;
 	}
 	

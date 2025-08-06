@@ -69,9 +69,6 @@ export default class Global
 	//场景
     static _stage=null;
     
-    //场景
-	static map =null;
-
 	static get stage()
 	{
 		return Global._stage;
