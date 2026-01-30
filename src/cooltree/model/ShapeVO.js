@@ -109,6 +109,13 @@ export default class ShapeVO
 		delete node.tagName;
 		vo.properties=node;
 		
+		try{
+			vo.properties.d=vo.properties.d || vo.properties.attributes.d.nodeValue;
+		}
+		catch(err){
+			console.log(err);
+		}
+		
 		vo.rect=ObjectPool.create(Rectangle);
 		vo.rect.data=rect ? rect : ShapeUtil.getShapeBounds(vo);
 		

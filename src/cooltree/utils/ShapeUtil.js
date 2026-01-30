@@ -148,7 +148,10 @@ export default class ShapeUtil
 			break;
 			
 			case SVGLabel.PATH:
-			    let path = vo.properties.d.split(/[a-zA-Z]/);
+			    const value=vo.properties.d;
+				if(!value) break;
+				let path = value.split(/[a-zA-Z]/);
+				
 			    for(let i=0,j,p1,p2,s,n,l=path.length;i<l;i++){
 			    	s=path[i];
 			    	if(StringUtil.isEmpty(s)) continue;
