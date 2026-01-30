@@ -277,7 +277,7 @@ export default class Loader
                         resolve(res.tempFilePath);
                 },
                 fail:(res)=> {
-                    console.log("下载 zip 失败", res.errMsg);
+                    console.log("下载"+path+"失败", res.errMsg);
 					reject(res);
                 }
             })

@@ -75,6 +75,10 @@ export default class Factory
 				break;
 			case "do":
 			    instance=ObjectPool.create(DisplayObject);
+				if(properties && properties.hasOwnProperty("source") && properties.source){
+					instance.setInstance(properties.source);
+					delete properties.source;
+				}
 				break;
 			case "sp":
 				instance=ObjectPool.create(Sprite);

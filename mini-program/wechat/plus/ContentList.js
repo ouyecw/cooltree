@@ -34,7 +34,7 @@ export default class ContentList extends DisplayObjectContainer
         
 		this.ops={
 			width:Global.stage.stageWidth,
-			height:500,
+			height:Global.stage.stageHeight,
 			isY:true,
 			space:10,
 			line:{

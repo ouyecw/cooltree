@@ -47,7 +47,7 @@ export default class ClassUtil
 	static isImage(value)
 	{
 		if(ClassUtil.getClassName(value)=="[object HTMLImageElement]") return true;
-		return /^[A-Za-z]\d$/.test(ClassUtil.getQualifiedClassName(value));
+		return /^[A-Za-z]\d$/.test(ClassUtil.getQualifiedClassName(value)) || (value && value.hasOwnProperty("__onload") && value.hasOwnProperty("__onerror"));
 	}
 
 	static getQualifiedSuperclassName(value) 

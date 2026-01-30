@@ -55,10 +55,6 @@ export default class BoxShape extends DisplayObjectContainer
 	
 	set pattern(value) 
 	{
-    	if(this._pattern && this._pattern.parentNode){
-    		this._pattern.parentNode.removeChild(this._pattern);
-    	}
-    	
     	this.resize=true;
     	this.__checkDisplayUpdate();
     	this._pattern_src=this._pattern=null;
