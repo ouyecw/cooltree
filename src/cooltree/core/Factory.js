@@ -83,6 +83,10 @@ export default class Factory
 				break;
 			case "do":
 			    instance=ObjectPool.create(useCanvas ? DisplayObject : DOMDisplay);
+				if(properties && properties.hasOwnProperty("instance") && properties.instance){
+					instance.setInstance(properties.instance);
+					delete properties.instance;
+				}
 				break;
 			case "mc":
 			    instance=ObjectPool.create(useCanvas ? MovieClip : DOMMovie);

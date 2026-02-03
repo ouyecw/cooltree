@@ -83,6 +83,12 @@ export default class Timer extends EventDispatcher
 		return setTimeout(function(){callback.apply(target,params)},1000*second);
 	}
 
+	static delay(time)
+	{
+		return new Promise((resolve, reject)=>{
+			setTimeout(()=>resolve(0),time*1000);
+		});
+	}
 }
 
 Timer.className="Timer";

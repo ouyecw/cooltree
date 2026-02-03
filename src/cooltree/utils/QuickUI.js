@@ -55,6 +55,23 @@ export default class QuickUI
 	    return btn;
 	}
 	
+	static checkLoad(img)
+	{
+		return new Promise(resolve => {
+			if(img.complete) return resolve(img);
+			
+			img.onload=function(){
+				img.onerror=img.onload=null;
+				resolve(img);
+			}
+			
+			img.onerror=function(){
+				img.onerror=img.onload=null;
+				resolve(null);
+			}
+		});
+	}
+	
 	/**
 	 * 快速创建图片显示对象
 	 * @param {String} url

@@ -41,7 +41,7 @@ export default class CanvasUtil
 		canvas.height=h;
 		canvas.width=w;
 		
-		context.drawImage(image, x, y, w, h,0,0,w, h);
+		context.drawImage(image,Math.max(0,x), Math.max(0,y), w, h,0,0,w, h);
 		return canvas;
 	}
 	
